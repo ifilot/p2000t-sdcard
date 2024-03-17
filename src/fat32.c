@@ -234,6 +234,11 @@ uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_
                     break;
                 }
 
+                // continue if an unused entry is encountered 0xE5
+                if(_sectorblock[j*32] == 0xE5) {
+                    continue;
+                }
+
                 uint8_t attrib = _sectorblock[j*32+0x0B];
 
                 // if lower five bits of byte 0x0B of file table is unset
