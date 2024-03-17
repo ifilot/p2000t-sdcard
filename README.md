@@ -26,3 +26,11 @@ Binaries can also be directly downloaded from the releases.
 * [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
 * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
 * [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
+
+## Images
+
+![SD-card cartridge bare front](img/sdcard-cartridge-bare-front.jpg)
+![SD-card cartridge bare back](img/sdcard-cartridge-bare-back.jpg)
+
+![SD-card cartridge populated front](img/sdcard-cartridge-populated-front.jpg)
+![SD-card cartridge populated back](img/sdcard-cartridge-populated-back.jpg)
