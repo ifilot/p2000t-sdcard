@@ -29,8 +29,12 @@ Binaries can also be directly downloaded from the releases.
 
 ## Images
 
-<img src="img/sdcard-cartridge-bare-front.jpg" width="40%">
-<img src="img/sdcard-cartridge-bare-back.jpg" width="40%">
+<p float="left">
+    <img src="img/sdcard-cartridge-bare-front.jpg" width="40%">
+    <img src="img/sdcard-cartridge-bare-back.jpg" width="40%">
+</p>
 
-<img src="img/sdcard-cartridge-populated-front.jpg" width="40%">
-<img src="img/sdcard-cartridge-populated-back.jpg" width="40%">
+<p float="left">
+    <img src="img/sdcard-cartridge-populated-front.jpg" width="40%">
+    <img src="img/sdcard-cartridge-populated-back.jpg" width="40%">
+</p>
