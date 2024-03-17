@@ -7,7 +7,7 @@ import struct
 # INSPIRATION: https://www.pjrc.com/tech/8051/ide/fat32.html
 #
 
-f = open(os.path.join('D:/', 'SDCARD', 'sdcard_rawdata_4G_cas_test03'), 'rb')
+f = open(os.path.join('D:/', 'SDCARD', 'sdcard_rawdata_4G_cas_test04'), 'rb')
 BYTES_PER_SECTOR = 512
 
 def main():   
@@ -50,8 +50,8 @@ def main():
     print(['%08X' % x for x in ll])
     files = read_files_root_directory(cluster_begin_lba, ll, sectors_per_cluster)
     
-    ll = find_linked_list(fat_begin_lba, 0x000000BC)
-    files = read_files_root_directory(cluster_begin_lba, ll, sectors_per_cluster)
+    #ll = find_linked_list(fat_begin_lba, 0x000000BC)
+    #files = read_files_root_directory(cluster_begin_lba, ll, sectors_per_cluster)
     
     # try to open a file
     # file = files[0]
@@ -87,7 +87,7 @@ def read_files_root_directory(cluster_begin_lba, linked_list, sectors_per_cluste
                     attrib = data[j*32+0x0B]
                     binstring = "{:08b}".format(attrib)
                     
-                    if attrib & 0x1F == 0x00: # this is a file
+                    if attrib & 0x1F == 0x00 and data[j*32] != 0xE5: # this is a file
                         try:
                             name = data[j*32:j*32+8].decode('ascii') + "." + data[j*32+8:j*32+11].decode('ascii')
                             size = struct.unpack('<L', data[j*32+28:(j+1)*32])[0]
@@ -97,9 +97,9 @@ def read_files_root_directory(cluster_begin_lba, linked_list, sectors_per_cluste
                             files.append(
                                 (name, size, fc)
                             )
-                            print('[%s] (%03i) %s %i bytes (%08X)' % (binstring, len(files), name, size, fc))
+                            print('[%s] (%03i) %s %i bytes (%08X) 0x%02X' % (binstring, len(files), name, size, fc, attrib))
                         except Exception as e:
-                            print('Error: %s' % e)
+                            print('Error: %s (attrib=0x%02X)' % (e,attrib))
                     elif attrib & 0x0F == 0x00 and attrib & (1 << 4): # this is a folder
                         fch = struct.unpack('<H', data[j*32+0x14:j*32+0x16])[0]
                         fcl = struct.unpack('<H', data[j*32+0x1A:j*32+0x1C])[0]

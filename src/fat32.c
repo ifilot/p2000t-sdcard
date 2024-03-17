@@ -128,7 +128,12 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id) {
                     break;
                 }
 
-                uint8_t attrib = _sectorblock[j*32+0x0B];
+                // continue if an unused entry is encountered 0xE5
+                if(_sectorblock[j*32] == 0xE5) {
+                    continue;
+                }
+
+                const uint8_t attrib = _sectorblock[j*32+0x0B];
 
                 // if lower five bits of byte 0x0B of file table is unset
                 // assume we are reading a file and try to decode it
@@ -227,6 +232,11 @@ uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_
                     ram_write_uint32_t(SECTOR_CACHE_ADDR, cluster);
                     ram_write_uint32_t(SECTOR_CACHE_SIZE, fctr);
                     break;
+                }
+
+                // continue if an unused entry is encountered 0xE5
+                if(_sectorblock[j*32] == 0xE5) {
+                    continue;
                 }
 
                 uint8_t attrib = _sectorblock[j*32+0x0B];
