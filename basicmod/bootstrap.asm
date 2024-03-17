@@ -103,6 +103,7 @@ loadrom:
     call read_ram       ; load low byte file size
     ld c,a
     call copydata       ; bc contains number of bytes
+    xor a               ; set flags z, nc
     jp $28d4            ; launch basic program
 
 msglp:
