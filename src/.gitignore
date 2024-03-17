@@ -1,0 +1,6 @@
+*.o
+*.map
+*.sym
+*.rom
+*.bin
+*.txt
