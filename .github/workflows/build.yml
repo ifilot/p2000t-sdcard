@@ -230,7 +230,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: ${{env.MULTIROM_BIN}}
-        path: basicmod/${{env.MULTIROM_BIN}}
+        path: ${{env.MULTIROM_BIN}}
 
   deploy-multirom:
     runs-on: ubuntu-latest
