@@ -1,4 +1,4 @@
-all: flasher launcher
+all: flasher launcher launcher-slot1
 
 flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c terminal.c copy.c copy.asm ramrw.asm
 	zcc \
@@ -18,7 +18,7 @@ flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c terminal.c c
 	&& wc -c < main.rom \
 	&& mv main.rom FLASHER.BIN
 
-launcher: main.c commands.c fat32.c main.c memory.c ram.c terminal.c ramrw.asm sdcard.c
+launcher: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sdcard.c
 	zcc \
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c ram.c terminal.c \
@@ -37,7 +37,7 @@ launcher: main.c commands.c fat32.c main.c memory.c ram.c terminal.c ramrw.asm s
 	&& mv main.rom LAUNCHER.BIN \
 	&& truncate -s 11520 LAUNCHER.BIN
 
-launcher-slot1: main.c commands.c fat32.c main.c memory.c ram.c terminal.c ramrw.asm sdcard.c
+launcher-slot1: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sdcard.c
 	zcc \
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c ram.c terminal.c \
