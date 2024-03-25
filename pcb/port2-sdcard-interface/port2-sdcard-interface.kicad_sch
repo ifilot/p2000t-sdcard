@@ -6,8 +6,8 @@
 
   (title_block
     (title "Philips P2000T SD-CARD SLOT2 cartridge")
-    (date "2024-01-21")
-    (rev "rev1")
+    (date "2024-03-25")
+    (rev "rev3")
   )
 
   (lib_symbols

@@ -227,7 +227,7 @@ read_ram:
     out (IO_AH),a         ; store upper bytes in register
     ld a,e
     out (IO_AL),a         ; store lower bytes in register
-    in a,(RAM_IO)       ; load byte
+    in a,(RAM_IO)         ; load byte
     ret
 
 ;-----------------------------------------------------
@@ -243,5 +243,5 @@ write_ram:
     ld a,l
     out (IO_AL),a         ; store lower bytes in register
     pop af
-    out (RAM_IO),a      ; write byte
+    out (RAM_IO),a        ; write byte
     ret
