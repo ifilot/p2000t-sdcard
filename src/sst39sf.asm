@@ -4,6 +4,7 @@ ADDR_LOW        EQU  $68
 ADDR_HIGH       EQU  $69
 ROM_BANK        EQU  $6A
 ROM_IO          EQU  $6C
+LED_IO          EQU  $64
 
 PUBLIC _crc16_romchip
 PUBLIC _copy_to_rom
@@ -19,6 +20,8 @@ PUBLIC _copy_to_rom
 ; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
 ;-------------------------------------------------------------------------------
 _crc16_romchip:
+    ld a,1
+    out (LED_IO),a              ; turn ROM led on
     pop de                      ; return address
     pop hl                      ; ramptr
     pop bc                      ; number of bytes
@@ -54,10 +57,12 @@ clr:
     or c
     jp nz,nextbyte              ; if not zero, go to next byte
     ex de,hl
+    ld a,0
+    out (LED_IO),a              ; turn ROM led off
     ret                         ; return value is stored in hl
 
 ;-------------------------------------------------------------------------------
-; Copy bytes to external RAM chip
+; Copy bytes to external ROM chip
 ;
 ; void copy_to_ram(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
 ;
@@ -68,6 +73,8 @@ clr:
 ;-------------------------------------------------------------------------------
 _copy_to_rom:
     di
+    ld a,1
+    out (LED_IO),a              ; turn ROM led on
     pop iy                      ; return address
     pop hl                      ; src
     pop de                      ; dest
@@ -113,5 +120,7 @@ next:
     ld a,c
     or b
     jp nz, next
+    ld a,0
+    out (LED_IO),a              ; turn ROM led off
     ei
     ret

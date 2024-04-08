@@ -7,6 +7,7 @@
 #include "constants.h"
 #include "ascii.h"
 #include "config.h"
+#include "leds.h"
 
 // set printf io
 #pragma printf "%i %X %lX %c %s %lu %u"
@@ -69,6 +70,9 @@ void init(void) {
     // initialize command line
     memset(__input, 0x00, INPUTLENGTH+1);
     memset(__lastinput, 0x00, INPUTLENGTH);
+
+    // turn LEDs off
+    z80_outp(LED_IO, 0x00);
 
     // mount sd card
     print_info("Initializing SD card..", 1);

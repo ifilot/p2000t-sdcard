@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <z80.h>
 
 #include "constants.h"
 #include "sst39sf.h"
@@ -11,6 +12,9 @@
 #include "terminal.h"
 #include "fat32.h"
 #include "ram.h"
+#include "leds.h"
+
+#define __clock_freq 2500000
 
 extern char __lastinput[INPUTLENGTH];
 extern uint8_t __bootcas;
@@ -22,6 +26,7 @@ void commands_fileinfo(void);
 void command_run(void);
 void command_testram(void);
 void command_printsdsector(void);
+void command_ledtest(void);
 void execute_command(void);
 
 // *****************************************************************************

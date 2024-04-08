@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 26441)
+    (start_pass_no 24141)
     (layer_rule F.Cu
       (active on)
       (preferred_direction vertical)
@@ -90,7 +90,7 @@
     "unconnected-(U5-Q1-Pad13)" "unconnected-(U5-Q2-Pad12)" "unconnected-(U5-Q3-Pad11)" "Net-(D4-A)" "unconnected-(U6-O5-Pad10)" "unconnected-(U6-O6-Pad9)" "unconnected-(U6-O7-Pad7)" ~{CLKSTOP}
     "SD_SPI" "Net-(U2-Pad3)" "~{CLKSTART_DB}" CLKSTOP ~{CLK} "Net-(U17-E3)" "Net-(U7A-Q)" CS
     "unconnected-(U7B-Q-Pad5)" "unconnected-(U7A-~{Q}-Pad4)" "Net-(U8-Cp)" "Net-(U11-Cp)" ~{S4} ~{S3} ~{S2} ~{S1}
-    ~{CLKSTART} "~{SER_RD}" "unconnected-(U9-Pad6)" "~{SDOUT_SET}" "~{SDOUT_RESET}" "~{SER_WR}" "~{SDCS_SET}" "~{SDCS_RESET}"
+    ~{CLKSTART} "~{SER_RD}" "Net-(U4-Pad12)" "~{SDOUT_SET}" "~{SDOUT_RESET}" "~{SER_WR}" "~{SDCS_SET}" "~{SDCS_RESET}"
     "Net-(U14-Pad3)" "unconnected-(U12-~{Q7}-Pad7)" "unconnected-(U13-QH'-Pad9)" A3 "unconnected-(U15-NC-Pad30)" ~{S13} ROM16 "unconnected-(U15-NC-Pad1)"
     ~{S14} RAM16 "unconnected-(U1-NC-Pad1)" "unconnected-(U17-O7-Pad7)" "unconnected-(U17-O6-Pad9)" ~{S12} ~{S11} ~{S10}
     ~{S9} "Net-(U18A-C)" "unconnected-(U18A-~{Q}-Pad6)" "unconnected-(U18B-~{Q}-Pad8)" "Net-(U18B-C)" "unconnected-(U20-Oa>b-Pad5)" "unconnected-(U20-Oa<b-Pad7)" "unconnected-(X1-NC-Pad1)"

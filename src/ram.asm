@@ -3,6 +3,7 @@ SECTION code_user
 ADDR_LOW        EQU  $68
 ADDR_HIGH       EQU  $69
 RAM_IO          EQU  $6D
+LED_IO          EQU  $64
 
 PUBLIC _crc16_ramchip
 PUBLIC _copy_to_ram
@@ -18,6 +19,8 @@ PUBLIC _copy_to_ram
 ; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
 ;-------------------------------------------------------------------------------
 _crc16_ramchip:
+    ld a,0x01
+    out (LED_IO),a              ; turn RAM led on
     pop de                      ; return address
     pop hl                      ; ramptr
     pop bc                      ; number of bytes
@@ -53,6 +56,8 @@ clr:
     or c
     jp nz,nextbyte              ; if not zero, go to next byte
     ex de,hl
+    ld a,0x00
+    out (LED_IO),a              ; turn RAM led off
     ret                         ; return value is stored in hl
 
 ;-------------------------------------------------------------------------------
@@ -66,6 +71,8 @@ clr:
 ; uses: all
 ;-------------------------------------------------------------------------------
 _copy_to_ram:
+    ld a,0x02
+    out (LED_IO),a              ; turn RAM led on
     pop iy                      ; return address
     pop hl                      ; src
     pop de                      ; dest
@@ -84,4 +91,6 @@ next:
     ld a,c
     or b
     jp nz, next
+    ld a,0x00
+    out (LED_IO),a              ; turn RAM led off
     ret

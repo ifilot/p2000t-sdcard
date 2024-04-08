@@ -12,6 +12,7 @@
 ; VARIABLES
 ;-----------------------------------------------------
 EXCODE:         EQU $7000       ; address to put and launch external code from
+LED_IO:         EQU $64         ; LED I/O
 ROM_IO:         EQU $6C         ; external ROM
 RAM_IO:         EQU $6D         ; external RAM
 IO_AL:          EQU $68         ; address low
@@ -55,7 +56,9 @@ DEPLOYADDR:     EQU $6152       ; storage location of deploy addr
 ;
 ;-----------------------------------------------------
 loadcode:
-    ld a,0
+    ld a,0x01
+    out (LED_IO), a     ; turn read LED on
+    dec a               ; set a = 0
     ld ($6150),a        ; disable bootstrap routine
     ld hl,msgbl
     call printmsg
@@ -75,6 +78,7 @@ lcnextbyte:
     ld a,b
     or c
     jr nz,lcnextbyte
+    out (LED_IO), a     ; turn read led off (a = 0 here)
     call EXCODE         ; call custom firmware code (will return here)
     call zeroram
     jp loadrom
@@ -87,6 +91,7 @@ msgbl:
 ;-----------------------------------------------------
 loadrom:
     ld a,1
+    out (LED_IO), a     ; set read LED
     out (RAM_BANK), a   ; load programs from second RAM bank
     ld hl,msglp
     call printmsg
@@ -103,6 +108,8 @@ loadrom:
     call read_ram       ; load low byte file size
     ld c,a
     call copydata       ; bc contains number of bytes
+    ld a,0
+    out (LED_IO), a     ; turn read LED off
     xor a               ; set flags z, nc
     jp $28d4            ; launch basic program
 
@@ -206,13 +213,12 @@ read_rom:
     out (IO_AH),a         ; store upper bytes in register
     ld a,e
     out (IO_AL),a         ; store lower bytes in register
-    in a,(ROM_IO)      ; load byte
+    in a,(ROM_IO)         ; load byte
     ret
 
 ;-----------------------------------------------------
 ; read a byte to external ram
 ;
-;  a - byte to write
 ; de - address
 ;-----------------------------------------------------
 read_ram:
@@ -220,7 +226,7 @@ read_ram:
     out (IO_AH),a         ; store upper bytes in register
     ld a,e
     out (IO_AL),a         ; store lower bytes in register
-    in a,(RAM_IO)       ; load byte
+    in a,(RAM_IO)         ; load byte
     ret
 
 ;-----------------------------------------------------
@@ -236,5 +242,5 @@ write_ram:
     ld a,l
     out (IO_AL),a         ; store lower bytes in register
     pop af
-    out (RAM_IO),a      ; write byte
+    out (RAM_IO),a        ; write byte
     ret
