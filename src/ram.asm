@@ -19,7 +19,7 @@ PUBLIC _copy_to_ram
 ; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
 ;-------------------------------------------------------------------------------
 _crc16_ramchip:
-    ld a,0x02
+    ld a,0x01
     out (LED_IO),a              ; turn RAM led on
     pop de                      ; return address
     pop hl                      ; ramptr

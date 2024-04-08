@@ -20,7 +20,7 @@ PUBLIC _copy_to_rom
 ; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
 ;-------------------------------------------------------------------------------
 _crc16_romchip:
-    ld a,0x01
+    ld a,1
     out (LED_IO),a              ; turn ROM led on
     pop de                      ; return address
     pop hl                      ; ramptr
@@ -57,7 +57,7 @@ clr:
     or c
     jp nz,nextbyte              ; if not zero, go to next byte
     ex de,hl
-    ld a,0x00
+    ld a,0
     out (LED_IO),a              ; turn ROM led off
     ret                         ; return value is stored in hl
 
@@ -73,7 +73,7 @@ clr:
 ;-------------------------------------------------------------------------------
 _copy_to_rom:
     di
-    ld a,0x01
+    ld a,1
     out (LED_IO),a              ; turn ROM led on
     pop iy                      ; return address
     pop hl                      ; src
@@ -120,7 +120,7 @@ next:
     ld a,c
     or b
     jp nz, next
-    ld a,0x00
+    ld a,0
     out (LED_IO),a              ; turn ROM led off
     ei
     ret

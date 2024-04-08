@@ -1,3 +1,6 @@
+#ifndef _SST39SF_H
+#define _SST39SF_H
+
 #include <z80.h>
 
 #define ROM_ADDR_LOW  0x68
@@ -71,3 +74,5 @@ void copy_to_rom(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
  * @return uint16_t CRC-16 checksum
  */
 uint16_t crc16_romchip(uint16_t addr, uint16_t nrbytes) __z88dk_callee;
+
+#endif

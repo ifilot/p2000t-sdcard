@@ -109,8 +109,9 @@ void acmd41(void);
 
 /**
  * Read a 512 byte block including the 2 bytes checksum
+ * See: sdcard.asm
  */
-void read_block(void);
+void read_block(uint16_t* ramptr) __z88dk_callee;
 
 /**
  * @brief Read a single 512-byte sector

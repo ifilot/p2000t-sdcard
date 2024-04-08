@@ -259,11 +259,11 @@ void receive_R7(void) {
 /**
  * Read a 512 byte block including the 2 bytes checksum
  */
-void read_block(void) {
-  for(unsigned int i=0; i<514; i++) {
-    _sectorblock[i] = receive_byte();
-  }
-}
+// void read_block(void) {
+//   for(unsigned int i=0; i<514; i++) {
+//     _sectorblock[i] = receive_byte();
+//   }
+// }
 
 /**
  * @brief Read a single 512-byte sector
@@ -273,7 +273,7 @@ void read_block(void) {
 void read_sector(uint32_t addr) {
     open_command();
     cmd17(addr);
-    read_block();
+    read_block(_sectorblock);
     close_command();
 }
 

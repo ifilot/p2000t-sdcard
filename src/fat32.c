@@ -23,16 +23,7 @@ uint8_t _current_attrib = 0;
  * @return uint32_t start sector-address of the first sector
  */
 uint32_t read_mbr(void) {
-    // CMD17: Read first block
-    open_command();
-    cmd17(0x00000000);
-    // sprintf(termbuffer, "CMD17: %02X", _resp[0]);
-    // terminal_printtermbuffer();
-
-    // read the 512 bytes requested via the read block operations including
-    // its two-byte checksum
-    read_block();
-    close_command();
+    read_sector(0x00000000);
 
     return read_uint32_t(&_sectorblock[446+8]);
 }
