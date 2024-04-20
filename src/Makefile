@@ -29,7 +29,7 @@ launcher: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sdcard.c
 	-pragma-define:CLIB_FOPEN_MAX=0 \
 	-pragma-define:CRT_ON_EXIT=0x10002 \
 	-pragma-define:CRT_ENABLE_EIDI=0x33 \
-	--max-allocs-per-node20000 \
+	--max-allocs-per-node2000 \
 	--opt-code-size \
 	-SO3 -bn main.bin \
 	-create-app -m \
@@ -49,7 +49,7 @@ launcher-slot1: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sd
 	-pragma-define:CRT_STACK_SIZE=256 \
 	-pragma-define:CRT_INCLUDE_PREAMBLE=1 \
 	-pragma-define:CLIB_FOPEN_MAX=0 \
-	--max-allocs-per-node20000 \
+	--max-allocs-per-node2000 \
 	--opt-code-size \
 	-SO3 -bn main.bin \
 	-create-app -m \

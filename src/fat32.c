@@ -48,7 +48,7 @@ void read_partition(uint32_t lba0) {
     _sectors_per_fat = read_uint32_t(&_sectorblock[0x24]);
     _root_dir_first_cluster = read_uint32_t(&_sectorblock[0x2C]);
     _current_folder_cluster = _root_dir_first_cluster;
-    uint16_t signature = read_uint16_t(&_sectorblock[0x1FE]);
+    // uint16_t signature = read_uint16_t(&_sectorblock[0x1FE]);
 
     // print data
     sprintf(termbuffer, "LBA partition 1:%c%08lX", COL_GREEN, lba0);
@@ -69,16 +69,27 @@ void read_partition(uint32_t lba0) {
     sprintf(termbuffer, "Sectors per FAT:%c%i", COL_GREEN, _sectors_per_fat);
     terminal_printtermbuffer();
 
-    sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
+    // terminal_printtermbuffer();
 
-    sprintf(termbuffer, "Signature:%c%04X", COL_GREEN, signature);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Signature:%c%04X", COL_GREEN, signature);
+    // terminal_printtermbuffer();
 
     // consolidate variables
     _fat_begin_lba = lba0 + _reserved_sectors;
     _SECTOR_begin_lba = lba0 + _reserved_sectors + (_number_of_fats * _sectors_per_fat);
     _lba_addr_root_dir = get_sector_addr(_root_dir_first_cluster, 0);
+
+    // read first sector of first partition to establish volume name
+    read_sector(_lba_addr_root_dir);
+
+    // volume name is written as the first 11 bytes
+    char volume_name[12];
+    volume_name[11] = '\0';
+    memcpy(volume_name, _sectorblock, 11);
+    sprintf(termbuffer, "Volume name:%c%s", COL_GREEN, volume_name);
+    terminal_printtermbuffer();
+
     _flag_sdcard_mounted = 1;
 }
 
