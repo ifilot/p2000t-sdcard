@@ -49,6 +49,7 @@ jobs:
         cd src
         sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make launcher
+        ls -alh LAUNCHER*
     - name: Upload launcher
       uses: actions/upload-artifact@v3
       with:
@@ -128,6 +129,7 @@ jobs:
         cd src
         sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make flasher
+        ls -alh FLASHER*
     - name: Upload flasher
       uses: actions/upload-artifact@v3
       with:

@@ -15,6 +15,7 @@ flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c sdcard.asm t
 	--max-allocs-per-node2000 \
 	-SO3 -bn FLASHER.BIN \
 	-create-app -m \
+	&& mv FLASHER.bin FLASHER.BIN \
 	&& wc -c < FLASHER.BIN
 
 launcher: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.asm ram.asm
@@ -32,6 +33,7 @@ launcher: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.as
 	--opt-code-size \
 	-SO3 -bn LAUNCHER.BIN \
 	-create-app -m \
+	&& mv LAUNCHER.bin LAUNCHER.BIN \
 	&& wc -c < LAUNCHER.BIN \
 	&& truncate -s 11520 LAUNCHER.BIN
 
@@ -51,5 +53,6 @@ launcher-slot1: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdc
 	--opt-code-size \
 	-SO3 -bn LAUNCHER-SLOT1.BIN \
 	-create-app -m \
+	&& mv LAUNCHER-SLOT1.bin LAUNCHER-SLOT1.BIN \
 	&& wc -c < LAUNCHER-SLOT1.BIN \
 	&& truncate -s 11520 LAUNCHER-SLOT1.BIN
