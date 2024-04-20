@@ -16,19 +16,16 @@
 #define SECTOR_CACHE            0x1008
 #define ENTRY_CACHE             0x2000
 
-// void ram_write_byte(uint16_t addr, uint8_t val) __z88dk_callee;
-// uint8_t ram_read_byte(uint16_t addr) __z88dk_callee;
+void ram_write_byte(uint16_t addr, uint8_t val) __z88dk_callee;
+uint8_t ram_read_byte(uint16_t addr) __z88dk_callee;
 
-void ram_write_byte(uint16_t addr, uint8_t val);
-uint8_t ram_read_byte(uint16_t addr);
+void ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;
+void ram_write_uint32_t(uint16_t addr, uint32_t val) __z88dk_callee;
 
-void ram_write_uint16_t(uint16_t addr, uint16_t val);
-void ram_write_uint32_t(uint16_t addr, uint32_t val);
+uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
+uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_callee;
 
-uint16_t ram_read_uint16_t(uint16_t addr);
-uint32_t ram_read_uint32_t(uint16_t addr);
-
-void set_ram_bank(uint8_t val);
+void set_ram_bank(uint8_t val) __z88dk_callee;
 
 /**
  * @brief Copy data from internal memory to external RAM
