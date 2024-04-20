@@ -357,30 +357,38 @@ void store_cas_ram(uint32_t faddr, uint16_t ram_addr, uint8_t verbose) {
         // loop over all sectors given a cluster and copy the data to RAM
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
 
-            read_sector(caddr + i); // read sector data
-
             if(sector_ctr == 0) {
                 // program length and transfer address
+                read_sector(caddr + i); // read sector data
                 ram_write_uint16_t(0x8000, read_uint16_t(&_sectorblock[0x0030]));
                 ram_write_uint16_t(0x8002, read_uint16_t(&_sectorblock[0x0032]));
-            }
+                copy_to_ram((uint16_t)&_sectorblock[0x100], ram_addr, 0x100);
+                ram_addr += 0x100;
+            } else {
+                // open command for sending sector retrieval address
+                open_command();
+                cmd17(caddr + i);    // prime SD-card for data retrieval
 
-            // discard preamble
-            switch(sector_ctr % 5) {
-                case 0:
-                    // preamble is first 0x100 bytes of sector
-                    copy_to_ram((uint16_t)&_sectorblock[0x100], ram_addr, 0x100);
-                    ram_addr += 0x100;
-                break;
-                case 2:
-                    // preamble is last 0x100 bytes of sector
-                    copy_to_ram((uint16_t)&_sectorblock[0], ram_addr, 0x100);
-                    ram_addr += 0x100;
-                break;
-                default: // 1,3,4 are complete blocks
-                    copy_to_ram((uint16_t)&_sectorblock[0], ram_addr, 0x200);
-                    ram_addr += 0x200;
-                break;
+                // perform fast data transfer using custom assembly routines
+                switch(sector_ctr % 5) {
+                    case 0:
+                        // preamble is first 0x100 bytes of sector
+                        fast_sd_to_ram_last_0x100(ram_addr);
+                        ram_addr += 0x100;
+                    break;
+                    case 2:
+                        // preamble is last 0x100 bytes of sector
+                        fast_sd_to_ram_first_0x100(ram_addr);
+                        ram_addr += 0x100;
+                    break;
+                    default: // 1,3,4 are complete blocks
+                        fast_sd_to_ram_full(ram_addr);
+                        ram_addr += 0x200;
+                    break;
+                }
+
+                // close command
+                close_command();
             }
 
             if(verbose == 1) {
