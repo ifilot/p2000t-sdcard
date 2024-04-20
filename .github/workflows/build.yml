@@ -47,7 +47,7 @@ jobs:
     - name: Build launcher application
       run: |
         cd src
-        sed -i 's/node20000/node2000000/g' Makefile
+        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make launcher
     - name: Upload launcher
       uses: actions/upload-artifact@v3
@@ -126,7 +126,7 @@ jobs:
     - name: Build launcher application
       run: |
         cd src
-        sed -i 's/node2000/node200000/' Makefile
+        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make flasher
     - name: Upload flasher
       uses: actions/upload-artifact@v3

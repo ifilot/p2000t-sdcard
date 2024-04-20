@@ -1,6 +1,6 @@
 all: flasher launcher launcher-slot1
 
-flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c sdcard.asm terminal.c copy.c copy.asm ramrw.asm
+flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c sdcard.asm terminal.c copy.c copy.asm ram.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
 	fat32.c flasher.c memory.c ram.c sst39sf.c \
@@ -13,12 +13,11 @@ flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c sdcard.asm t
 	-pragma-define:CRT_INCLUDE_PREAMBLE=1 \
 	-pragma-define:CLIB_FOPEN_MAX=0 \
 	--max-allocs-per-node2000 \
-	-SO3 -bn main.bin \
+	-SO3 -bn FLASHER.BIN \
 	-create-app -m \
-	&& wc -c < main.rom \
-	&& mv main.rom FLASHER.BIN
+	&& wc -c < FLASHER.BIN
 
-launcher: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sdcard.c sdcard.asm
+launcher: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.asm ram.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c ram.c terminal.c \
@@ -29,15 +28,14 @@ launcher: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sdcard.c
 	-pragma-define:CLIB_FOPEN_MAX=0 \
 	-pragma-define:CRT_ON_EXIT=0x10002 \
 	-pragma-define:CRT_ENABLE_EIDI=0x33 \
-	--max-allocs-per-node20000 \
+	--max-allocs-per-node2000 \
 	--opt-code-size \
-	-SO3 -bn main.bin \
+	-SO3 -bn LAUNCHER.BIN \
 	-create-app -m \
-	&& wc -c < main.rom \
-	&& mv main.rom LAUNCHER.BIN \
+	&& wc -c < LAUNCHER.BIN \
 	&& truncate -s 11520 LAUNCHER.BIN
 
-launcher-slot1: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sdcard.c sdcard.asm
+launcher-slot1: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.asm ram.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c ram.c terminal.c \
@@ -49,10 +47,9 @@ launcher-slot1: main.c commands.c fat32.c memory.c ram.c terminal.c ramrw.asm sd
 	-pragma-define:CRT_STACK_SIZE=256 \
 	-pragma-define:CRT_INCLUDE_PREAMBLE=1 \
 	-pragma-define:CLIB_FOPEN_MAX=0 \
-	--max-allocs-per-node20000 \
+	--max-allocs-per-node2000 \
 	--opt-code-size \
-	-SO3 -bn main.bin \
+	-SO3 -bn LAUNCHER-SLOT1.BIN \
 	-create-app -m \
-	&& wc -c < main.rom \
-	&& mv main.rom LAUNCHER-SLOT1.BIN \
+	&& wc -c < LAUNCHER-SLOT1.BIN \
 	&& truncate -s 11520 LAUNCHER-SLOT1.BIN
