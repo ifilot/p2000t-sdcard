@@ -56,9 +56,26 @@ int main(void) {
         terminal_printtermbuffer();
 
         uint16_t rom_id = sst39sf_get_device_id();
-        if(rom_id == 0xB5BF) {
+
+        char *devicestring[11];
+        memset(devicestring, 0x00, 11);
+        switch(rom_id) {
+            case 0xB5BF:
+                memcpy(devicestring, "SST39SF010", 10);
+            break;
+            case 0xB6BF:
+                memcpy(devicestring, "SST39SF020", 10);
+            break;
+            case 0xB7BF:
+                memcpy(devicestring, "SST39SF040", 10);
+            break;
+        }
+
+        if(rom_id == 0xB5BF || rom_id == 0xB6BF || rom_id == 0xB7BF) {
             // copying from RAM to ROM
             print_info("Connection to ROM chip established.", 0);
+            sprintf(termbuffer, "Device signature%c%04X%c: %s", COL_CYAN, rom_id, COL_WHITE, devicestring);
+            terminal_printtermbuffer();
             print_info("Wiping 0x0000-0x3FFF.", 0);
             for(uint8_t i=0; i<4; i++) {
                 sst39sf_wipe_sector(0x1000 * i);
