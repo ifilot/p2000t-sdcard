@@ -249,6 +249,11 @@ void read_folder_cas(uint32_t cluster) {
                     copy_from_ram(SECTOR_CACHE_ADDR + 0x36, casname, 8);
                     copy_from_ram(SECTOR_CACHE_ADDR + 0x47, &casname[8], 8);
                     copy_from_ram(SECTOR_CACHE_ADDR + 0x2E, ext, 3);
+
+                    // prune erroneous characters
+                    replace_bytes(casname, 0x00, 0x20, 16);
+                    replace_bytes(ext, 0x00, 0x20, 3);
+
                     const uint16_t filesize = ram_read_uint16_t(SECTOR_CACHE_ADDR + 0x32);
                     const uint8_t blocks = ram_read_byte(SECTOR_CACHE_ADDR + 0x4F);
 

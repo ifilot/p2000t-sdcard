@@ -6,6 +6,7 @@
 #include "sdcard.h"
 #include "util.h"
 #include "ram.h"
+#include "util.h"
 
 // global variables for the FAT
 extern uint16_t _bytes_per_sector;
