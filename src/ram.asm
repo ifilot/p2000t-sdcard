@@ -8,6 +8,7 @@ LED_IO          EQU  $64
 
 PUBLIC _crc16_ramchip
 PUBLIC _copy_to_ram
+PUBLIC _copy_from_ram
 
 PUBLIC _ram_write_byte
 PUBLIC _ram_read_byte
@@ -19,6 +20,7 @@ PUBLIC _ram_read_uint16_t
 PUBLIC _ram_read_uint32_t
 
 PUBLIC _set_ram_bank
+PUBLIC _ram_set
 
 ;-------------------------------------------------------------------------------
 ; uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
@@ -267,7 +269,7 @@ _copy_to_ram:
     pop de                      ; dest
     pop bc                      ; number of bytes
     push iy                     ; put return address back on stack
-next:
+nextto:
     ld a,d
     out (ADDR_HIGH),a
     ld a,e
@@ -279,7 +281,71 @@ next:
     dec bc
     ld a,c
     or b
-    jp nz, next
+    jp nz,nextto
     ld a,0x00
     out (LED_IO),a              ; turn RAM led off
+    ret
+
+;-------------------------------------------------------------------------------
+; Copy bytes from external RAM chip
+;
+; void copy_from_ram(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
+;
+; input:  hl - source address
+;         de - destination address
+;         bc - number of bytes
+; uses: all
+;-------------------------------------------------------------------------------
+_copy_from_ram:
+    ld a,0x01
+    out (LED_IO),a              ; turn read LEd on
+    pop iy                      ; return address
+    pop hl                      ; src
+    pop de                      ; dest
+    pop bc                      ; number of bytes
+    push iy                     ; put return address back on stack
+nextfrom:
+    ld a,h
+    out (ADDR_HIGH),a
+    ld a,l
+    out (ADDR_LOW),a
+    in a,(RAM_IO)
+    ld (de),a
+    inc de
+    inc hl
+    dec bc
+    ld a,c
+    or b
+    jp nz,nextfrom
+    ld a,0x00
+    out (LED_IO),a              ; turn RAM led off
+    ret
+
+;-------------------------------------------------------------------------------
+; Write fixed byte size to memory, can be used for clearing memory
+;
+; void ram_set(uint16_t addr, uint8_t val, uint16_t num_bytes) __z88dk_callee;
+;-------------------------------------------------------------------------------
+_ram_set:
+    di                          ; disable interrupts
+    pop de                      ; retrieve return address
+    pop hl                      ; ramptr
+    dec sp
+    pop af                      ; byte to write in a
+    pop bc                      ; number of bytes
+    push de                     ; put return address back on stack
+    ld e,a                      ; store value to write in e
+rsnext:
+    ld a,h
+    out (ADDR_HIGH),a           ; set upper byte address
+    ld a,l
+    out (ADDR_LOW),a            ; set lower byte address
+    ld a,e
+    out (RAM_IO),a              ; write byte
+    inc hl                      ; go to next memory address
+    dec bc                      ; decrement counter
+    ld a,b
+    or c
+    jr nz,rsnext                ; check if counter is zero
+    ei                          ; enable interrupts
     ret

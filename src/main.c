@@ -86,6 +86,9 @@ void init(void) {
     uint32_t lba0 = read_mbr();
     read_partition(lba0);
 
+    // set the CACHE bank
+    set_ram_bank(RAM_BANK_CACHE);
+
     // sd card successfully mounted
     print_info("Partition 1 mounted", 0);
     print_info("System ready.", 0);
@@ -93,7 +96,4 @@ void init(void) {
     // insert cursor
     sprintf(termbuffer, "%c>%c", COL_CYAN, COL_WHITE);
     terminal_redoline();
-
-    // load program using first ram bank
-    set_ram_bank(0);
 }

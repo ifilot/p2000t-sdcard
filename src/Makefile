@@ -1,9 +1,9 @@
 all: flasher launcher launcher-slot1
 
-flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c sdcard.asm terminal.c copy.c copy.asm ram.asm
+flasher: fat32.c flasher.c memory.c sst39sf.c util.c sdcard.c sdcard.asm terminal.c copy.c copy.asm ram.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
-	fat32.c flasher.c memory.c ram.c sst39sf.c \
+	fat32.c flasher.c memory.c sst39sf.c \
 	util.c sdcard.c sdcard.asm terminal.c copy.c copy.asm ram.asm sst39sf.asm \
 	-startup=1 \
 	-pragma-define:CRT_ORG_CODE=0x1000 \
@@ -18,10 +18,10 @@ flasher: fat32.c flasher.c memory.c ram.c sst39sf.c util.c sdcard.c sdcard.asm t
 	&& mv FLASHER.bin FLASHER.BIN \
 	&& wc -c < FLASHER.BIN
 
-launcher: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.asm ram.asm
+launcher: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
-	commands.c fat32.c main.c memory.c ram.c terminal.c \
+	commands.c fat32.c main.c memory.c terminal.c \
 	util.c sdcard.c sdcard.asm ram.asm \
 	-startup=0 \
 	-pragma-define:CRT_ORG_CODE=0x7000 \
@@ -29,7 +29,7 @@ launcher: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.as
 	-pragma-define:CLIB_FOPEN_MAX=0 \
 	-pragma-define:CRT_ON_EXIT=0x10002 \
 	-pragma-define:CRT_ENABLE_EIDI=0x33 \
-	--max-allocs-per-node2000 \
+	--max-allocs-per-node20000 \
 	--opt-code-size \
 	-SO3 -bn LAUNCHER.BIN \
 	-create-app -m \
@@ -37,10 +37,10 @@ launcher: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.as
 	&& wc -c < LAUNCHER.BIN \
 	&& truncate -s 11520 LAUNCHER.BIN
 
-launcher-slot1: main.c commands.c fat32.c memory.c ram.c terminal.c sdcard.c sdcard.asm ram.asm
+launcher-slot1: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
-	commands.c fat32.c main.c memory.c ram.c terminal.c \
+	commands.c fat32.c main.c memory.c terminal.c \
 	util.c sdcard.c sdcard.asm ram.asm \
 	-startup=1 \
 	-pragma-define:CRT_ORG_CODE=0x1000 \

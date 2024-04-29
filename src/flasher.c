@@ -48,7 +48,6 @@ int main(void) {
     // read the root directory
     uint32_t faddr = find_file(_root_dir_first_cluster, LAUNCHERNAME, LAUNCHEREXT);
     if(faddr != 0) {
-        set_ram_bank(1);
         set_rom_bank(0);
 
         // reporting if file is found
@@ -102,7 +101,7 @@ int main(void) {
             terminal_printtermbuffer();
         }
 
-        set_ram_bank(0);
+        set_ram_bank(RAM_BANK_CACHE);
     } else {
         sprintf(termbuffer, "No %s.%s found in root dir", LAUNCHERNAME, LAUNCHEREXT);
         terminal_printtermbuffer();
@@ -172,10 +171,9 @@ void init(void) {
     sprintf(&vidmem[0x50+2], "SDCARD FLASHER");
     sprintf(&vidmem[0x50*22], "Version: %s", __VERSION__);
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
-
     print_info("System booted.", 0);
 
     // load program using first ram bank
     set_rom_bank(0);
-    set_ram_bank(0);
+    set_ram_bank(RAM_BANK_CACHE);
 }

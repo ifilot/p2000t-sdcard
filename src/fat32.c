@@ -88,6 +88,7 @@ void read_partition(uint32_t lba0) {
     volume_name[11] = '\0';
     memcpy(volume_name, _sectorblock, 11);
     sprintf(termbuffer, "Volume name:%c%s", COL_GREEN, volume_name);
+    memcpy(&vidmem[0x50+39-11], volume_name, 11);
     terminal_printtermbuffer();
 
     _flag_sdcard_mounted = 1;
@@ -125,8 +126,6 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id) {
                 // early exit if a zero is read
                 if(_sectorblock[j*32] == 0x00) {
                     stopreading = 1;
-                    ram_write_uint32_t(SECTOR_CACHE_ADDR, cluster);
-                    ram_write_uint32_t(SECTOR_CACHE_SIZE, fctr);
                     break;
                 }
 
@@ -143,28 +142,18 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id) {
 
                     // capture metadata
                     fctr++;
-                    char basename[9];
-                    basename[8] = 0x00; // null-terminated string
-                    char ext[4];
-                    ext[3] = 0x00; // null-terminated string
-                    memcpy(basename, &_sectorblock[j*32+0x00], 8);
-                    memcpy(ext, &_sectorblock[j*32+0x08], 3);
-                    uint16_t fch = read_uint16_t(&_sectorblock[j*32+0x14]);
-                    uint16_t fcl = read_uint16_t(&_sectorblock[j*32+0x1A]);
-                    uint32_t fc = (uint32_t)fch << 16 | fcl;
-                    uint32_t filesize = read_uint32_t(&_sectorblock[j*32+28]);
+                    const uint16_t fch = read_uint16_t(&_sectorblock[j*32+0x14]);
+                    const uint16_t fcl = read_uint16_t(&_sectorblock[j*32+0x1A]);
+                    const uint32_t fc = (uint32_t)fch << 16 | fcl;
+                    const uint32_t filesize = read_uint32_t(&_sectorblock[j*32+28]);
                     totalfilesize += filesize;
-
-                    // cache cluster address for quick loading
-                    ram_write_uint32_t(SECTOR_CACHE + (fctr-1) * 4, caddr + i);
-                    ram_write_byte(ENTRY_CACHE + fctr - 1, j);
 
                     if(file_id < 0) {
                         if(attrib & (1 << 4)) { // directory entry
-                            sprintf(termbuffer, "%c%3u%c%s DIR       %c%08lX", COL_YELLOW, fctr, COL_WHITE, basename, COL_CYAN, fc);
+                            sprintf(termbuffer, "%c%3u%c%.8s DIR       %c%08lX", COL_YELLOW, fctr, COL_WHITE, &_sectorblock[j*32+0x00], COL_CYAN, fc);
                             terminal_printtermbuffer();
                         } else {                // file entry
-                            sprintf(termbuffer, "%c%3u%c%s.%s%c%6lu%c%08lX", COL_GREEN, fctr, COL_WHITE, basename, ext, COL_YELLOW, filesize, COL_CYAN, fc);
+                            sprintf(termbuffer, "%c%3u%c%.8s.%.3s%c%6lu%c%08lX", COL_GREEN, fctr, COL_WHITE, &_sectorblock[j*32+0x00], &_sectorblock[j*32+0x08], COL_YELLOW, filesize, COL_CYAN, fc);
                             terminal_printtermbuffer();
                         }
 
@@ -184,21 +173,108 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id) {
                 }
             }
         }
-
         ctr++;
     }
 
     if(file_id < 0) {
         sprintf(termbuffer, "%6u File(s) %10lu Bytes", fctr, totalfilesize);
         terminal_printtermbuffer();
-        ram_write_uint32_t(SECTOR_CACHE_ADDR, cluster);
-        ram_write_uint32_t(SECTOR_CACHE_SIZE, fctr);
     } else {
         sprintf(termbuffer, "%c File id > %6u", fctr);
         terminal_printtermbuffer();
     }
 
     return _root_dir_first_cluster;
+}
+
+/**
+ * @brief Read the contents of the root folder and search for a file identified 
+ *        by file id. When a negative file_id is supplied, the directory is
+ *        simply scanned and the list of files are outputted to the screen.
+ * 
+ * @param uint32_t cluster_address
+ */
+void read_folder_cas(uint32_t cluster) {
+    // build linked list for the root directory
+    build_linked_list(cluster);
+
+    // loop over the clusters and read directory contents
+    uint8_t ctr = 0;                // counter over sectors
+    uint16_t fctr = 0;              // counter over directory entries (files and folders)
+    uint32_t totalfilesize = 0;
+    uint8_t stopreading = 0;
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && stopreading == 0) {
+        
+        // print cluster number and address
+        const uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
+
+        // loop over all sectors per cluster
+        for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
+            read_sector(caddr + i); // read sector data
+            for(uint16_t j=0; j<16; j++) { // 16 file tables per sector
+
+                // early exit if a zero is read
+                if(_sectorblock[j*32] == 0x00) {
+                    stopreading = 1;
+                    break;
+                }
+
+                // continue if an unused entry is encountered 0xE5
+                if(_sectorblock[j*32] == 0xE5) {
+                    continue;
+                }
+
+                const uint8_t attrib = _sectorblock[j*32+0x0B];
+
+                // if lower five bits of byte 0x0B of file table is unset
+                // assume we are reading a file and try to decode it
+                if((attrib & 0x0F) == 0x00) {
+                    // capture metadata
+                    fctr++;
+
+                    // find cluster address
+                    const uint16_t fch = read_uint16_t(&_sectorblock[j*32+0x14]);
+                    const uint16_t fcl = read_uint16_t(&_sectorblock[j*32+0x1A]);
+                    const uint32_t fc = (uint32_t)fch << 16 | fcl;
+                    
+                    // read from SD card once more and extract CAS data
+                    open_command();
+                    cmd17(get_sector_addr(fc, 0));
+                    fast_sd_to_ram_first_0x100(SECTOR_CACHE_ADDR);
+                    close_command();
+
+                    // grab metadata
+                    char casname[16];
+                    char ext[3];
+                    copy_from_ram(SECTOR_CACHE_ADDR + 0x36, casname, 8);
+                    copy_from_ram(SECTOR_CACHE_ADDR + 0x47, &casname[8], 8);
+                    copy_from_ram(SECTOR_CACHE_ADDR + 0x2E, ext, 3);
+                    const uint16_t filesize = ram_read_uint16_t(SECTOR_CACHE_ADDR + 0x32);
+                    const uint8_t blocks = ram_read_byte(SECTOR_CACHE_ADDR + 0x4F);
+
+                    if(attrib & (1 << 4)) { // directory entry
+                        sprintf(termbuffer, "%c%3u%c%.8s DIR", COL_YELLOW, fctr, COL_WHITE, &_sectorblock[j*32+0x00]);
+                        terminal_printtermbuffer();
+                    } else {                // file entry
+                        sprintf(termbuffer, "%c%3u%c%.16s %.3s%c%2i %6lu", COL_GREEN, fctr, COL_YELLOW, casname, ext, COL_CYAN, blocks, filesize);
+                        terminal_printtermbuffer();
+                    }
+
+                    if(fctr % 16 == 0) {
+                        print_info("-- Press key to continue, q to quit --", 1);
+                        if(wait_for_key_fixed(3) == 1) {
+                            stopreading = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        ctr++;
+    }
+
+    sprintf(termbuffer, "%6u File(s)", fctr);
+    terminal_printtermbuffer();
 }
 
 /**
@@ -231,8 +307,6 @@ uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_
                 // early exit if a zero is read
                 if(_sectorblock[j*32] == 0x00) {
                     stopreading = 1;
-                    ram_write_uint32_t(SECTOR_CACHE_ADDR, cluster);
-                    ram_write_uint32_t(SECTOR_CACHE_SIZE, fctr);
                     break;
                 }
 

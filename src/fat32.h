@@ -53,6 +53,8 @@ void read_partition(uint32_t lba0);
  */
 uint32_t read_folder(uint32_t cluster, int16_t file_id);
 
+void read_folder_cas(uint32_t cluster);
+
 /**
  * @brief Find a file identified by BASENAME and EXT in the folder correspond
  *        to the cluster address

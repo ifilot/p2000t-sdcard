@@ -11,10 +11,18 @@
 #define PORT_RAM_BANK   0x6B
 #define PORT_RAM        0x6D
 
-#define SECTOR_CACHE_ADDR       0x1000
-#define SECTOR_CACHE_SIZE       0x1004
-#define SECTOR_CACHE            0x1008
-#define ENTRY_CACHE             0x2000
+#define SECTOR_CACHE_ADDR       0x1000      // cluster address
+#define SECTOR_CACHE_SIZE       0x1004      // number of files in cache
+#define SECTOR_CACHE            0x1008      // start of sector cache
+#define ENTRY_CACHE             0x2000      // file entries
+
+/*
+ * The internal memory on the SD-card cartridge has a capacity of 128kb divided
+ * over 2x64kb banks. The lower bank is used for caching SD-card data while the
+ * upper bank is used for loading in programs.
+ */
+#define RAM_BANK_CACHE          0
+#define RAM_BANK_CASSETTE       1
 
 /**
  * @brief Write a single byte to external RAM
@@ -23,6 +31,15 @@
  * @param val nbyte to write
  */
 void ram_write_byte(uint16_t addr, uint8_t val) __z88dk_callee;
+
+/**
+ * @brief Write fixed byte size to memory, can be used for clearing memory
+ * 
+ * @param addr memory start address
+ * @param val value to write
+ * @param num_bytes number of bytes to write
+ */
+void ram_set(uint16_t addr, uint8_t val, uint16_t num_bytes) __z88dk_callee;
 
 /**
  * @brief Retrieve single byte from external RAM
@@ -76,6 +93,17 @@ void set_ram_bank(uint8_t val) __z88dk_callee;
  * @param nrbytes  number of bytes to copy
  */
 void copy_to_ram(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
+
+/**
+ * @brief Copy data from external memory to internal RAM
+ * 
+ * See: ram.asm
+ *
+ * @param src      address on external RAM
+ * @param dest     internal address
+ * @param nrbytes  number of bytes to copy
+ */
+void copy_from_ram(uint16_t src, uint8_t *dest, uint16_t nrbytes) __z88dk_callee;
 
 /**
  * @brief Calculate CRC16 checksum for N bytes starting at external ram address
