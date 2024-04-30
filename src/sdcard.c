@@ -29,7 +29,7 @@ void init_sdcard(void) {
 
     // send CMD8: Sends interface condition
     open_command();
-    cmd8();
+    cmd8(_resp);
     close_command();
 
     #ifdef SDCARD_VERBOSE
@@ -38,16 +38,16 @@ void init_sdcard(void) {
     #endif
 
     // keep polling until we have received host capacity information
-    _resp[0] = 5;
+    uint8_t c = 0xFF;
     uint16_t ctr = 0;
-    while(_resp[0] != 0) {
+    while(c != 0) {
         ctr++;
         open_command();
         cmd55();
         close_command();
     
         open_command();
-        acmd41();
+        c = acmd41();
         close_command();
 
         #ifdef SDCARD_VERBOSE
@@ -65,7 +65,7 @@ void init_sdcard(void) {
 
     // CMD58: read OCR register - R3 response (5 bytes)
     open_command();
-    cmd58();
+    cmd58(_resp);
     close_command();
 
     #ifdef SDCARD_VERBOSE
@@ -94,8 +94,6 @@ void clkstart(void) {
 uint8_t serial_read(void) {
     return z80_inp(0x60);
 }
-
-
 
 /**
  * @brief      Send a byte to the SD card
@@ -133,42 +131,6 @@ void send_command(uint8_t *vals) {
  ******************************************************************************
 
 /**
- * Open the command interface
- */
-void open_command(void) {
-    send_byte(0xFF);
-    sdcs_reset();
-    send_byte(0xFF);
-}
-
-/**
- * Close the command interface
- */
-void close_command(void) {
-    send_byte(0xFF);
-    sdcs_set();
-    send_byte(0xFF); 
-}
-
-/**
- * CMD0: Reset the SD Memory Card
- */
-void cmd0(void) {
-    static uint8_t CMD[] = {0|0x40,0,0,0,0,0x94|0x01};
-    send_command(CMD);
-    receive_R1();
-}
-
-/**
- * CMD8: Sends interface condition
- */
-void cmd8(void) {
-  static uint8_t CMD[] = {8|0x40,0,0,0x01,0xaa,0x86|0x01};
-  send_command(CMD);
-  receive_R7();
-}
-
-/**
  * CMD17: Read block
  */
 void cmd17(uint32_t addr) {
@@ -184,71 +146,6 @@ void cmd17(uint32_t addr) {
   uint8_t c = 0;
   while(c != 0xFE) {  // keep on grabbing bytes until "FE" is read
     c = receive_byte();  
-  }
-}
-
-/**
- * CMD55: Next command is application specific command
- */
-void cmd55(void) {
-  static uint8_t CMD[] = {55|0x40,0,0,0,0,0x00|0x01};
-  send_command(CMD);
-  receive_R1();
-}
-
-/**
- * CMD58: Read OCR register
- */
-void cmd58(void) {
-  static uint8_t CMD[] = {58|0x40,0,0,0,0,0x00|0x01};
-  send_command(CMD);
-  receive_R3();
-}
-
-/**
- * ACMD41: Send host capacity support information
- */
-void acmd41(void) {
-  static uint8_t CMD[] = {41|0x40,0x40,0x00,0x00,0x00,0x00|0x01};
-  send_command(CMD);
-  receive_R1();
-}
-
-/******************************************************************************
- * RECEIVE OPERATIONS
- ******************************************************************************/
-
-/**
- * Receive a response R1
- * 
- * Uses a response buffer object to write data to
- */
-void receive_R1(void) {
-    send_byte(0xFF);
-    _resp[0] = receive_byte();
-}
-
-/**
- * Receive a response R3
- * 
- * Uses a response buffer object to write data to
- */
-void receive_R3(void) {
-  send_byte(0xFF);
-  for(uint8_t i=0; i<5; i++) {
-    _resp[i] = receive_byte();
-  }
-}
-
-/**
- * Receive a response R7
- * 
- * Uses a response buffer object to write data to
- */
-void receive_R7(void) {
-  send_byte(0xFF);
-  for(uint8_t i=0; i<5; i++) {
-    _resp[i] = receive_byte();
   }
 }
 

@@ -204,7 +204,7 @@ _ram_read_byte:
 ;
 ; input:  bc - number of bytes
 ;         hl - start of memory address
-; output: de - crc16 checksum
+; output: hl - crc16 checksum
 ; uses: a, bc, de, hl
 ;
 ; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
@@ -246,7 +246,7 @@ clr:
     ld a,b                      ; check if counter is zero
     or c
     jp nz,nextbyte              ; if not zero, go to next byte
-    ex de,hl
+    ex de,hl                    ; swap de and hl such that hl contains crc
     ld a,0x00
     out (LED_IO),a              ; turn RAM led off
     ret                         ; return value is stored in hl

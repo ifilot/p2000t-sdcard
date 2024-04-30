@@ -43,21 +43,7 @@ void send_byte(uint8_t val);
  * 
  * Uses a response buffer object to write data to
  */
-void receive_R1(void);
-
-/**
- * Receive a response R3
- * 
- * Uses a response buffer object to write data to
- */
-void receive_R3(void);
-
-/**
- * Receive a response R7
- * 
- * Uses a response buffer object to write data to
- */
-void receive_R7(void);
+uint8_t receive_R1(void) __z88dk_callee;
 
 /******************************************************************************
  * COMMAND OPERATIONS
@@ -66,22 +52,22 @@ void receive_R7(void);
 /**
  * Open the command interface
  */
-void open_command(void);
+void open_command(void) __z88dk_callee;
 
 /**
  * Close the command interface
  */
-void close_command(void);
+void close_command(void) __z88dk_callee;
 
 /**
  * CMD0: Reset the SD Memory Card
  */
-void cmd0(void);
+void cmd0(void) __z88dk_callee;
 
 /**
  * CMD8: Sends interface condition
  */
-void cmd8(void);
+void cmd8(uint8_t *resp) __z88dk_callee;
 
 /**
  * CMD17: Read block
@@ -91,17 +77,17 @@ void cmd17(uint32_t addr);
 /**
  * CMD55: Next command is application specific command
  */
-void cmd55(void);
+void cmd55(void) __z88dk_callee;
 
 /**
  * CMD58: Read OCR register
  */
-void cmd58(void);
+void cmd58(uint8_t *resp) __z88dk_callee;
 
 /**
  * ACMD41: Send host capacity support information
  */
-void acmd41(void);
+uint8_t acmd41(void) __z88dk_callee;
 
 /******************************************************************************
  * BLOCK OPERATIONS
