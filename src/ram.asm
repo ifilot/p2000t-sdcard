@@ -14,10 +14,7 @@ PUBLIC _ram_write_byte
 PUBLIC _ram_read_byte
 
 PUBLIC _ram_write_uint16_t
-PUBLIC _ram_write_uint32_t
-
 PUBLIC _ram_read_uint16_t
-PUBLIC _ram_read_uint32_t
 
 PUBLIC _set_ram_bank
 PUBLIC _ram_set
@@ -46,42 +43,6 @@ _ram_read_uint16_t:
     in a,(RAM_IO)
     ld h,a                      ; then store upper byte
     ret                         ; result stored in HL
-
-;-------------------------------------------------------------------------------
-; uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_callee;
-;-------------------------------------------------------------------------------
-_ram_read_uint32_t:
-    pop de                      ; return address
-    pop bc                      ; ramptr
-    push de                     ; push return address back onto stack
-    ld a,b
-    out (ADDR_HIGH), a
-    ld a,c
-    out (ADDR_LOW), a
-    in a,(RAM_IO)
-    ld e,a                      ; store byte 3
-    inc bc                      ; next byte
-    ld a,b
-    out (ADDR_HIGH), a
-    ld a,c
-    out (ADDR_LOW), a
-    in a,(RAM_IO)
-    ld d,a                      ; store byte 2
-    inc bc                      ; next byte
-    ld a,b
-    out (ADDR_HIGH), a
-    ld a,c
-    out (ADDR_LOW), a
-    in a,(RAM_IO)
-    ld l,a                      ; store byte 1
-    inc bc                      ; next byte
-    ld a,b
-    out (ADDR_HIGH), a
-    ld a,c
-    out (ADDR_LOW), a
-    in a,(RAM_IO)
-    ld h,a                      ; store byte 0
-    ret                         ; result stored in DEHL
 
 ;-------------------------------------------------------------------------------
 ; PUBLIC _set_ram_bank(uint8_t val)
@@ -115,44 +76,6 @@ _ram_write_uint16_t:
     out (ADDR_LOW), a
     ld a,b                      ; grab upper byte
     out (RAM_IO), a             ; store upper byte next
-    ret
-
-;-------------------------------------------------------------------------------
-; ram_write_uint32_t(uint16_t addr, uint32_t val) __z88dk_callee;
-;-------------------------------------------------------------------------------
-_ram_write_uint32_t:
-    pop iy                      ; return address
-    pop hl                      ; ramptr
-    pop de                      ; value to store upper bytes
-    pop bc                      ; value to store lower bytes
-    push iy                     ; push return address back onto stack
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,c                      ; grab byte 0
-    out (RAM_IO),a              ; store byte 0 (little endian)
-    inc hl                      ; next byte
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,b                      ; grab byte 1
-    out (RAM_IO), a             ; store byte 1
-    inc hl                      ; next byte
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,e                      ; grab byte 2
-    out (RAM_IO),a              ; store byte 2
-    inc hl                      ; next byte
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,d                      ; grab byte 3
-    out (RAM_IO), a             ; store byte 3
     ret
 
 ;-------------------------------------------------------------------------------

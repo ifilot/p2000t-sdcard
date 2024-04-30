@@ -73,7 +73,7 @@ void cmd8(uint8_t *resp) __z88dk_callee;
 /**
  * CMD17: Read block
  */
-void cmd17(uint32_t addr);
+void cmd17(uint32_t addr) __z88dk_callee;
 
 /**
  * CMD55: Next command is application specific command

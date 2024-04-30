@@ -16,6 +16,7 @@ PUBLIC _init_sdcard
 
 PUBLIC _cmd0
 PUBLIC _cmd8
+PUBLIC _cmd17
 PUBLIC _cmd55
 PUBLIC _cmd58
 PUBLIC _acmd41
@@ -71,21 +72,13 @@ pulse:
     djnz pulse
     call _open_command
     call _cmd0
-    call _close_command
-    call _open_command
     call _cmd8                  ; this command will retrieve resp8 from stack
-    call _close_command
 hosttry:
-    call _open_command
     call _cmd55
-    call _close_command
-    call _open_command
     call _acmd41                ; value in l
-    call _close_command
     ld a,l
     cp 0
     jr nz,hosttry               ; if not zero, try again
-    call _open_command
     call _cmd58                 ; this command will retrieve resp58 from stack
     call _close_command
     ld hl,(NOTEPAD)             ; retrieve from notepad RAM
@@ -112,6 +105,50 @@ _cmd8:
     call sendcommand            ; garbles a,b,hl
     call receiveR7              ; garbles a,b,de
     push iy                     ; push return address back onto stack
+    ret
+
+;-------------------------------------------------------------------------------
+; CMD17: Read block
+;
+; void cmd17(uint32_t addr);
+;-------------------------------------------------------------------------------
+_cmd17:
+    pop iy                      ; retrieve return address
+    pop hl                      ; retrieve upper bytes of 32 bit address
+    pop de                      ; retrieve lower bytes of 32 bit address
+    ld a,17|0x40
+    out (SERIAL),a
+    out (CLKSTART),a            ; send out
+
+    ld a,d
+    out (SERIAL),a              ; byte 0
+    out (CLKSTART),a            ; send out
+
+    ld a,e
+    out (SERIAL),a              ; byte 1
+    out (CLKSTART),a            ; send out
+
+    ld a,h
+    out (SERIAL),a              ; byte 2
+    out (CLKSTART),a            ; send out
+
+    ld a,l
+    out (SERIAL),a              ; byte 3
+    out (CLKSTART),a            ; send out
+
+    ld a,0x00|0x01
+    out (SERIAL),a
+    out (CLKSTART),a            ; send out
+
+    call _receive_R1
+    ld a,0xFF                   ; flush with ones
+    out (SERIAL),a
+cmd17next:
+    out (CLKSTART),a            ; send out
+    in a,(SERIAL)
+    cp 0xFE
+    jr nz,cmd17next
+    push iy                     ; put return address back on stack
     ret
 
 ;-------------------------------------------------------------------------------
