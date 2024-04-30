@@ -10,6 +10,9 @@ ADDR_HIGH       EQU  $69
 RAM_BANK        EQU  $6B
 RAM_IO          EQU  $6D
 LED_IO          EQU  $64
+NOTEPAD         EQU  $6160
+
+PUBLIC _init_sdcard
 
 PUBLIC _cmd0
 PUBLIC _cmd8
@@ -25,6 +28,11 @@ PUBLIC _read_block
 PUBLIC _fast_sd_to_ram_first_0x100
 PUBLIC _fast_sd_to_ram_last_0x100
 PUBLIC _fast_sd_to_ram_full
+
+PUBLIC _sdout_set
+PUBLIC _sdout_reset
+PUBLIC _sdcs_set
+PUBLIC _sdcs_reset
 
 ;-------------------------------------------------------------------------------
 ; SD card command bytes
@@ -43,6 +51,48 @@ defb 58|0x40,0x00,0x00,0x00,0x00,0x00|0x01
 
 acmd41str:
 defb 41|0x40,0x40,0x00,0x00,0x00,0x00|0x01
+
+;-------------------------------------------------------------------------------
+; Initialize the SD card
+;
+; void init_sdcard(uint8_t *resp8, uint8_t *resp58);
+;-------------------------------------------------------------------------------
+_init_sdcard:
+    di                          ; disable interrupts
+    pop hl                      ; retrieve return address
+    exx                         ; swap to shadow registers
+    call _sdcs_set
+    call _sdout_set
+    ld b,12
+    ld a,0xFF
+    out (SERIAL),a
+pulse:
+    out (CLKSTART),a
+    djnz pulse
+    call _open_command
+    call _cmd0
+    call _close_command
+    call _open_command
+    call _cmd8                  ; this command will retrieve resp8 from stack
+    call _close_command
+hosttry:
+    call _open_command
+    call _cmd55
+    call _close_command
+    call _open_command
+    call _acmd41                ; value in l
+    call _close_command
+    ld a,l
+    cp 0
+    jr nz,hosttry               ; if not zero, try again
+    call _open_command
+    call _cmd58                 ; this command will retrieve resp58 from stack
+    call _close_command
+    ld hl,(NOTEPAD)             ; retrieve from notepad RAM
+    exx                         ; swap back from shadow registers
+    push hl                     ; put return address back onto stack
+    ei                          ; enable interrupts
+    ret
 
 ;-------------------------------------------------------------------------------
 ; CMD0: Reset the SD Memory Card
@@ -305,4 +355,32 @@ _close_command:
     out (CLKSTART),a            ; send out
     out (DESELECT),a            ; deactivate (release) SD card
     out (CLKSTART),a            ; send another byte of ones
+    ret
+
+;-------------------------------------------------------------------------------
+; void sdout_set(void)
+;-------------------------------------------------------------------------------
+_sdout_set:
+    in a,(DESELECT)             ; value is ignored
+    ret
+
+;-------------------------------------------------------------------------------
+; void sdout_reset(void)
+;-------------------------------------------------------------------------------
+_sdout_reset:
+    in a,(SELECT)               ; value is ignored
+    ret
+
+;-------------------------------------------------------------------------------
+; void sdcs_set(void)
+;-------------------------------------------------------------------------------
+_sdcs_set:
+    out (DESELECT),a            ; value is ignored
+    ret
+
+;-------------------------------------------------------------------------------
+; void sdcs_reset(void)
+;-------------------------------------------------------------------------------
+_sdcs_reset:
+    out (SELECT),a              ; value is ignored
     ret

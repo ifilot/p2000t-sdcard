@@ -2,77 +2,9 @@
 
 // shared buffer object to store the data of a single sector on the SD card
 uint8_t _sectorblock[514];
-uint8_t _resp[7];
+uint8_t _resp8[5];
+uint8_t _resp58[5];
 uint8_t _flag_sdcard_mounted = 0;
-
-void init_sdcard(void) {
-    // set chip select to low, activating the SD-card
-    sdcs_set();
-
-    // pull MISO to low via a 10k resistor
-    sdout_set();
-
-    // first send 96 pulses (12 * 8 bits) to the SD card 
-    for(uint8_t i=0; i<12; i++) {
-        send_byte(0xFF);
-    }
-
-    // send CMD0: Reset the SD Memory Card
-    open_command();
-    cmd0();
-    close_command();
-
-    #ifdef SDCARD_VERBOSE
-        sprintf(termbuffer, "CMD0: %02X", _resp[0]);
-        terminal_printtermbuffer();
-    #endif
-
-    // send CMD8: Sends interface condition
-    open_command();
-    cmd8(_resp);
-    close_command();
-
-    #ifdef SDCARD_VERBOSE
-        sprintf(termbuffer, "CMD8: %02X %02X %02X %02X %02X", _resp[0], _resp[1], _resp[2], _resp[3], _resp[4]);
-        terminal_printtermbuffer();
-    #endif
-
-    // keep polling until we have received host capacity information
-    uint8_t c = 0xFF;
-    uint16_t ctr = 0;
-    while(c != 0) {
-        ctr++;
-        open_command();
-        cmd55();
-        close_command();
-    
-        open_command();
-        c = acmd41();
-        close_command();
-
-        #ifdef SDCARD_VERBOSE
-            sprintf(termbuffer, "ACMD41: %02X", _resp[0]);
-            terminal_redoline();
-        #endif
-    }
-
-    #ifdef SDCARD_VERBOSE
-      // provide number of responds and response value
-        sprintf(termbuffer, "ACMD41 accepted (%i attempts)", ctr);
-        terminal_printtermbuffer();
-    #endif
-    
-
-    // CMD58: read OCR register - R3 response (5 bytes)
-    open_command();
-    cmd58(_resp);
-    close_command();
-
-    #ifdef SDCARD_VERBOSE
-        sprintf(termbuffer, "CMD58: %02X %02X %02X %02X %02X", _resp[0], _resp[1], _resp[2], _resp[3], _resp[4]);
-        terminal_printtermbuffer();
-    #endif
-}
 
 /**
  * Write value on the databus into the PISO register
@@ -163,36 +95,4 @@ void read_sector(uint32_t addr) {
     cmd17(addr);
     read_block(_sectorblock);
     close_command();
-}
-
-/******************************************************************************
- * I/O CONTROL
- ******************************************************************************/
-
- /**
- * SDOUT is pulled low, pulling MISO low via a 10k resistor
- */
-void sdout_set(void) {
-    z80_inp(0x62);
-}
-
-/**
- * SDOUT is pulled high, pulling MISO high via a 10k resistor
- */
-void sdout_reset(void) {
-    z80_inp(0x63);
-}
-
-/**
- * Set the SD CS signal to low (activating the SD card)
- */
-void sdcs_set(void) {
-    z80_outp(0x62, 0x00);
-}
-
-/**
- * Set the SD CS signal to high (deactivating the SD card)
- */
-void sdcs_reset(void) {
-    z80_outp(0x63, 0x00);
 }

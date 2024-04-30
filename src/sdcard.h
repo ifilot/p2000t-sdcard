@@ -18,14 +18,15 @@
 
 // shared buffer object to store the data of a single sector on the SD card
 extern uint8_t _sectorblock[514];
-extern uint8_t _resp[7];
+extern uint8_t _resp8[5];
+extern uint8_t _resp58[5];
 extern uint8_t _flag_sdcard_mounted;
 
 /**
  * @brief Initialize the SD card in such a way that sectors can be read
  *        from the card
  */
-void init_sdcard(void);
+void init_sdcard(uint8_t *resp8, uint8_t *resp58) __z88dk_callee;
 
 /**
  * @brief Send a byte to the SD card
@@ -138,21 +139,21 @@ void read_sector(uint32_t addr);
 /**
  * Set the SD CS signal to low (activating the SD card)
  */
-void sdcs_reset(void);
+void sdcs_reset(void) __z88dk_callee;
 
 /**
  * Set the SD CS signal to high (deactivating the SD card)
  */
-void sdcs_set(void);
+void sdcs_set(void) __z88dk_callee;
 
  /**
  * SDOUT is pulled low, pulling MISO low via a 10k resistor
  */
-void sdout_set(void);
+void sdout_set(void) __z88dk_callee;
 
 /**
  * SDOUT is pulled high, pulling MISO high via a 10k resistor
  */
- void sdout_reset(void);
+ void sdout_reset(void) __z88dk_callee;
 
 #endif // _SDCARD_H

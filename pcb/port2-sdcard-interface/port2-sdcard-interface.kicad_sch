@@ -4249,7 +4249,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 2d7ca261-a846-425e-bf12-175b1742c66d)
   )
-  (text "out $60: ~{SER_WR} is pulled low, loading the values on the data bus into the out register.\nout $61: ~{CLKSTART} is pulled low, starting the counter circuit and pushing a byte into the SD card while simultaneously reading a byte.\nout $62: ~{SDCS_SET} is pulled low, pulling ~{CS} low, activating the SD card.\nout $63: ~{SDCS_RESET} is pulled low, pulling ~{CS} high, deactivating the SD card."
+  (text "out $60: ~{SER_WR} is pulled low, loading the values on the data bus into the out register.\nout $61: ~{CLKSTART} is pulled low, starting the counter circuit and pushing a byte into the SD card while simultaneously reading a byte.\nout $62: ~{SDCS_SET} is pulled low, pulling ~{CS} high, deactivating the SD card.\nout $63: ~{SDCS_RESET} is pulled low, pulling ~{CS} low, activating the SD card."
     (at 19.05 172.085 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 2e83dce1-4e25-4146-a640-1ea4d2361f31)

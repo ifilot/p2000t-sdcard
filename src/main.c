@@ -76,7 +76,7 @@ void init(void) {
 
     // mount sd card
     print_info("Initializing SD card..", 1);
-    init_sdcard();
+    init_sdcard(_resp8, _resp58);
 
     // inform user that the SD card is initialized and that we are ready to read
     // the first block from the SD card and print it to the screen
