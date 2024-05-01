@@ -1,5 +1,10 @@
 #include "terminal_ext.h"
 
+/**
+ * @brief Perform hexdump from part of external RAM
+ * 
+ * @param addr external RAM address
+ */
 void terminal_hexdump_ram(uint16_t addr) {
     sprintf(termbuffer, "%c%04X", COL_YELLOW, addr);
     for(uint8_t i=0; i<8; i++) {
@@ -20,6 +25,11 @@ void terminal_hexdump_ram(uint16_t addr) {
     terminal_printtermbuffer();
 }
 
+/**
+ * @brief Perform hexdump from part of internal RAM
+ * 
+ * @param buf buffer location
+ */
 void printblock(const uint8_t* buf) {
     // display the first 128 bytes of the 512 block on the screen
     for(uint8_t i=0; i<64; i++) {

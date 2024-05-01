@@ -25,6 +25,7 @@ launcher: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c terminal.c \
 	util.c sdcard.c sdcard.asm ram.asm util.asm \
+	terminal_ext.c \
 	-startup=0 \
 	-pragma-define:CRT_ORG_CODE=0x7000 \
 	-pragma-define:REGISTER_SP=-1 \
@@ -44,6 +45,7 @@ launcher-slot1: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.as
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c terminal.c \
 	util.c sdcard.c sdcard.asm ram.asm util.asm \
+	terminal_ext.c \
 	-startup=1 \
 	-pragma-define:CRT_ORG_CODE=0x1000 \
 	-pragma-define:CRT_ORG_DATA=0x6100 \

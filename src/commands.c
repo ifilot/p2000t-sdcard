@@ -21,6 +21,8 @@ void (*__operations[])(void) = {
     command_cd,
     command_fileinfo,
     command_run,
+    command_hexdump,
+    command_ledtest,
 };
 
 void execute_command(void) {
@@ -165,6 +167,35 @@ void command_run(void) {
 
     set_ram_bank(0);
     __bootcas = 1;
+}
+
+void command_hexdump(void) {
+    int file_id = atoi(&__lastinput[7]);
+
+    if(read_file_metadata(file_id) != 0) {
+        return;
+    }
+
+    // read the first sector of the file
+    read_sector(get_sector_addr(_linkedlist[0], 0));
+
+    sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
+    terminal_printtermbuffer();
+
+    // print to screen
+    for(uint8_t i=0; i<16; i++) {
+        terminal_hexdump_ram(SDCACHE0 + i * 8);
+    }
+}
+
+void command_ledtest(void) {
+    z80_outp(LED_IO, 0x00);
+    z80_delay_ms(500);
+    z80_outp(LED_IO, 0x01);
+    z80_delay_ms(500);
+    z80_outp(LED_IO, 0x02);
+    z80_delay_ms(500);
+    z80_outp(LED_IO, 0x00);
 }
 
 // *****************************************************************************
