@@ -8,17 +8,18 @@ PUBLIC _replace_bytes
 _replace_bytes:
     pop iy                  ; retrieve return address
     pop hl                  ; ramptr
-    pop de                  ; d = org, e = rep
+    pop de                  ; e = org, d = rep
     pop bc                  ; number of bytes
     push iy                 ; put return address back on stack
 nextbyte:
     ld a,(hl)
-    cp d
+    cp e
     jr nz,skip
-    ld a,e
+    ld a,d
     ld (hl),a
 skip:
-    dec bc
+    inc hl                  ; next character
+    dec bc                  ; decrement counter
     ld a,b
     or c
     jr nz,nextbyte

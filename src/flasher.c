@@ -136,7 +136,7 @@ uint8_t store_file_rom(uint32_t faddr, uint16_t rom_addr, uint8_t verbose) {
 
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
             read_sector(caddr + i); // read sector data
-            copy_to_rom((uint16_t)&_sectorblock[0], rom_addr, 0x200);
+            fast_sd_to_rom_full(rom_addr);
             rom_addr += 0x200;
 
             if(verbose == 1) {

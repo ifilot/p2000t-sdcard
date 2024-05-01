@@ -10,7 +10,9 @@ ADDR_HIGH       EQU  $69
 RAM_BANK        EQU  $6B
 RAM_IO          EQU  $6D
 LED_IO          EQU  $64
-NOTEPAD         EQU  $6160
+SDCACHE0        EQU  $0000
+SDCACHE1        EQU  $0200
+SDCACHE2        EQU  $0400
 
 PUBLIC _init_sdcard
 
@@ -81,7 +83,6 @@ hosttry:
     jr nz,hosttry               ; if not zero, try again
     call _cmd58                 ; this command will retrieve resp58 from stack
     call _close_command
-    ld hl,(NOTEPAD)             ; retrieve from notepad RAM
     exx                         ; swap back from shadow registers
     push hl                     ; put return address back onto stack
     ei                          ; enable interrupts
@@ -242,26 +243,32 @@ recvbyte:
 ; Read block from SD card
 ;-------------------------------------------------------------------------------
 _read_block:
+    ld a,0x02
+    out (LED_IO),a              ; turn write led on
     di
-    pop de                      ; return address
-    pop hl                      ; ramptr
-    push de                     ; put return address back on stack
     ld a,$FF
     out (SERIAL),a              ; flush shift register with ones
+    ld hl,SDCACHE0              ; set external RAM address
     ld c,2                      ; number of outer loops
-ornb00:
+blockouter:
     ld b,0                      ; 256 iterations for inner loop
-nb00:
+blocknext:
+    ld a,h
+    out (ADDR_HIGH),a           ; set high byte
+    ld a,l
+    out (ADDR_LOW),a            ; set low byte
     out (CLKSTART),a            ; pulse clock, does not care about value of a
     in a, (SERIAL)              ; read value
-    ld (hl),a
-    inc hl
-    djnz nb00
+    out (RAM_IO),a              ; write to RAM
+    inc hl                      ; increment RAM pointer
+    djnz blocknext
     dec c
-    jp nz, ornb00
+    jp nz, blockouter
     out (CLKSTART),a            ; two more pulses for the checksum
-    out (CLKSTART),a
+    out (CLKSTART),a            ; which are ignored
     ei
+    ld a,0x00
+    out (LED_IO),a              ; turn write led off
     ret
 
 ;-------------------------------------------------------------------------------

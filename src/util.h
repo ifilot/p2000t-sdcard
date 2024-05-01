@@ -3,7 +3,7 @@
 
 #include "terminal.h"
 
-void replace_bytes(uint8_t* str, uint8_t org, uint8_t rep, uint16_t nrbytes) __z88dk_callee;
+void replace_bytes(uint8_t *str, uint8_t org, uint8_t rep, uint16_t nrbytes) __z88dk_callee;
 
 uint16_t read_uint16_t(const uint8_t* data);
 

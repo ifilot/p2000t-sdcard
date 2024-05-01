@@ -1,5 +1,10 @@
 SECTION code_user
 
+; SD-card ports
+SERIAL          EQU  $60
+CLKSTART        EQU  $61
+
+; ROM ports
 ADDR_LOW        EQU  $68
 ADDR_HIGH       EQU  $69
 ROM_BANK        EQU  $6A
@@ -8,6 +13,7 @@ LED_IO          EQU  $64
 
 PUBLIC _crc16_romchip
 PUBLIC _copy_to_rom
+PUBLIC _fast_sd_to_rom_full
 
 ;-------------------------------------------------------------------------------
 ; Generate a 16 bit checksum
@@ -120,6 +126,69 @@ next:
     ld a,c
     or b
     jp nz, next
+    ld a,0
+    out (LED_IO),a              ; turn ROM led off
+    ei
+    ret
+
+;-------------------------------------------------------------------------------
+; Copy bytes to external ROM chip
+;
+; void void fast_sd_to_rom_full(uint16_t ram_addr) __z88dk_callee;
+;-------------------------------------------------------------------------------
+_fast_sd_to_rom_full:
+    di
+    ld a,1
+    out (LED_IO),a              ; turn ROM led on
+    pop iy                      ; return address
+    pop de                      ; dest
+    push iy                     ; put return address back on stack
+    ld a,$FF
+    out (SERIAL),a              ; flush shift register with ones
+    ld c,0
+copyouter:
+    ld b,0
+copynext:
+    ; send 0xAA to 0x5555
+    ld a,$55
+    out (ADDR_HIGH),a
+    ld a,$55
+    out (ADDR_LOW),a
+    ld a,$AA
+    out (ROM_IO),a
+    
+    ; send 0x55 to 0x2AAAA
+    ld a,$2A
+    out (ADDR_HIGH),a
+    ld a,$AA
+    out (ADDR_LOW),a
+    ld a,$55
+    out (ROM_IO),a
+
+    ; send 0xA0 to 0x5555
+    ld a,$55
+    out (ADDR_HIGH),a
+    ld a,$55
+    out (ADDR_LOW),a
+    ld a,$A0
+    out (ROM_IO),a
+
+    ; send byte from (hl) to ROM address in (de)
+    ld a,d
+    out (ADDR_HIGH),a
+    ld a,e
+    out (ADDR_LOW),a
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a, (SERIAL)              ; read value
+    out (ROM_IO),a              ; store in ROM
+
+    ; increment addresses and decrement counters
+    inc de
+    djnz copynext
+    dec c
+    jp nz, copyouter
+    out (CLKSTART),a            ; two more pulses for the checksum
+    out (CLKSTART),a
     ld a,0
     out (LED_IO),a              ; turn ROM led off
     ei

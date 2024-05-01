@@ -11,6 +11,10 @@
 #define PORT_RAM_BANK   0x6B
 #define PORT_RAM        0x6D
 
+#define SDCACHE0 0x0000
+#define SDCACHE1 0x0200
+#define SDCACHE2 0x0400
+
 #define SECTOR_CACHE_ADDR       0x1000      // cluster address
 #define SECTOR_CACHE_SIZE       0x1004      // number of files in cache
 #define SECTOR_CACHE            0x1008      // start of sector cache
@@ -66,6 +70,14 @@ void ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;
 uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
 
 /**
+ * @brief Retrieve 32 bit value from external RAM
+ * 
+ * @param addr  external memory address
+ * @return uint32_t value to receive
+ */
+uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_callee;
+
+/**
  * @brief Set the ram bank
  * 
  * @param bank id
@@ -93,6 +105,17 @@ void copy_to_ram(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
  * @param nrbytes  number of bytes to copy
  */
 void copy_from_ram(uint16_t src, uint8_t *dest, uint16_t nrbytes) __z88dk_callee;
+
+/**
+ * @brief Copy data from external RAM to external RAM
+ * 
+ * See: ram.asm
+ *
+ * @param src      source address on external RAM
+ * @param dest     destination address on external RAM
+ * @param nrbytes  number of bytes to copy
+ */
+void ram_transfer(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
 
 /**
  * @brief Calculate CRC16 checksum for N bytes starting at external ram address

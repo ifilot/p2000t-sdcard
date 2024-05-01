@@ -59,6 +59,9 @@ void main(void) {
 }
 
 void init(void) {
+    // set the CACHE bank
+    set_ram_bank(RAM_BANK_CACHE);
+
     clear_screen();
     terminal_init(3, 20);
     vidmem[0x50] = TEXT_DOUBLE;
@@ -85,9 +88,6 @@ void init(void) {
     print_info("Mounting partition 1..", 1);
     uint32_t lba0 = read_mbr();
     read_partition(lba0);
-
-    // set the CACHE bank
-    set_ram_bank(RAM_BANK_CACHE);
 
     // sd card successfully mounted
     print_info("Partition 1 mounted", 0);

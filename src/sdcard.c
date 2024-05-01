@@ -1,7 +1,6 @@
 #include "sdcard.h"
 
 // shared buffer object to store the data of a single sector on the SD card
-uint8_t _sectorblock[514];
 uint8_t _resp8[5];
 uint8_t _resp58[5];
 uint8_t _flag_sdcard_mounted = 0;
@@ -18,6 +17,6 @@ uint8_t _flag_sdcard_mounted = 0;
 void read_sector(uint32_t addr) {
     open_command();
     cmd17(addr);
-    read_block(_sectorblock);
+    read_block();
     close_command();
 }

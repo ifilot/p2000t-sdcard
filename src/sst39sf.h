@@ -65,6 +65,13 @@ void set_rom_bank(uint8_t rom_bank);
 void copy_to_rom(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
 
 /**
+ * @brief Copy all 0x200 bytes immediately from SD to external ROM.
+ * 
+ * @param ram_addr external memory address
+ */
+void fast_sd_to_rom_full(uint16_t ram_addr) __z88dk_callee;
+
+/**
  * @brief Calculate CRC16 checksum on ROM
  * 
  * See: sst39sf.asm

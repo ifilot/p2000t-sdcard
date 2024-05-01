@@ -17,7 +17,6 @@
  */
 
 // shared buffer object to store the data of a single sector on the SD card
-extern uint8_t _sectorblock[514];
 extern uint8_t _resp8[5];
 extern uint8_t _resp58[5];
 extern uint8_t _flag_sdcard_mounted;
@@ -96,10 +95,8 @@ uint8_t acmd41(void) __z88dk_callee;
 
 /**
  * @brief Read a 512 byte block including 2 bytes checksum from SD card
- * 
- * @param ramptr internal memory address to write to
  */
-void read_block(uint16_t* ramptr) __z88dk_callee;
+void read_block(void) __z88dk_callee;
 
 /**
  * @brief Copy the first 0x100 bytes immediately from SD to RAM while discarding
