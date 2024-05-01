@@ -1,16 +1,5 @@
 #include "util.h"
 
-uint16_t read_uint16_t(const uint8_t* data) {
-    return (*(data+1)) << 8 | (*data);
-}
-
-uint32_t read_uint32_t(const uint8_t* data) {
-    return (uint32_t)(*(data+3)) << 24 |
-           (uint32_t)(*(data+2)) << 16 | 
-           (uint32_t)(*(data+1)) << 8 |
-           (uint32_t)(*data);
-}
-
 /**
  * @brief Wait for key-press
  *
@@ -33,6 +22,10 @@ uint8_t wait_for_key_fixed(uint8_t quitkey) {
     }
 }
 
+/**
+ * @brief Clear the screen
+ * 
+ */
 void clear_screen(void) {
     memset(vidmem, 0x00, 0x1000);
 }

@@ -20,14 +20,41 @@
 extern char __lastinput[INPUTLENGTH];
 extern uint8_t __bootcas;
 
-void command_mount(void);
 void commands_ls(void);
-void commands_cd(void);
-void commands_fileinfo(void);
+
+/**
+ * @brief List contents of a folder and parse CAS files
+ * 
+ */
+void command_lscas(void);
+
+/**
+ * @brief change directory to folder indicated by id
+ */
+void command_cd(void);
+
+/**
+ * @brief Obtain info of a given file
+ * 
+ */
+void command_fileinfo(void);
+
+/**
+ * @brief Load a (CAS) file into memory and launch it
+ * 
+ */
 void command_run(void);
-void command_testram(void);
-void command_printsdsector(void);
+
+/**
+ * @brief Test burning of read and write LEDs
+ * 
+ */
 void command_ledtest(void);
+
+/**
+ * @brief Execute the command given by instruction
+ * 
+ */
 void execute_command(void);
 
 // *****************************************************************************
