@@ -10,6 +10,7 @@
 #include "sdcard.h"
 #include "memory.h"
 #include "terminal.h"
+#include "terminal_ext.h"
 #include "fat32.h"
 #include "ram.h"
 #include "leds.h"

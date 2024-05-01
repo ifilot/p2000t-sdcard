@@ -59,6 +59,9 @@ void main(void) {
 }
 
 void init(void) {
+    // set the CACHE bank
+    set_ram_bank(RAM_BANK_CACHE);
+
     clear_screen();
     terminal_init(3, 20);
     vidmem[0x50] = TEXT_DOUBLE;
@@ -76,7 +79,7 @@ void init(void) {
 
     // mount sd card
     print_info("Initializing SD card..", 1);
-    init_sdcard();
+    init_sdcard(_resp8, _resp58);
 
     // inform user that the SD card is initialized and that we are ready to read
     // the first block from the SD card and print it to the screen
@@ -93,7 +96,4 @@ void init(void) {
     // insert cursor
     sprintf(termbuffer, "%c>%c", COL_CYAN, COL_WHITE);
     terminal_redoline();
-
-    // load program using first ram bank
-    set_ram_bank(0);
 }

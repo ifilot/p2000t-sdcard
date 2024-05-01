@@ -6,6 +6,7 @@ uint8_t __bootcas = 0;
 // set list of commands
 char* __commands[] = {
     "ls",
+    "lscas",
     "cd",
     "fileinfo",
     "run",
@@ -16,6 +17,7 @@ char* __commands[] = {
 // set list of function pointers
 void (*__operations[])(void) = {
     command_ls,
+    command_lscas,
     command_cd,
     command_fileinfo,
     command_run,
@@ -63,6 +65,12 @@ void command_ls(void) {
     if(check_mounted() == 1) { return; }
 
     read_folder(_current_folder_cluster, -1);
+}
+
+void command_lscas(void) {
+    if(check_mounted() == 1) { return; }
+
+    read_folder_cas(_current_folder_cluster);
 }
 
 /**
@@ -131,7 +139,7 @@ void command_run(void) {
     sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
     terminal_printtermbuffer();
     
-    set_ram_bank(1);
+    set_ram_bank(RAM_BANK_CASSETTE);
     store_cas_ram(_linkedlist[0], 0x0000, 1);
 
     uint16_t deploy_addr = ram_read_uint16_t(0x8000);
@@ -174,9 +182,9 @@ void command_hexdump(void) {
     sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
     terminal_printtermbuffer();
 
-    // print sectorblock to screen
+    // print to screen
     for(uint8_t i=0; i<16; i++) {
-        terminal_hexdump(i*8, &_sectorblock[i*8]);
+        terminal_hexdump_ram(SDCACHE0 + i * 8);
     }
 }
 
@@ -207,19 +215,6 @@ uint8_t read_file_metadata(int16_t file_id) {
     if(file_id < 0) {
         print_error("Invalid file id");
         return 1;
-    }
-
-    if(ram_read_uint32_t(SECTOR_CACHE_ADDR) == _current_folder_cluster &&
-       file_id < ram_read_uint32_t(SECTOR_CACHE_SIZE)) {
-
-        uint32_t cluster = ram_read_uint32_t(SECTOR_CACHE + (file_id-1) *4);
-        uint8_t entry_id = ram_read_byte(ENTRY_CACHE + file_id - 1);
-
-        read_sector(cluster);
-        uint32_t fc = store_file_metadata(entry_id);
-        build_linked_list(fc);
-
-        return 0;
     }
 
     uint32_t cluster = read_folder(_current_folder_cluster, file_id);

@@ -31,7 +31,7 @@ int main(void) {
 
     // mount sd card
     print_info("Initializing SD card..", 1);
-    init_sdcard();
+    init_sdcard(_resp8, _resp58);
 
     // inform user that the SD card is initialized and that we are ready to read
     // the first block from the SD card and print it to the screen
@@ -48,7 +48,6 @@ int main(void) {
     // read the root directory
     uint32_t faddr = find_file(_root_dir_first_cluster, LAUNCHERNAME, LAUNCHEREXT);
     if(faddr != 0) {
-        set_ram_bank(1);
         set_rom_bank(0);
 
         // reporting if file is found
@@ -102,7 +101,7 @@ int main(void) {
             terminal_printtermbuffer();
         }
 
-        set_ram_bank(0);
+        set_ram_bank(RAM_BANK_CACHE);
     } else {
         sprintf(termbuffer, "No %s.%s found in root dir", LAUNCHERNAME, LAUNCHEREXT);
         terminal_printtermbuffer();
@@ -137,7 +136,7 @@ uint8_t store_file_rom(uint32_t faddr, uint16_t rom_addr, uint8_t verbose) {
 
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
             read_sector(caddr + i); // read sector data
-            copy_to_rom((uint16_t)&_sectorblock[0], rom_addr, 0x200);
+            fast_sd_to_rom_full(rom_addr);
             rom_addr += 0x200;
 
             if(verbose == 1) {
@@ -172,10 +171,9 @@ void init(void) {
     sprintf(&vidmem[0x50+2], "SDCARD FLASHER");
     sprintf(&vidmem[0x50*22], "Version: %s", __VERSION__);
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
-
     print_info("System booted.", 0);
 
     // load program using first ram bank
     set_rom_bank(0);
-    set_ram_bank(0);
+    set_ram_bank(RAM_BANK_CACHE);
 }

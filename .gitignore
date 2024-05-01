@@ -31,3 +31,4 @@ fp-info-cache
 *.zip
 *.step
 *.lck
+.vscode/*

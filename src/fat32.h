@@ -6,6 +6,7 @@
 #include "sdcard.h"
 #include "util.h"
 #include "ram.h"
+#include "util.h"
 
 // global variables for the FAT
 extern uint16_t _bytes_per_sector;
@@ -52,6 +53,8 @@ void read_partition(uint32_t lba0);
  * @return uint32_t first cluster of the file
  */
 uint32_t read_folder(uint32_t cluster, int16_t file_id);
+
+void read_folder_cas(uint32_t cluster);
 
 /**
  * @brief Find a file identified by BASENAME and EXT in the folder correspond
