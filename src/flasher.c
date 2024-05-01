@@ -48,8 +48,6 @@ int main(void) {
     // read the root directory
     uint32_t faddr = find_file(_root_dir_first_cluster, LAUNCHERNAME, LAUNCHEREXT);
     if(faddr != 0) {
-        set_rom_bank(0);
-
         // reporting if file is found
         sprintf(termbuffer, "%s.%s found: %c%lu Bytes", LAUNCHERNAME, LAUNCHEREXT, COL_GREEN, _filesize_current_file);
         terminal_printtermbuffer();
@@ -100,8 +98,6 @@ int main(void) {
             sprintf(termbuffer, "Invalid device id: %04X", rom_id);
             terminal_printtermbuffer();
         }
-
-        set_ram_bank(RAM_BANK_CACHE);
     } else {
         sprintf(termbuffer, "No %s.%s found in root dir", LAUNCHERNAME, LAUNCHEREXT);
         terminal_printtermbuffer();
@@ -135,8 +131,13 @@ uint8_t store_file_rom(uint32_t faddr, uint16_t rom_addr, uint8_t verbose) {
         const uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
 
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
-            read_sector(caddr + i); // read sector data
+            // directly transfer data to ROM chip
+            open_command();
+            cmd17(caddr + i);
             fast_sd_to_rom_full(rom_addr);
+            close_command();
+
+            // increment memory pointer
             rom_addr += 0x200;
 
             if(verbose == 1) {

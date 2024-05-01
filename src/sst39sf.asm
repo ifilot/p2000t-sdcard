@@ -134,7 +134,7 @@ next:
 ;-------------------------------------------------------------------------------
 ; Copy bytes to external ROM chip
 ;
-; void void fast_sd_to_rom_full(uint16_t ram_addr) __z88dk_callee;
+; void fast_sd_to_rom_full(uint16_t rom_addr) __z88dk_callee;
 ;-------------------------------------------------------------------------------
 _fast_sd_to_rom_full:
     di
@@ -145,7 +145,7 @@ _fast_sd_to_rom_full:
     push iy                     ; put return address back on stack
     ld a,$FF
     out (SERIAL),a              ; flush shift register with ones
-    ld c,0
+    ld c,2
 copyouter:
     ld b,0
 copynext:
@@ -173,7 +173,7 @@ copynext:
     ld a,$A0
     out (ROM_IO),a
 
-    ; send byte from (hl) to ROM address in (de)
+    ; send byte from to ROM address in (de)
     ld a,d
     out (ADDR_HIGH),a
     ld a,e

@@ -217,7 +217,7 @@ void read_folder_cas(uint32_t cluster) {
             for(uint16_t j=0; j<16; j++) { // 16 file tables per sector
 
                 // grab file metadata
-                copy_from_ram(j*32, fileblock, 32);
+                copy_from_ram(SDCACHE0 + j * 32, fileblock, 32);
 
                 // early exit if a zero is read
                 if(fileblock[0] == 0x00) {
@@ -317,7 +317,7 @@ uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_
             for(uint16_t j=0; j<16; j++) { // 16 file tables per sector
 
                 // grab file metadata
-                copy_from_ram(j*32, fileblock, 32);
+                copy_from_ram(SDCACHE0 + j * 32, fileblock, 32);
 
                 // early exit if a zero is read
                 if(fileblock[0] == 0x00) {
@@ -337,8 +337,8 @@ uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_
                 if((attrib & 0x0F) == 0x00) {
                     fctr++;
 
-                    if(strcmp(basename_find, &fileblock[0x00]) == 0 && 
-                       strcmp(ext_find, &fileblock[0x08]) == 0) {
+                    if(memcmp(basename_find, fileblock, 8) == 0 && 
+                       memcmp(ext_find, &fileblock[8], 3) == 0) {
 
                         uint16_t fch = read_uint16_t(&fileblock[0x14]);
                         uint16_t fcl = read_uint16_t(&fileblock[0x1A]);
