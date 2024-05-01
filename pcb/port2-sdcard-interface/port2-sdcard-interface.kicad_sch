@@ -7301,7 +7301,7 @@
     (property "Reference" "R6" (at 231.14 153.543 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "560" (at 231.14 155.448 90)
+    (property "Value" "180" (at 231.14 155.448 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder" (at 231.14 157.226 90)
