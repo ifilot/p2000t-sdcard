@@ -25,48 +25,24 @@ void (*__operations[])(void) = {
     command_ledtest,
 };
 
-void execute_command(void) {
-    // create copy of the input and flush input buffer
-    memcpy(__lastinput, __input, INPUTLENGTH);
-    memset(__input, 0x00, INPUTLENGTH+1);
-    __inputpos = 0;
-    strrstrip(__lastinput);
+// *****************************************************************************
+// LIST OF COMMANDS
+// *****************************************************************************
 
-    sprintf(termbuffer, "%c>%c%s", COL_CYAN, COL_WHITE, __lastinput);
-    terminal_printtermbuffer();
-
-    // if only whitespaces are read, simply return
-    if(strlen(__lastinput) == 0) {
-        return;
-    }
-
-    // loop over all commmands until a match is found;
-    // if so, execute the command
-    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
-        if(strcmp(__lastinput, __commands[i]) == 0) {
-            __operations[i]();
-            return;
-        }
-    }
-
-    // try the same thing, but now only for the first n bytes
-    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
-        if(memcmp(__lastinput, __commands[i], strlen(__commands[i])) == 0) {
-            __operations[i]();
-            return;
-        }
-    }
-
-    // if no valid command is found, print an error message
-    print_error("Invalid command.");
-}
-
+/**
+ * @brief List contents of a folder
+ * 
+ */
 void command_ls(void) {
     if(check_mounted() == 1) { return; }
 
     read_folder(_current_folder_cluster, -1);
 }
 
+/**
+ * @brief List contents of a folder and parse CAS files
+ * 
+ */
 void command_lscas(void) {
     if(check_mounted() == 1) { return; }
 
@@ -95,6 +71,10 @@ void command_cd(void) {
     }
 }
 
+/**
+ * @brief Obtain info of a given file
+ * 
+ */
 void command_fileinfo(void) {
     int fileid = atoi(&__lastinput[8]);
 
@@ -119,6 +99,10 @@ void command_fileinfo(void) {
     }
 }
 
+/**
+ * @brief Load a (CAS) file into memory and launch it
+ * 
+ */
 void command_run(void) {
     print_info("Searching file...", 1);
 
@@ -188,6 +172,10 @@ void command_hexdump(void) {
     }
 }
 
+/**
+ * @brief Test burning of read and write LEDs
+ * 
+ */
 void command_ledtest(void) {
     z80_outp(LED_IO, 0x00);
     z80_delay_ms(500);
@@ -196,6 +184,50 @@ void command_ledtest(void) {
     z80_outp(LED_IO, 0x02);
     z80_delay_ms(500);
     z80_outp(LED_IO, 0x00);
+}
+
+// *****************************************************************************
+// COMMAND PARSER
+// *****************************************************************************
+
+/**
+ * @brief Execute the command given by instruction
+ * 
+ */
+void execute_command(void) {
+    // create copy of the input and flush input buffer
+    memcpy(__lastinput, __input, INPUTLENGTH);
+    memset(__input, 0x00, INPUTLENGTH+1);
+    __inputpos = 0;
+    strrstrip(__lastinput);
+
+    sprintf(termbuffer, "%c>%c%s", COL_CYAN, COL_WHITE, __lastinput);
+    terminal_printtermbuffer();
+
+    // if only whitespaces are read, simply return
+    if(strlen(__lastinput) == 0) {
+        return;
+    }
+
+    // loop over all commmands until a match is found;
+    // if so, execute the command
+    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
+        if(strcmp(__lastinput, __commands[i]) == 0) {
+            __operations[i]();
+            return;
+        }
+    }
+
+    // try the same thing, but now only for the first n bytes
+    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
+        if(memcmp(__lastinput, __commands[i], strlen(__commands[i])) == 0) {
+            __operations[i]();
+            return;
+        }
+    }
+
+    // if no valid command is found, print an error message
+    print_error("Invalid command.");
 }
 
 // *****************************************************************************

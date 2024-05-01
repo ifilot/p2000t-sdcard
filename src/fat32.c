@@ -266,8 +266,11 @@ void read_folder_cas(uint32_t cluster) {
                     if(attrib & (1 << 4)) { // directory entry
                         sprintf(termbuffer, "%c%3u%c%.8s DIR", COL_YELLOW, fctr, COL_WHITE, &fileblock[0x00]);
                         terminal_printtermbuffer();
-                    } else {                // file entry
+                    } else if(memcmp(&fileblock[8], "CAS", 3) == 0) { // .CAS file
                         sprintf(termbuffer, "%c%3u%c%.16s %.3s%c%2i %6u", COL_GREEN, fctr, COL_YELLOW, casname, ext, COL_CYAN, blocks, filesize);
+                        terminal_printtermbuffer();
+                    } else { // regular file
+                        sprintf(termbuffer, "%c%3u%c%.8s %.3s", COL_YELLOW, fctr, COL_WHITE, &fileblock[0x00], &fileblock[0x08]);
                         terminal_printtermbuffer();
                     }
 
