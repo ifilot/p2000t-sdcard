@@ -61,14 +61,13 @@ jobs:
     needs: [build-launcher]
     permissions: write-all
     steps:
-    - uses: actions/checkout@v3
-      with:
-        name: ifilot/crc16sign
-        ref: refs/heads/release
     - name: Install dependencies
-      run: sudo apt install -y cmake build-essential libtclap-dev libboost-all-dev
+      run: sudo apt install -y cmake build-essential libtclap-dev libboost-all-dev git
+    - name: Download repository
+      run: git clone https://github.com/ifilot/crc16sign.git --depth 1
     - name: build crc16sign
       run: |
+        cd crc16sign
         mkdir build
         cd build
         cmake ../src
@@ -80,7 +79,7 @@ jobs:
         path: ./
     - name: Sign binary
       run: |
-        build/crc16sign -i ${{env.LAUNCHER_BIN}} -o ${{env.LAUNCHER_BIN}} -s
+        crc16sign/build/crc16sign -i ${{env.LAUNCHER_BIN}} -o ${{env.LAUNCHER_BIN}} -s
     - name: Upload launcher
       uses: actions/upload-artifact@v3
       with:

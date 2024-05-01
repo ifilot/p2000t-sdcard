@@ -87,13 +87,16 @@ int main(void) {
             print_info("Calculating CRC16, please wait...", 0);
             uint16_t checksum = crc16_romchip(0x0000, _filesize_current_file);
 
-            sprintf(termbuffer, "Checksum: %c0x%04X", COL_CYAN, checksum);
-            terminal_printtermbuffer();
+            if(checksum == 0x0000) {
+                print_info("Checksum successfully validated.", 0);
 
-            // all done
-            print_info("",0); // empty line
-            sprintf(termbuffer, "%cFLASHING COMPLETED!", COL_GREEN);
-            terminal_printtermbuffer();
+                print_info("",0); // empty line
+                sprintf(termbuffer, "%cFLASHING COMPLETED!", COL_GREEN);
+                terminal_printtermbuffer();
+            } else {
+                print_error("Invalid checksum encountered.");
+                print_info("Please try again.", 0);
+            }
         } else {
             sprintf(termbuffer, "Invalid device id: %04X", rom_id);
             terminal_printtermbuffer();
