@@ -107,21 +107,6 @@ jobs:
         asset_path: ${{env.LAUNCHER_BIN}}
         asset_name: ${{env.LAUNCHER_BIN}}
         asset_content_type: application/octet-stream
-    - name: Download launcher-checksum.txt
-      uses: actions/download-artifact@v3
-      with:
-        name: launcher-checksum.txt
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset-checksums
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: launcher-checksum.txt
-        asset_name: launcher-checksum.txt
-        asset_content_type: text/plain
 
 ################################################################################
 
