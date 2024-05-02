@@ -66,3 +66,11 @@ Binaries can also be directly downloaded from the releases.
 ![P2000T SD-card PCB screenshots](img/p2000t-sdcard-pcb-rev4.jpg)
 
 ![P2000T SD-card cartridge set and monitor](img/p2000t-sdcard-cartridge-and-monitor.jpg)
+
+## Contents
+
+* [Cartridge cases](cases/)
+* [PCB layout files (KiCAD)](pcb/port2-sdcard-interface/)
+* [Modified BASIC ROM source files](basicmod/)
+* [Launcher and Flasher programs](src/)
+* [Custom programs](programs/)
