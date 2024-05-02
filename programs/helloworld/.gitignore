@@ -5,3 +5,7 @@
 *.bin
 *.txt
 *.c.asm
+*.lis
+*.PRG
+*.BIN
+*.map
