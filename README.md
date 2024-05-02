@@ -63,12 +63,6 @@ Binaries can also be directly downloaded from the releases.
 
 ## Images
 
-<p float="left">
-    <img src="img/sdcard-cartridge-bare-front.jpg" width="40%">
-    <img src="img/sdcard-cartridge-bare-back.jpg" width="40%">
-</p>
+![P2000T SD-card PCB screenshots](img/p2000t-sdcard-pcb-rev4.jpg)
 
-<p float="left">
-    <img src="img/sdcard-cartridge-populated-front.jpg" width="40%">
-    <img src="img/sdcard-cartridge-populated-back.jpg" width="40%">
-</p>
+![P2000T SD-card cartridge set and monitor](img/p2000t-sdcard-cartridge-and-monitor.jpg)
