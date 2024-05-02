@@ -92,8 +92,13 @@ _get_stack_location:
     ret                     ; result in HL
 
 ;-------------------------------------------------------------------------------
-; void call_program(void) __z88dk_callee;
+; void call_program(uint16_t) __z88dk_callee;
+;
+; This subroutine is a bit of a hack. It mimics an indirect call.
+;
 ;-------------------------------------------------------------------------------
 _call_program:
-    call $A010
-    ret
+    pop iy                  ; return address
+    pop hl                  ; pointer address
+    push iy                 ; put return address on the stack
+    jp (hl)

@@ -79,6 +79,6 @@ uint16_t get_stack_location(void) __z88dk_callee;
  * 
  * @param location 
  */
-void call_program(void) __z88dk_callee;
+void call_program(uint16_t ramptr) __z88dk_callee;
 
 #endif //_UINT_UTIL_H

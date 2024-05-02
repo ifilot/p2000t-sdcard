@@ -34,6 +34,8 @@
 #define NUMBANKS        6      // assuming 64kb memory expansion
 #define MEMBANK         0x94   // Z80 I/O address for memory banking
 
+#define PROGRAM_LOCATION 0xA000  // where to store custom programs
+
 extern char* memory;
 extern char* vidmem;
 extern char* keymem;

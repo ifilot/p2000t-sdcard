@@ -463,11 +463,15 @@ void store_prg_intram(uint32_t faddr, uint16_t ram_addr) {
         // calculate address of sector
         const uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
 
+        sprintf(termbuffer, "Copying program to %04X", ram_addr);
+        terminal_printtermbuffer();
+
         // loop over all sectors given a cluster and copy the data to RAM
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
 
+            // copy sector over to internal memory
             open_command();
-            cmd17(caddr + i);    // prime SD-card for data retrieval
+            cmd17(caddr + i);
             fast_sd_to_intram_full(ram_addr);
             close_command();
 

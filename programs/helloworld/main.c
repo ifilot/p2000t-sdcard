@@ -11,6 +11,8 @@ int main(void) {
     // write hello world
     memcpy(vidmem, "Hello world!", 11);
 
+    memcpy(&vidmem[0x50], "Press any key to exit program...", 32);
+
     // wait for key press
     wait_for_key();
 

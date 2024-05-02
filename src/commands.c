@@ -170,8 +170,20 @@ void command_run(void) {
         set_ram_bank(0);
         __bootcas = 1;
     } else if(memcmp(_ext, "PRG", 3) == 0) {
+        if(memory[0x605C] < 2) {
+            print_error("Insufficient memory.");
+            print_info("At least 32kb of memory required.", 0);
+            return;
+        }
+
         // copy program
-        store_prg_intram(_linkedlist[0], 0xA000);
+        store_prg_intram(_linkedlist[0], PROGRAM_LOCATION);
+
+        // verify that the signature is correct
+        if(memory[PROGRAM_LOCATION] != 0x50) {
+            print_error("Invalid program ID");
+            return;
+        }
 
         // wait on user key push
         print_info("Press any key to start program", 0);
@@ -179,11 +191,15 @@ void command_run(void) {
         
         print_info("Launching program...", 0);
 
-        // call program at $A010
+        // transfer copy of current screen to external RAM
         copy_to_ram(vidmem, VIDMEM_CACHE, 0x1000);
-        call_program();
-        copy_from_ram(VIDMEM_CACHE, vidmem, 0x1000);
 
+        // launch the program
+        //memset(&memory[0xA000], 0x00, 0x200);
+        call_program(PROGRAM_LOCATION + 0x10);
+
+        // retrieve copy of current screen
+        copy_from_ram(VIDMEM_CACHE, vidmem, 0x1000);
     } else {
         print_error("Cannot only run CAS or PRG files.");
     }
