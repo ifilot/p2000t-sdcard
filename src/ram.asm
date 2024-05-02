@@ -215,7 +215,7 @@ clr:
 ;-------------------------------------------------------------------------------
 ; Copy bytes to external RAM chip
 ;
-; void copy_to_ram(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
+; void copy_to_ram(uint8_t *src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
 ;
 ; input:  hl - source address
 ;         de - destination address

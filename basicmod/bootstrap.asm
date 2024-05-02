@@ -254,19 +254,3 @@ read_ram:
     out (IO_AL),a         ; store lower bytes in register
     in a,(RAM_IO)         ; load byte
     ret
-
-;-------------------------------------------------------------------------------
-; write a byte to external ram
-;
-;  a - byte to write
-; hl - address
-;-------------------------------------------------------------------------------
-write_ram:
-    push af
-    ld a,h
-    out (IO_AH),a         ; store upper bytes in register
-    ld a,l
-    out (IO_AL),a         ; store lower bytes in register
-    pop af
-    out (RAM_IO),a        ; write byte
-    ret

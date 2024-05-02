@@ -58,5 +58,4 @@ launcher-slot1: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.as
 	-SO3 -bn LAUNCHER-SLOT1.BIN \
 	-create-app -m \
 	&& mv LAUNCHER-SLOT1.bin LAUNCHER-SLOT1.BIN \
-	&& wc -c < LAUNCHER-SLOT1.BIN \
-	&& truncate -s 11520 LAUNCHER-SLOT1.BIN
+	&& wc -c < LAUNCHER-SLOT1.BIN

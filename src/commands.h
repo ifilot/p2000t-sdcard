@@ -34,6 +34,7 @@
 #include "fat32.h"
 #include "ram.h"
 #include "leds.h"
+#include "util.h"
 
 #define __clock_freq 2500000
 
@@ -70,6 +71,12 @@ void command_run(void);
  * 
  */
 void command_ledtest(void);
+
+/**
+ * @brief Indicate where the stack is
+ * 
+ */
+void command_stack(void);
 
 /**
  * @brief Execute the command given by instruction

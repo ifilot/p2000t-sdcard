@@ -142,6 +142,13 @@ void fast_sd_to_ram_last_0x100(uint16_t ram_addr) __z88dk_callee;
 void fast_sd_to_ram_full(uint16_t ram_addr) __z88dk_callee;
 
 /**
+ * @brief Copy all 0x200 bytes immediately from SD to internal RAM.
+ * 
+ * @param ram_addr external memory address
+ */
+void fast_sd_to_intram_full(uint16_t ram_addr) __z88dk_callee;
+
+/**
  * @brief Read a single 512-byte sector
  * 
  * @param addr cluster address

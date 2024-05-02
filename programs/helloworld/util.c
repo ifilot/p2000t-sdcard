@@ -18,9 +18,13 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#include "util.h"
 
-#define __VERSION__ "0.6.0"
-
-#endif
+/**
+ * @brief Wait for key-press
+ *
+ */
+void wait_for_key(void) {
+    keymem[0x0C] = 0;
+    while(keymem[0x0C] == 0) {} // wait until a key is pressed
+}

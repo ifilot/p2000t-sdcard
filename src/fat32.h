@@ -70,11 +70,10 @@ void read_partition(uint32_t lba0);
  * 
  * @param cluster cluster address of the folder
  * @param file_id ith file in the folder
+ * @param casrun whether we are performing a run with CAS file metadata scan
  * @return uint32_t first cluster of the file
  */
-uint32_t read_folder(uint32_t cluster, int16_t file_id);
-
-void read_folder_cas(uint32_t cluster);
+uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun);
 
 /**
  * @brief Find a file identified by BASENAME and EXT in the folder correspond
@@ -116,8 +115,15 @@ uint32_t store_file_metadata(uint8_t entry_id);
  * 
  * @param faddr    cluster address of the file
  * @param ram_addr first position in ram to store the file
- * @param verbose  whether to show progress
  */
-void store_cas_ram(uint32_t faddr, uint16_t ram_addr, uint8_t verbose);
+void store_cas_ram(uint32_t faddr, uint16_t ram_addr);
+
+/**
+ * @brief Store a PRG file in internal ram
+ * 
+ * @param faddr    cluster address of the file
+ * @param ram_addr first position in ram to store the file
+ */
+void store_prg_intram(uint32_t faddr, uint16_t ram_addr);
 
 #endif // _FAT32_H
