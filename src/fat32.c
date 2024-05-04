@@ -70,8 +70,8 @@ void read_partition(uint32_t lba0) {
     uint16_t signature = ram_read_uint16_t(SDCACHE0 + 0x1FE);
 
     // print data
-    sprintf(termbuffer, "LBA partition 1:%c%08lX", COL_GREEN, lba0);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "LBA partition 1:%c%08lX", COL_GREEN, lba0);
+    // terminal_printtermbuffer();
 
     sprintf(termbuffer, "Bytes per sector:%c%i", COL_GREEN, _bytes_per_sector);
     terminal_printtermbuffer();
@@ -85,7 +85,15 @@ void read_partition(uint32_t lba0) {
     // sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
     // terminal_printtermbuffer();
 
-    sprintf(termbuffer, "Sectors per FAT:%c%i", COL_GREEN, _sectors_per_fat);
+    // sprintf(termbuffer, "Sectors per FAT:%c%lu", COL_GREEN, _sectors_per_fat);
+    // terminal_printtermbuffer();
+
+    // calculate the total capacity on the partition; this corresponds to the
+    // each FAT holds a number of sectors
+    // each sector can refer to 128 clusters (128 x 32 = 512 bytes)
+    // each cluster hosts a number of sectors
+    // each sector has a specific sectors size (512 bytes for FAT32)
+    sprintf(termbuffer, "Partition size:%c%lu MiB", COL_GREEN, (_sectors_per_fat * 128 * _sectors_per_cluster * _bytes_per_sector) >> 20 );
     terminal_printtermbuffer();
 
     // sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
