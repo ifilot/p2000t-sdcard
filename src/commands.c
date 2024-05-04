@@ -155,7 +155,7 @@ void command_run(void) {
         terminal_printtermbuffer();
 
         print_info("Press c to calculate checksum or any", 0);
-        print_info("or any other key to launch program.", 0);
+        print_info("other key to launch program.", 0);
         if(wait_for_key_fixed(28) == 1) {
             // calculate CRC16 checksum
             print_info("Calculating CRC16 checksum...", 1);
