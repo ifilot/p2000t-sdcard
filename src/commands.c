@@ -33,6 +33,9 @@ char* __commands[] = {
     "hexdump",
     "ledtest",
     "stack",
+    "romdump",
+    "ramdump",
+    "dump",
 };
 
 // set list of function pointers
@@ -45,6 +48,9 @@ void (*__operations[])(void) = {
     command_hexdump,
     command_ledtest,
     command_stack,
+    command_romdump,
+    command_ramdump,
+    command_dump,
 };
 
 // *****************************************************************************
@@ -219,9 +225,7 @@ void command_hexdump(void) {
     terminal_printtermbuffer();
 
     // print to screen
-    for(uint8_t i=0; i<16; i++) {
-        terminal_hexdump_ram(SDCACHE0 + i * 8);
-    }
+    terminal_hexdump(SDCACHE0, DUMP_EXTRAM);
 }
 
 /**
@@ -246,6 +250,33 @@ void command_stack(void) {
     const uint16_t stackloc = get_stack_location();
     sprintf(termbuffer, "Stack location: %04X", stackloc);
     terminal_printtermbuffer();
+}
+
+/**
+ * @brief Dump cartridge ROM contents to the screen
+ * 
+ */
+void command_romdump(void) {
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[7]);
+    terminal_hexdump(addr, DUMP_EXTROM);
+}
+
+/**
+ * @brief Dump cartridge ROM contents to the screen
+ * 
+ */
+void command_ramdump(void) {
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[7]);
+    terminal_hexdump(addr, DUMP_EXTRAM);
+}
+
+/**
+ * @brief Dump system RAM to the screen
+ * 
+ */
+void command_dump(void) {
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[4]);
+    terminal_hexdump(addr, DUMP_INTRAM);
 }
 
 // *****************************************************************************

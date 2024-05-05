@@ -23,15 +23,18 @@ from said SD card and load them into memory.
 Upon booting into the LAUNCHER application, the user interfaces with the SD-card
 using a set of short commands. Below, the list of commands is provided
 
-| **Command**         | **Description**                                                |
-| ------------------- | -------------------------------------------------------------- |
-| `ls`                | List contents of current folder                                |
-| `lscas`             | List contents of current folder, listing contents of CAS files |
-| `cd <number>`       | Change directory                                               |
-| `run <number>`      | Run .CAS file                                                  |
-| `hexdump <number>`  | Performs a 96-byte hexdump of a file                           |
-| `fileinfo <number>` | Provides location details of a file                            |
-| `ledtest`           | Performs a quick test on the read/write LEDs                   |
+| **Command**         | **Description**                                                   |
+| ------------------- | ------------------------------------------------------------------|
+| `ls`                | List contents of current folder                                   |
+| `lscas`             | List contents of current folder, listing contents of CAS files    |
+| `cd <number>`       | Change directory                                                  |
+| `run <number>`      | Run .CAS file                                                     |
+| `hexdump <number>`  | Performs a 120-byte hexdump of a file                             |
+| `fileinfo <number>` | Provides location details of a file                               |
+| `ledtest`           | Performs a quick test on the read/write LEDs                      |
+| `dump<XXXX>`        | Perform a 120-byte hexdump of main memory starting at `0xXXXX`    |
+| `romdump<XXXX>`     | Perform a 120-byte hexdump of cartridge ROM starting at `0xXXXX`  |
+| `ramdump<XXXX>`     | Perform a 120-byte hexdump of cartridge RAM starting at `0xXXXX`  |
 
 Note that `<number>` needs to replaced with the specific number of a file. Users
 who are familiar with command line interfaces are probably used to specifying

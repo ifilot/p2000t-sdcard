@@ -100,21 +100,3 @@ void terminal_cursor_blink(void) {
         }
     }
 }
-
-void terminal_hexdump(uint16_t addr, uint8_t *mem) {
-    sprintf(termbuffer, "%c%04X", COL_YELLOW, addr);
-    for(uint8_t i=0; i<8; i++) {
-        sprintf(&termbuffer[5+i*3], "%c%02X", COL_WHITE, mem[i]);
-    }
-
-    termbuffer[5+8*3] = COL_CYAN;
-
-    for(uint8_t i=0; i<8; i++) {
-        if(mem[i] >= 32 && mem[i] <= 127) {
-            termbuffer[6+8*3+i] = mem[i];
-        } else {
-            termbuffer[6+8*3+i] = '.';
-        }
-    }
-    terminal_printtermbuffer();
-}

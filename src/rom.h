@@ -18,19 +18,19 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _CONSTANTS_H
-#define _CONSTANTS_H
+#ifndef _ROM_H
+#define _ROM_H
 
-#define COL_NONE    0x00
-#define COL_RED     0x01
-#define COL_GREEN   0x02
-#define COL_YELLOW  0x03
-#define COL_BLUE    0x04
-#define COL_MAGENTA 0x05
-#define COL_CYAN    0x06
-#define COL_WHITE   0x07
-#define TEXT_DOUBLE 0x0D
+#include <z80.h>
+#include <stdint.h>
+#include "memory.h"
 
-#define INPUTLENGTH 20
+/**
+ * @brief Retrieve single byte from external ROM
+ * 
+ * @param addr external memory address
+ * @return uint8_t byte at address
+ */
+uint8_t rom_read_byte(uint16_t addr) __z88dk_callee;
 
-#endif
+#endif // _ROM_H

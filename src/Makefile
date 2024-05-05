@@ -20,11 +20,11 @@ flasher: fat32.c flasher.c memory.c sst39sf.c util.c sdcard.c sdcard.asm termina
 	&& mv FLASHER.bin FLASHER.BIN \
 	&& wc -c < FLASHER.BIN
 
-launcher: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm util.asm
+launcher: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm util.asm rom.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c terminal.c \
-	util.c sdcard.c sdcard.asm ram.asm util.asm \
+	util.c sdcard.c sdcard.asm ram.asm util.asm rom.asm \
 	terminal_ext.c \
 	-startup=0 \
 	-pragma-define:CRT_ORG_CODE=0x7000 \
@@ -40,11 +40,11 @@ launcher: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.
 	&& wc -c < LAUNCHER.BIN \
 	&& truncate -s 11520 LAUNCHER.BIN
 
-launcher-slot1: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm util.asm
+launcher-slot1: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm util.asm rom.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
 	commands.c fat32.c main.c memory.c terminal.c \
-	util.c sdcard.c sdcard.asm ram.asm util.asm \
+	util.c sdcard.c sdcard.asm ram.asm util.asm rom.asm \
 	terminal_ext.c \
 	-startup=1 \
 	-pragma-define:CRT_ORG_CODE=0x1000 \

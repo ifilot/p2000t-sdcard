@@ -25,55 +25,46 @@
  * 
  * @param addr external RAM address
  */
-void terminal_hexdump_ram(uint16_t addr) {
-    sprintf(termbuffer, "%c%04X", COL_YELLOW, addr);
-    for(uint8_t i=0; i<8; i++) {
-        uint8_t val = ram_read_byte(addr+i);
-        sprintf(&termbuffer[5+i*3], "%c%02X", COL_WHITE, val);
-    }
+void terminal_hexdump(uint16_t addr, uint8_t mode) {
 
-    termbuffer[5+8*3] = COL_CYAN;
+    for(uint16_t j=0; j<16; j++) {  // loop over lines
 
-    for(uint8_t i=0; i<8; i++) {
-        uint8_t val = ram_read_byte(addr+i);
-        if(val >= 32 && val <= 127) {
-            termbuffer[6+8*3+i] = val;
-        } else {
-            termbuffer[6+8*3+i] = '.';
+        // show address
+        sprintf(termbuffer, "%c%04X", COL_YELLOW, addr);
+
+        // show bytes
+        for(uint8_t i=0; i<8; i++) {    // loop over bytes
+            uint8_t val = bytegrab(addr, mode);
+            sprintf(&termbuffer[5+i*3], "%c%02X", COL_WHITE, val);
+
+            // show ASCII value
+            if(val >= 32 && val <= 127) {
+                termbuffer[6+8*3+i] = val;
+            } else {
+                termbuffer[6+8*3+i] = '.';
+            }
+
+            addr++;
         }
+
+        termbuffer[5+8*3] = COL_CYAN;
+        terminal_printtermbuffer();
     }
-    terminal_printtermbuffer();
 }
 
-/**
- * @brief Perform hexdump from part of internal RAM
- * 
- * @param buf buffer location
- */
-void printblock(const uint8_t* buf) {
-    // display the first 128 bytes of the 512 block on the screen
-    for(uint8_t i=0; i<64; i++) {
-
-        // show hexchars
-        termbuffer[0] = COL_YELLOW;
-        sprintf(&termbuffer[1], "0x%04X", i*8);
-
-        termbuffer[7] = COL_WHITE;
-        for(uint8_t j=0; j<8; j++) {
-            sprintf(&termbuffer[j*3 + 8], "%02X", buf[i*8+j]);
-        }
-
-        // show ascii
-        termbuffer[31] = COL_CYAN;
-        for(uint8_t j=0; j<8; j++) {
-            const uint8_t c = buf[i*8+j];
-            if(c >= 32 && c <= 126) {
-                termbuffer[32 + j] = c;
-            } else {
-                termbuffer[32 + j] = '.';
-            }
-        }
-
-        terminal_printtermbuffer();
+uint8_t bytegrab(uint16_t addr, uint8_t mode) {
+    switch(mode) {
+        case DUMP_INTRAM:
+            return memory[addr];
+        break;
+        case DUMP_EXTRAM:
+            return ram_read_byte(addr);
+        break;
+        case DUMP_EXTROM:
+            return rom_read_byte(addr);
+        break;
+        default:
+            return 0x00;
+        break;
     }
 }

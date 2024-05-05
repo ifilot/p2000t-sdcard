@@ -79,6 +79,24 @@ void command_ledtest(void);
 void command_stack(void);
 
 /**
+ * @brief Dump cartridge ROM contents to the screen
+ * 
+ */
+void command_romdump(void);
+
+/**
+ * @brief Dump cartridge ROM contents to the screen
+ * 
+ */
+void command_ramdump(void);
+
+/**
+ * @brief Dump system RAM to the screen
+ * 
+ */
+void command_dump(void);
+
+/**
  * @brief Execute the command given by instruction
  * 
  */
