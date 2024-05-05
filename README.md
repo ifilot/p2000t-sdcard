@@ -32,6 +32,7 @@ using a set of short commands. Below, the list of commands is provided
 | `hexdump <number>`  | Performs a 120-byte hexdump of a file                             |
 | `fileinfo <number>` | Provides location details of a file                               |
 | `ledtest`           | Performs a quick test on the read/write LEDs                      |
+| `stack`             | Show current position of the stack pointer                        |
 | `dump<XXXX>`        | Perform a 120-byte hexdump of main memory starting at `0xXXXX`    |
 | `romdump<XXXX>`     | Perform a 120-byte hexdump of cartridge ROM starting at `0xXXXX`  |
 | `ramdump<XXXX>`     | Perform a 120-byte hexdump of cartridge RAM starting at `0xXXXX`  |
