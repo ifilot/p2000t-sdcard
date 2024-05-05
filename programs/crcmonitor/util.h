@@ -18,26 +18,75 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _ROM_H
-#define _ROM_H
+#ifndef _UTIL_H
+#define _UTIL_H
 
-#include <z80.h>
-#include <stdint.h>
-#include "memory.h"
+#include "terminal.h"
 
 /**
- * @brief Retrieve single byte from external ROM
+ * @brief Replace all bytes in a string
  * 
- * @param addr external memory address
- * @return uint8_t byte at address
+ * @param str original string
+ * @param org byte to replace
+ * @param rep replacement byte
+ * @param nrbytes number of bytes to check
  */
-uint8_t rom_read_byte(uint16_t addr) __z88dk_callee;
+void replace_bytes(uint8_t *str, uint8_t org, uint8_t rep, uint16_t nrbytes) __z88dk_callee;
 
 /**
- * @brief Set the rom bank
+ * @brief Read a 16 bit value from memory
  * 
- * @param rom_bank rom bank index (0 or 1)
+ * @param data memory location
+ * @return uint16_t 16-bit value
  */
-void set_rom_bank(uint8_t rom_bank) __z88dk_callee;
+uint16_t read_uint16_t(const uint8_t* data) __z88dk_callee;
 
-#endif // _ROM_H
+/**
+ * @brief Read a 32 bit value from memory
+ * 
+ * @param data memory location
+ * @return uint32_t 32-bit value
+ */
+uint32_t read_uint32_t(const uint8_t* data) __z88dk_callee;
+
+/**
+ * @brief Wait for key-press
+ *
+ */
+void wait_for_key(void);
+
+/**
+ * @brief Wait but check for a specific key press
+ *
+ */
+uint8_t wait_for_key_fixed(uint8_t quitkey);
+
+/**
+ * @brief Clear the screen
+ * 
+ */
+void clear_screen(void);
+
+/**
+ * @brief Get the stack location object
+ * 
+ * @return uint16_t 
+ */
+uint16_t get_stack_location(void) __z88dk_callee;
+
+/**
+ * @brief Call program at location
+ * 
+ * @param location 
+ */
+void call_program(uint16_t ramptr) __z88dk_callee;
+
+/**
+ * @brief Convert hexcode to unsigned 16 bit integer
+ * 
+ * @param addr 
+ * @return uint16_t 
+ */
+uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
+
+#endif //_UTIL_H

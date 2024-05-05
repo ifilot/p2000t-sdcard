@@ -18,26 +18,9 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _ROM_H
-#define _ROM_H
+#ifndef _CRC16_H
+#define _CRC16_H
 
-#include <z80.h>
-#include <stdint.h>
-#include "memory.h"
+uint16_t crc16(uint16_t addr, uint16_t nrbytes) __z88dk_callee;
 
-/**
- * @brief Retrieve single byte from external ROM
- * 
- * @param addr external memory address
- * @return uint8_t byte at address
- */
-uint8_t rom_read_byte(uint16_t addr) __z88dk_callee;
-
-/**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
- */
-void set_rom_bank(uint8_t rom_bank) __z88dk_callee;
-
-#endif // _ROM_H
+#endif // _CRC16_H

@@ -198,6 +198,6 @@ void init(void) {
     print_info("System booted.", 0);
 
     // load program using first ram bank
-    set_rom_bank(0);
+    set_rom_bank(ROM_BANK_DEFAULT);
     set_ram_bank(RAM_BANK_CACHE);
 }

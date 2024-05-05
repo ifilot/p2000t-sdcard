@@ -16,7 +16,7 @@
                     ld        b,a                           ;[000f] 47
                     jp        $a013                         ;[0010] c3 13 a0
                     ld        ($a1d9),sp                    ;[0013] ed 73 d9 a1
-                    ld        sp,$dfff                      ;[0017] 31 ff df
+                    ld        sp,$deff                      ;[0017] 31 ff de
                     ld        hl,$a155                      ;[001a] 21 55 a1
                     ld        bc,$0080                      ;[001d] 01 80 00
                     call      $a050                         ;[0020] cd 50 a0

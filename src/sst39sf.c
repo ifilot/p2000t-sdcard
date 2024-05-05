@@ -94,12 +94,3 @@ void sst39sf_wipe_sector(uint16_t addr) {
         attempts++;
     }
 }
-
-/**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
- */
-void set_rom_bank(uint8_t rom_bank) {
-    z80_outp(ROM_BANK, rom_bank);
-}

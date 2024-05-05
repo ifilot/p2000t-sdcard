@@ -9,10 +9,10 @@ all: helloworld
 # CRT_ENABLE_EIDI=0x22 ; set ei on both start and exit, ei is required for
 #                        the keyboard to function
 
-helloworld: main.c util.c
+helloworld: main.c util.c memory.c terminal.c util.asm crc16.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
-	main.c memory.c util.c \
+	main.c memory.c util.c terminal.c util.asm crc16.asm \
 	-startup=0 \
 	-pragma-define:CRT_ORG_CODE=0xA000 \
 	-pragma-define:REGISTER_SP=0xDEFF \
@@ -22,10 +22,8 @@ helloworld: main.c util.c
 	-pragma-define:CRT_INCLUDE_PREAMBLE=1 \
 	--max-allocs-per-node2000 \
 	--opt-code-size \
-	--list \
-	-SO3 -bn HELLOWORLD.BIN \
+	-SO3 -bn MONCRC16.BIN \
 	-create-app -m \
-	&& mv -v HELLOWORLD.BIN HELLOWORLD.PRG \
+	&& mv -v MONCRC16.BIN MONCRC16.PRG \
 	&& sleep 0.01 \
-	&& wc -c < HELLOWORLD.PRG \
-	&& z88dk-dis HELLOWORLD.PRG > HELLOWORLD.asm
+	&& wc -c < MONCRC16.PRG

@@ -18,26 +18,39 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _ROM_H
-#define _ROM_H
+#ifndef _TERMINAL_H
+#define _TERMINAL_H
 
-#include <z80.h>
-#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include "memory.h"
+#include "util.h"
 
-/**
- * @brief Retrieve single byte from external ROM
- * 
- * @param addr external memory address
- * @return uint8_t byte at address
- */
-uint8_t rom_read_byte(uint16_t addr) __z88dk_callee;
+#define LINELENGTH 40
+#define BLINK_INTERVAL 500 // ms
+#define TIMER_INTERVAL 20
 
-/**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
- */
-void set_rom_bank(uint8_t rom_bank) __z88dk_callee;
+// these (global) variables are used to track the terminal
+extern uint8_t _terminal_curline;
+extern uint8_t _terminal_maxlines;
+extern uint8_t _terminal_startline;
+extern uint8_t _terminal_endline;
+extern uint16_t _prevcounter;
 
-#endif // _ROM_H
+extern char __input[INPUTLENGTH+1];
+extern uint8_t __inputpos;
+
+extern char termbuffer[LINELENGTH];
+
+void terminal_init(uint8_t, uint8_t);
+void terminal_printtermbuffer(void);
+void terminal_redoline(void);
+void terminal_scrollup(void);
+void terminal_backup_line(void);
+
+void print_error(char* str);
+void print_info(char* str, uint8_t backup_line);
+
+void terminal_cursor_blink(void);
+
+#endif // _TERMINAL_H

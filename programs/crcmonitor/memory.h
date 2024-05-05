@@ -18,26 +18,28 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _ROM_H
-#define _ROM_H
+#ifndef _MEMORY_H
+#define _MEMORY_H
 
 #include <z80.h>
-#include <stdint.h>
-#include "memory.h"
+#include "constants.h"
 
-/**
- * @brief Retrieve single byte from external ROM
- * 
- * @param addr external memory address
- * @return uint8_t byte at address
- */
-uint8_t rom_read_byte(uint16_t addr) __z88dk_callee;
+#define LOWMEM          0x6200 // starting point of lower memory
+#define HIGHMEM_START   0xA000 // start address of upper memory
+#define HIGHMEM_STOP    0xDFFF // end address of upper memory
+#define BANKMEM_START   0xE000 // starting point of bankable memory
+#define BANKMEM_STOP    0xFFFF // starting point of bankable memory
+#define BANK_BYTES      0x2000 // number of bytes per bank
+#define STACK           0x9F00 // lower position of the stack
+#define NUMBANKS        6      // assuming 64kb memory expansion
+#define MEMBANK         0x94   // Z80 I/O address for memory banking
 
-/**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
- */
-void set_rom_bank(uint8_t rom_bank) __z88dk_callee;
+#define PROGRAM_LOCATION 0xA000  // where to store custom programs
 
-#endif // _ROM_H
+extern char* memory;
+extern char* vidmem;
+extern char* keymem;
+extern char* highmem;
+extern char* bankmem;
+
+#endif // _MEMORY_H

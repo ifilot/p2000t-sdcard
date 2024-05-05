@@ -20,44 +20,48 @@
 
 SECTION code_user
 
-ADDR_LOW        EQU  $68
-ADDR_HIGH       EQU  $69
-ROM_BANK        EQU  $6A
-ROM_IO          EQU  $6C
-
-PUBLIC _rom_read_byte
-PUBLIC _set_rom_bank
+PUBLIC _crc16
 
 ;-------------------------------------------------------------------------------
-; Read a byte from external RAM
+; Generate a 16 bit checksum
 ;
-; uint8_t ram_read_byte(uint16_t addr);
+; input:  bc - number of bytes
+;         hl - start of memory address
+; output: hl - crc16 checksum
+; uses: a, bc, de, hl
 ;
-; input:  hl pointer to ram address
-;
-; return: value stored at memory address
+; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
 ;-------------------------------------------------------------------------------
-_rom_read_byte:
+_crc16:
     pop de                      ; return address
     pop hl                      ; ramptr
-    push de                     ; push return address back onto stack
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    in a,(ROM_IO)
-    ld l,a                      ; put return value in l-register
-    ret
-
-;-------------------------------------------------------------------------------
-; Set the external ROM bank
-;
-; void set_rom_bank(uint8_t rom_bank)
-;-------------------------------------------------------------------------------
-_set_rom_bank:
-    pop de                      ; return address
-    dec sp
-    pop af                      ; retrieve rom bank in a
-    out (ROM_BANK),a
+    pop bc                      ; number of bytes
     push de                     ; put return address back on stack
-    ret
+    ld de,$0000                 ; set de to $0000
+nextbyte:
+    push bc                     ; push counter onto stack
+    ld a,(hl)
+    xor d                       ; xor byte into CRC top byte
+    ld b,8                      ; prepare to rotate 8 bits
+rot:
+    sla e                       ; rotate crc
+    adc a,a
+    jp nc,clr                   ; bit 15 was zero
+    ld d,a                      ; put crc high byte back into d
+    ld a,e                      ; crc = crc ^ $1021 (xmodem polynomic)
+    xor $21
+    ld e,a
+    ld a,d                      ; get crc top byte back into a
+    xor $10
+clr:
+    dec b                       ; decrement bit counter
+    jp nz,rot                 ; loop for 8 bits
+    ld d,a                      ; put crc top byte back into d
+    inc hl                      ; step to next byte
+    pop bc                      ; get counter back from stack
+    dec bc                      ; decrement counter
+    ld a,b                      ; check if counter is zero
+    or c
+    jp nz,nextbyte              ; if not zero, go to next byte
+    ex de,hl                    ; swap de and hl such that hl contains crc
+    ret                         ; return value is stored in hl

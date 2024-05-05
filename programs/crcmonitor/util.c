@@ -18,26 +18,34 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _ROM_H
-#define _ROM_H
-
-#include <z80.h>
-#include <stdint.h>
-#include "memory.h"
+#include "util.h"
 
 /**
- * @brief Retrieve single byte from external ROM
- * 
- * @param addr external memory address
- * @return uint8_t byte at address
+ * @brief Wait for key-press
+ *
  */
-uint8_t rom_read_byte(uint16_t addr) __z88dk_callee;
+void wait_for_key(void) {
+    keymem[0x0C] = 0;
+    while(keymem[0x0C] == 0) {} // wait until a key is pressed
+}
 
 /**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
+ * @brief Wait but check for a specific key press
+ *
  */
-void set_rom_bank(uint8_t rom_bank) __z88dk_callee;
+uint8_t wait_for_key_fixed(uint8_t quitkey) {
+    wait_for_key();
+    if(keymem[0x00] == quitkey) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
-#endif // _ROM_H
+/**
+ * @brief Clear the screen
+ * 
+ */
+void clear_screen(void) {
+    memset(vidmem, 0x00, 0x1000);
+}

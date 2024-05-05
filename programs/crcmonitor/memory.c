@@ -18,26 +18,20 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _ROM_H
-#define _ROM_H
-
-#include <z80.h>
-#include <stdint.h>
 #include "memory.h"
 
-/**
- * @brief Retrieve single byte from external ROM
- * 
- * @param addr external memory address
- * @return uint8_t byte at address
- */
-uint8_t rom_read_byte(uint16_t addr) __z88dk_callee;
+// set video memory
+__at (0x0000) char MEMORY[];
+char* memory = MEMORY;
 
-/**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
- */
-void set_rom_bank(uint8_t rom_bank) __z88dk_callee;
+__at (0x5000) char VIDMEM[];
+char* vidmem = VIDMEM;
 
-#endif // _ROM_H
+__at (0x6000) char KEYMEM[];
+char* keymem = KEYMEM;
+
+__at (0xA000) char HIGHMEM[];
+char* highmem = HIGHMEM;
+
+__at (0xE000) char BANKMEM[];
+char* bankmem = BANKMEM;

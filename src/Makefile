@@ -1,11 +1,11 @@
 all: flasher launcher launcher-slot1
 
-flasher: fat32.c flasher.c memory.c sst39sf.c util.c sdcard.c sdcard.asm terminal.c copy.c copy.asm ram.asm util.asm
+flasher: fat32.c flasher.c memory.c sst39sf.c util.c sdcard.c sdcard.asm terminal.c copy.c copy.asm ram.asm util.asm rom.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
 	fat32.c flasher.c memory.c sst39sf.c \
 	util.c sdcard.c sdcard.asm terminal.c \
-	copy.c copy.asm ram.asm sst39sf.asm \
+	copy.c copy.asm ram.asm sst39sf.asm rom.asm \
 	util.asm \
 	-startup=1 \
 	-pragma-define:CRT_ORG_CODE=0x1000 \

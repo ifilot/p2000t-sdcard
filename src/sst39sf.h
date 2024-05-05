@@ -67,13 +67,6 @@ uint16_t sst39sf_get_device_id(void);
 void sst39sf_wipe_sector(uint16_t addr);
 
 /**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
- */
-void set_rom_bank(uint8_t rom_bank);
-
-/**
  * @brief Copy data from internal memory to external ROM
  * 
  * See: sst39sf.asm

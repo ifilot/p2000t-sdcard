@@ -84,10 +84,8 @@ void init(void) {
 
     clear_screen();
     terminal_init(3, 20);
-    vidmem[0x50] = TEXT_DOUBLE;
-    vidmem[0x50+1] = COL_CYAN;
-    const uint8_t nrkb = memory[0x605C] * 16;
-    sprintf(&vidmem[0x50+2], "SDCARD READER");
+    const uint8_t nrkb = memory[0x605C] * 16;   // number of kb of memory
+    sprintf(&vidmem[0x50], "%c%cSDCARD READER", TEXT_DOUBLE, COL_CYAN);
     sprintf(&vidmem[0x50*22], "Version: %s. Memory model: %i kb.", __VERSION__, nrkb);
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
 

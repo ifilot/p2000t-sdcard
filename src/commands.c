@@ -183,6 +183,8 @@ void command_run(void) {
         }
 
         // copy program
+        sprintf(termbuffer, "Deploying program at %c0xA000", COL_CYAN);
+        terminal_printtermbuffer();
         store_prg_intram(_linkedlist[0], PROGRAM_LOCATION);
 
         // verify that the signature is correct
@@ -191,11 +193,14 @@ void command_run(void) {
             return;
         }
 
+        if(_filesize_current_file > 0x3D00) {
+            print_error("File too large to load");
+            return;
+        }
+
         // wait on user key push
-        print_info("Press any key to start program", 0);
+        print_info("Press any key to run", 0);
         wait_for_key();
-        
-        print_info("Launching program...", 0);
 
         // transfer copy of current screen to external RAM
         copy_to_ram(vidmem, VIDMEM_CACHE, 0x1000);
@@ -206,6 +211,9 @@ void command_run(void) {
 
         // retrieve copy of current screen
         copy_from_ram(VIDMEM_CACHE, vidmem, 0x1000);
+
+        // clean up memory including stack program stack
+        memset(&memory[0xA000], 0x00, 0xDF00 - 0xA000);
     } else {
         print_error("Cannot only run CAS or PRG files.");
     }
@@ -257,8 +265,15 @@ void command_stack(void) {
  * 
  */
 void command_romdump(void) {
-    uint16_t addr = hexcode_to_uint16t(&__lastinput[7]);
+    uint8_t bank = 0;
+    if(__lastinput[7] == '1') {
+        bank = 1;
+    }
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[8]);
+
+    set_rom_bank(bank);
     terminal_hexdump(addr, DUMP_EXTROM);
+    set_rom_bank(ROM_BANK_DEFAULT);
 }
 
 /**
@@ -266,8 +281,15 @@ void command_romdump(void) {
  * 
  */
 void command_ramdump(void) {
-    uint16_t addr = hexcode_to_uint16t(&__lastinput[7]);
+    uint8_t bank = 0;
+    if(__lastinput[7] == '1') {
+        bank = 1;
+    }
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[8]);
+
+    set_ram_bank(bank);
     terminal_hexdump(addr, DUMP_EXTRAM);
+    set_ram_bank(RAM_BANK_CACHE);
 }
 
 /**
