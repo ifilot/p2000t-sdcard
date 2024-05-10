@@ -53,7 +53,7 @@ jobs:
     - name: Upload launcher
       uses: actions/upload-artifact@v4
       with:
-        name: ${{env.LAUNCHER_BIN}}
+        name: ${{env.LAUNCHER_BIN}}-UNSIGNED
         path: src/${{env.LAUNCHER_BIN}}
 
   sign-launcher:
@@ -75,7 +75,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{env.LAUNCHER_BIN}}
+        name: ${{env.LAUNCHER_BIN}}-UNSIGNED
         path: ./
     - name: Sign binary
       run: |
