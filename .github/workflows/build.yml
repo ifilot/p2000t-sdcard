@@ -269,7 +269,7 @@ jobs:
     - name: Upload HELLOWORLD.BIN
       uses: actions/upload-artifact@v4
       with:
-        name: HELLOWORLD.PRG
+        name: HELLOWORLD-UNSIGNED.PRG
         path: programs/helloworld/HELLOWORLD.PRG
 
   sign-prg-helloworld:
@@ -283,11 +283,12 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: HELLOWORLD.PRG
+        name: HELLOWORLD-UNSIGNED.PRG
         path: ./
     - name: Sign binary
       run: |
-        python3 scripts/signprg.py HELLOWORLD.PRG
+        python3 scripts/signprg.py HELLOWORLD-UNSIGNED.PRG
+        mv -v HELLOWORLD-UNSIGNED.PRG HELLOWORLD.PRG
     - name: Upload HELLOWORLD.PRG
       uses: actions/upload-artifact@v4
       with:
@@ -312,7 +313,7 @@ jobs:
     - name: Upload MONCRC16.BIN
       uses: actions/upload-artifact@v4
       with:
-        name: MONCRC16.PRG
+        name: MONCRC16-UNSIGNED.PRG
         path: programs/crcmonitor/MONCRC16.PRG
 
   sign-prg-moncrc16:
@@ -326,11 +327,12 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: MONCRC16.PRG
+        name: MONCRC16-UNSIGNED.PRG
         path: ./
     - name: Sign binary
       run: |
-        python3 scripts/signprg.py MONCRC16.PRG
+        python3 scripts/signprg.py MONCRC16-UNSIGNED.PRG
+        mv -v MONCRC16-UNSIGNED.PRG MONCRC16.PRG
     - name: Upload MONCRC16.PRG
       uses: actions/upload-artifact@v4
       with:
