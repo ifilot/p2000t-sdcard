@@ -34,11 +34,13 @@
 #define SDCACHE0 0x0000
 #define SDCACHE1 0x0200
 #define SDCACHE2 0x0400
+#define SDCACHE3 0x0600
+#define SDCACHE4 0x0800
+#define SDCACHE5 0x0A00
+#define SDCACHE6 0x0C00
+#define SDCACHE7 0x0E00
 
-#define SECTOR_CACHE_ADDR       0x1000      // cluster address
-#define SECTOR_CACHE_SIZE       0x1004      // number of files in cache
-#define SECTOR_CACHE            0x1008      // start of sector cache
-#define ENTRY_CACHE             0x2000      // file entries
+#define VIDMEM_CACHE 0x1000      // video memory address
 
 /*
  * The internal memory on the SD-card cartridge has a capacity of 128kb divided
@@ -113,7 +115,7 @@ void set_ram_bank(uint8_t val) __z88dk_callee;
  * @param dest     internal address
  * @param nrbytes  number of bytes to copy
  */
-void copy_to_ram(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
+void copy_to_ram(uint8_t *src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
 
 /**
  * @brief Copy data from external memory to internal RAM

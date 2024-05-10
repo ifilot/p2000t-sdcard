@@ -32,6 +32,10 @@ char* __commands[] = {
     "run",
     "hexdump",
     "ledtest",
+    "stack",
+    "romdump",
+    "ramdump",
+    "dump",
 };
 
 // set list of function pointers
@@ -43,6 +47,10 @@ void (*__operations[])(void) = {
     command_run,
     command_hexdump,
     command_ledtest,
+    command_stack,
+    command_romdump,
+    command_ramdump,
+    command_dump,
 };
 
 // *****************************************************************************
@@ -56,7 +64,7 @@ void (*__operations[])(void) = {
 void command_ls(void) {
     if(check_mounted() == 1) { return; }
 
-    read_folder(_current_folder_cluster, -1);
+    read_folder(_current_folder_cluster, -1, 0);
 }
 
 /**
@@ -66,7 +74,7 @@ void command_ls(void) {
 void command_lscas(void) {
     if(check_mounted() == 1) { return; }
 
-    read_folder_cas(_current_folder_cluster);
+    read_folder(_current_folder_cluster, -1, 1);
 }
 
 /**
@@ -77,7 +85,7 @@ void command_cd(void) {
 
     int id = atoi(&__lastinput[2]);
 
-    uint32_t clus = read_folder(_current_folder_cluster, id);
+    uint32_t clus = read_folder(_current_folder_cluster, id, 0);
     if(clus != _root_dir_first_cluster) {
         if(_current_attrib & (1 << 4)) {
             if(clus == 0) { // if zero, this is the root directory
@@ -133,44 +141,90 @@ void command_run(void) {
         return;
     }
 
-    if(strcmp(_ext, "CAS") != 0) {
-        print_error("Cannot run a non-CAS file.");
-        return;
-    }
+    if(memcmp(_ext, "CAS", 3) == 0) {
+        sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
+        terminal_printtermbuffer();
+        sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
+        terminal_printtermbuffer();
+        
+        set_ram_bank(RAM_BANK_CASSETTE);
+        store_cas_ram(_linkedlist[0], 0x0000);
 
-    sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
-    terminal_printtermbuffer();
-    
-    set_ram_bank(RAM_BANK_CASSETTE);
-    store_cas_ram(_linkedlist[0], 0x0000, 1);
+        uint16_t deploy_addr = ram_read_uint16_t(0x8000);
+        uint16_t file_length = ram_read_uint16_t(0x8002);
 
-    uint16_t deploy_addr = ram_read_uint16_t(0x8000);
-    uint16_t file_length = ram_read_uint16_t(0x8002);
-
-    sprintf(termbuffer, "Deploy addr: %c0x%04X", COL_CYAN, deploy_addr);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Program length: %c0x%04X", COL_CYAN, file_length);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Top RAM: %c0x%04X", COL_CYAN, deploy_addr + file_length);
-    terminal_printtermbuffer();
-
-    print_info("Press c to calculate checksum or any", 0);
-    print_info("or any other key to launch program.", 0);
-    if(wait_for_key_fixed(28) == 1) {
-        // calculate CRC16 checksum
-        print_info("Calculating CRC16 checksum...", 1);
-        uint16_t crc16 = crc16_ramchip(0x0000, file_length);
-        sprintf(termbuffer, "CRC16 checksum: %c0x%04X", COL_CYAN, crc16);
+        sprintf(termbuffer, "Deploy addr: %c0x%04X", COL_CYAN, deploy_addr);
+        terminal_printtermbuffer();
+        sprintf(termbuffer, "Program length: %c0x%04X", COL_CYAN, file_length);
+        terminal_printtermbuffer();
+        sprintf(termbuffer, "Top RAM: %c0x%04X", COL_CYAN, deploy_addr + file_length);
         terminal_printtermbuffer();
 
-        print_info("Press any key to start program", 0);
-        wait_for_key();
-    }
+        print_info("Press c to calculate checksum or any", 0);
+        print_info("other key to launch program.", 0);
+        if(wait_for_key_fixed(28) == 1) {
+            // calculate CRC16 checksum
+            print_info("Calculating CRC16 checksum...", 1);
+            uint16_t crc16 = crc16_ramchip(0x0000, file_length);
+            sprintf(termbuffer, "CRC16 checksum: %c0x%04X", COL_CYAN, crc16);
+            terminal_printtermbuffer();
 
-    set_ram_bank(0);
-    __bootcas = 1;
+            print_info("Press any key to start program", 0);
+            wait_for_key();
+        }
+
+        set_ram_bank(0);
+        __bootcas = 1;
+    } else if(memcmp(_ext, "PRG", 3) == 0) {
+        if(memory[0x605C] < 2) {
+            print_error("Insufficient memory.");
+            print_info("At least 32kb of memory required.", 0);
+            return;
+        }
+
+        // verify that the filesize is not too big
+        if(_filesize_current_file > 0x3D00) {
+            print_error("File too large to load");
+            return;
+        }
+
+        // copy program
+        sprintf(termbuffer, "Deploying program at %c0xA000", COL_CYAN);
+        terminal_printtermbuffer();
+        store_prg_intram(_linkedlist[0], PROGRAM_LOCATION);
+
+        // verify that the signature is correct
+        if(memory[PROGRAM_LOCATION] != 0x50) {
+            print_error("Invalid program ID");
+            return;
+        }
+
+        // verify that the CRC-16 checksum matches
+        if(crc16_intram(&memory[0xA010], read_uint16_t(&memory[0xA001])) != 
+                        read_uint16_t(&memory[0xA003])) {
+            print_error("CRC16 checksum failed");
+            return;
+        }
+
+        // wait on user key push
+        print_info("Press any key to run", 0);
+        wait_for_key();
+
+        // transfer copy of current screen to external RAM
+        copy_to_ram(vidmem, VIDMEM_CACHE, 0x1000);
+
+        // launch the program
+        //memset(&memory[0xA000], 0x00, 0x200);
+        call_program(PROGRAM_LOCATION + 0x10);
+
+        // retrieve copy of current screen
+        copy_from_ram(VIDMEM_CACHE, vidmem, 0x1000);
+
+        // clean up memory including stack program stack
+        memset(&memory[0xA000], 0x00, 0xDF00 - 0xA000);
+    } else {
+        print_error("Cannot only run CAS or PRG files.");
+    }
 }
 
 void command_hexdump(void) {
@@ -187,9 +241,7 @@ void command_hexdump(void) {
     terminal_printtermbuffer();
 
     // print to screen
-    for(uint8_t i=0; i<16; i++) {
-        terminal_hexdump_ram(SDCACHE0 + i * 8);
-    }
+    terminal_hexdump(SDCACHE0, DUMP_EXTRAM);
 }
 
 /**
@@ -204,6 +256,57 @@ void command_ledtest(void) {
     z80_outp(LED_IO, 0x02);
     z80_delay_ms(500);
     z80_outp(LED_IO, 0x00);
+}
+
+/**
+ * @brief Indicate where the stack is
+ * 
+ */
+void command_stack(void) {
+    const uint16_t stackloc = get_stack_location();
+    sprintf(termbuffer, "Stack location: %04X", stackloc);
+    terminal_printtermbuffer();
+}
+
+/**
+ * @brief Dump cartridge ROM contents to the screen
+ * 
+ */
+void command_romdump(void) {
+    uint8_t bank = 0;
+    if(__lastinput[7] == '1') {
+        bank = 1;
+    }
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[8]);
+
+    set_rom_bank(bank);
+    terminal_hexdump(addr, DUMP_EXTROM);
+    set_rom_bank(ROM_BANK_DEFAULT);
+}
+
+/**
+ * @brief Dump cartridge ROM contents to the screen
+ * 
+ */
+void command_ramdump(void) {
+    uint8_t bank = 0;
+    if(__lastinput[7] == '1') {
+        bank = 1;
+    }
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[8]);
+
+    set_ram_bank(bank);
+    terminal_hexdump(addr, DUMP_EXTRAM);
+    set_ram_bank(RAM_BANK_CACHE);
+}
+
+/**
+ * @brief Dump system RAM to the screen
+ * 
+ */
+void command_dump(void) {
+    uint16_t addr = hexcode_to_uint16t(&__lastinput[4]);
+    terminal_hexdump(addr, DUMP_INTRAM);
 }
 
 // *****************************************************************************
@@ -269,7 +372,7 @@ uint8_t read_file_metadata(int16_t file_id) {
         return 1;
     }
 
-    uint32_t cluster = read_folder(_current_folder_cluster, file_id);
+    uint32_t cluster = read_folder(_current_folder_cluster, file_id, 0);
     if(cluster == _root_dir_first_cluster) {
         print_error("Could not find file");
         return 1;

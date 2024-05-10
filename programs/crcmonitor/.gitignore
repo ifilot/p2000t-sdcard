@@ -1,0 +1,11 @@
+*.o
+*.map
+*.sym
+*.rom
+*.bin
+*.txt
+*.c.asm
+*.lis
+*.PRG
+*.BIN
+*.map

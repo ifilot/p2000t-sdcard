@@ -67,14 +67,7 @@ uint16_t sst39sf_get_device_id(void);
 void sst39sf_wipe_sector(uint16_t addr);
 
 /**
- * @brief Set the rom bank
- * 
- * @param rom_bank rom bank index (0 or 1)
- */
-void set_rom_bank(uint8_t rom_bank);
-
-/**
- * @brief Copy data from internal memory to external RAM
+ * @brief Copy data from internal memory to external ROM
  * 
  * See: sst39sf.asm
  *
@@ -82,7 +75,7 @@ void set_rom_bank(uint8_t rom_bank);
  * @param dest     internal address
  * @param nrbytes  number of bytes to copy
  */
-void copy_to_rom(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
+void copy_to_rom(uint8_t *src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
 
 /**
  * @brief Copy all 0x200 bytes immediately from SD to external ROM.

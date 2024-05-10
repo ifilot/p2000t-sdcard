@@ -16,22 +16,35 @@ a P2000T with an SD-card and the necessary software routines to grab .CAS files
 from said SD card and load them into memory.
 
 > [!TIP]
-> Detailed documentation can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
+> **Documentation**
+> * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
+> * There is also a [manual in Dutch](https://github.com/ifilot/P2000T-SD-kaart-handleiding) available.
+
+> [!TIP]
+> **Downloads**
+> * [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
+> * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
+> * [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
+> * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 
 ## Commands
 
 Upon booting into the LAUNCHER application, the user interfaces with the SD-card
 using a set of short commands. Below, the list of commands is provided
 
-| **Command**         | **Description**                                                |
-| ------------------- | -------------------------------------------------------------- |
-| `ls`                | List contents of current folder                                |
-| `lscas`             | List contents of current folder, listing contents of CAS files |
-| `cd <number>`       | Change directory                                               |
-| `run <number>`      | Run .CAS file                                                  |
-| `hexdump <number>`  | Performs a 96-byte hexdump of a file                           |
-| `fileinfo <number>` | Provides location details of a file                            |
-| `ledtest`           | Performs a quick test on the read/write LEDs                   |
+| **Command**         | **Description**                                                   |
+| ------------------- | ------------------------------------------------------------------|
+| `ls`                | List contents of current folder                                   |
+| `lscas`             | List contents of current folder, listing contents of CAS files    |
+| `cd <number>`       | Change directory                                                  |
+| `run <number>`      | Run .CAS file                                                     |
+| `hexdump <number>`  | Performs a 120-byte hexdump of a file                             |
+| `fileinfo <number>` | Provides location details of a file                               |
+| `ledtest`           | Performs a quick test on the read/write LEDs                      |
+| `stack`             | Show current position of the stack pointer                        |
+| `dump<XXXX>`        | Perform a 120-byte hexdump of main memory starting at `0xXXXX`    |
+| `romdump<XXXX>`     | Perform a 120-byte hexdump of cartridge ROM starting at `0xXXXX`  |
+| `ramdump<XXXX>`     | Perform a 120-byte hexdump of cartridge RAM starting at `0xXXXX`  |
 
 Note that `<number>` needs to replaced with the specific number of a file. Users
 who are familiar with command line interfaces are probably used to specifying
@@ -55,20 +68,30 @@ cd src
 ./compile flasher
 ```
 
-Binaries can also be directly downloaded from the releases.
+## Downloads
+
+Binaries can directly downloaded from the releases.
 
 * [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
 * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
 * [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
+* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 
 ## Images
 
-<p float="left">
-    <img src="img/sdcard-cartridge-bare-front.jpg" width="40%">
-    <img src="img/sdcard-cartridge-bare-back.jpg" width="40%">
-</p>
+![P2000T SD-card PCB screenshots](img/p2000t-sdcard-pcb-rev4.jpg)
 
-<p float="left">
-    <img src="img/sdcard-cartridge-populated-front.jpg" width="40%">
-    <img src="img/sdcard-cartridge-populated-back.jpg" width="40%">
-</p>
+![P2000T SD-card cartridge set and monitor](img/p2000t-sdcard-cartridge-and-monitor.jpg)
+
+## Contents
+
+* [Cartridge cases](cases/)
+* [PCB layout files (KiCAD)](pcb/port2-sdcard-interface/)
+* [Modified BASIC ROM source files](basicmod/)
+* [Launcher and Flasher programs](src/)
+* [Custom programs](programs/)
+
+## License
+
+* All software is shared under the [GPL v3 license](https://www.gnu.org/licenses/gpl-3.0).
+* All hardware (e.g. KiCAD files and .stl files) are shared under the [CC-BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).

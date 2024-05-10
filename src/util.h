@@ -67,4 +67,26 @@ uint8_t wait_for_key_fixed(uint8_t quitkey);
  */
 void clear_screen(void);
 
+/**
+ * @brief Get the stack location object
+ * 
+ * @return uint16_t 
+ */
+uint16_t get_stack_location(void) __z88dk_callee;
+
+/**
+ * @brief Call program at location
+ * 
+ * @param location 
+ */
+void call_program(uint16_t ramptr) __z88dk_callee;
+
+/**
+ * @brief Convert hexcode to unsigned 16 bit integer
+ * 
+ * @param addr 
+ * @return uint16_t 
+ */
+uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
+
 #endif //_UINT_UTIL_H

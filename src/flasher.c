@@ -197,7 +197,12 @@ void init(void) {
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
     print_info("System booted.", 0);
 
+    if(test_presence_sdcard() != 0xFF) {
+        print_error("No SD-card inserted.");
+        for(;;) {}
+    }
+
     // load program using first ram bank
-    set_rom_bank(0);
+    set_rom_bank(ROM_BANK_DEFAULT);
     set_ram_bank(RAM_BANK_CACHE);
 }

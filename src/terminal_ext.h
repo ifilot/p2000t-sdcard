@@ -24,20 +24,20 @@
 #include <stdio.h>
 #include <string.h>
 #include "ram.h"
+#include "rom.h"
 #include "terminal.h"
+
+#define DUMP_INTRAM 0
+#define DUMP_EXTRAM 1
+#define DUMP_EXTROM 2
 
 /**
  * @brief Perform hexdump from part of external RAM
  * 
  * @param addr external RAM address
  */
-void terminal_hexdump_ram(uint16_t addr);
+void terminal_hexdump(uint16_t addr, uint8_t mode);
 
-/**
- * @brief Perform hexdump from part of internal RAM
- * 
- * @param buf buffer location
- */
-void printblock(const uint8_t* buf);
+uint8_t bytegrab(uint16_t addr, uint8_t mode);
 
 #endif

@@ -84,10 +84,15 @@ void init(void) {
 
     clear_screen();
     terminal_init(3, 20);
-    vidmem[0x50] = TEXT_DOUBLE;
-    vidmem[0x50+1] = COL_CYAN;
-    sprintf(&vidmem[0x50+2], "SDCARD READER");
-    sprintf(&vidmem[0x50*22], "Version: %s", __VERSION__);
+
+    // set number of kb of memory
+    // memory[0x605C] == 1 --> 16 KiB (0x6000 - 0x9FFF)
+    //                   2 --> 32 KiB (0x6000 - 0xDFFF)
+    //                   3 --> 40 KiB (0x6000 - 0xFFFF)
+    const uint8_t nrkb = memory[0x605C] <= 2 ? memory[0x605C] * 16 : 40;   
+
+    sprintf(&vidmem[0x50], "%c%cSDCARD READER", TEXT_DOUBLE, COL_CYAN);
+    sprintf(&vidmem[0x50*22], "Version: %s. Memory model: %i kb.", __VERSION__, nrkb);
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
 
     // initialize command line
@@ -96,6 +101,12 @@ void init(void) {
 
     // turn LEDs off
     z80_outp(LED_IO, 0x00);
+
+    // check if SD card is present; if not, throw an error
+    if(test_presence_sdcard() != 0xFF) {
+        print_error("No SD-card inserted. Aborting.");
+        for(;;) {}
+    }
 
     // mount sd card
     print_info("Initializing SD card..", 1);

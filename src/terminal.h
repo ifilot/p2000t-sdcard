@@ -52,6 +52,5 @@ void print_error(char* str);
 void print_info(char* str, uint8_t backup_line);
 
 void terminal_cursor_blink(void);
-void terminal_hexdump(uint16_t addr, uint8_t *mem);
 
 #endif // _TERMINAL_H

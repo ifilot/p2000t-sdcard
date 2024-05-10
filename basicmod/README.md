@@ -16,7 +16,7 @@ continues.
 The small piece of code that is inserted at 0x4EE0 stores the value 0x55
 at memory address 0x6150 (which is free to use). When this value is present,
 another hijacked memory routine is activated. This routine is rather small
-and resides at 0x4CE7h. Here, a check is made whether memory address 0x6150
+and resides at 0x4CE7. Here, a check is made whether memory address 0x6150
 contains the value 0x55 and if so, a jump is made to 0x6151 where the bootloader
 can place a custom pointer to any desired piece of code to be executed. When
 desired, this custom piece of code can always return with a `jp 0029h` to
