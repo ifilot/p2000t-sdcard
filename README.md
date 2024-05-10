@@ -3,6 +3,7 @@
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/ifilot/p2000t-sdcard?label=version)
 [![build](https://github.com/ifilot/p2000t-sdcard/actions/workflows/build.yml/badge.svg)](https://github.com/ifilot/p2000t-sdcard/actions/workflows/build.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: CC-BY-SA v4](https://img.shields.io/badge/license-CC--4.0--BY--SA-lightgrey)](https://creativecommons.org/licenses/by-sa/4.0/deed.en)
 
 ## Purpose
 
