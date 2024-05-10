@@ -266,7 +266,7 @@ jobs:
         sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make
         ls -alh
-    - name: Upload helloworld
+    - name: Upload HELLOWORLD.BIN
       uses: actions/upload-artifact@v4
       with:
         name: HELLOWORLD.PRG
@@ -309,7 +309,7 @@ jobs:
         sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make
         ls -alh
-    - name: Upload helloworld
+    - name: Upload MONCRC16.BIN
       uses: actions/upload-artifact@v4
       with:
         name: MONCRC16.PRG

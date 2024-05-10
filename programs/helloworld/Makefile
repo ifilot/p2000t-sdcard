@@ -25,6 +25,6 @@ helloworld: main.c util.c
 	--list \
 	-SO3 -bn HELLOWORLD.BIN \
 	-create-app -m \
-	&& mv -v HELLOWORLD.BIN HELLOWORLD.PRG \
+	&& mv -v HELLOWORLD.bin HELLOWORLD.PRG \
 	&& sleep 0.01 \
 	&& wc -c < HELLOWORLD.PRG

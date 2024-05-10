@@ -24,6 +24,6 @@ helloworld: main.c util.c memory.c terminal.c util.asm crc16.asm
 	--opt-code-size \
 	-SO3 -bn MONCRC16.BIN \
 	-create-app -m \
-	&& mv -v MONCRC16.BIN MONCRC16.PRG \
+	&& mv -v MONCRC16.bin MONCRC16.PRG \
 	&& sleep 0.01 \
 	&& wc -c < MONCRC16.PRG
