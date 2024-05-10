@@ -6,8 +6,8 @@
 	(paper "A3")
 	(title_block
 		(title "Philips P2000T SD-CARD SLOT2 cartridge")
-		(date "2024-04-09")
-		(rev "rev4")
+		(date "2024-05-10")
+		(rev "rev5")
 	)
 	(lib_symbols
 		(symbol "74xx:74HC00"
