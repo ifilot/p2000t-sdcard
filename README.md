@@ -16,7 +16,16 @@ a P2000T with an SD-card and the necessary software routines to grab .CAS files
 from said SD card and load them into memory.
 
 > [!TIP]
-> Detailed documentation can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
+> **Documentation**
+> * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
+> * There is also a [manual in Dutch](https://github.com/ifilot/P2000T-SD-kaart-handleiding) available.
+
+> [!TIP]
+> **Downloads**
+> * [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
+> * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
+> * [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
+> * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 
 ## Commands
 
@@ -59,11 +68,14 @@ cd src
 ./compile flasher
 ```
 
-Binaries can also be directly downloaded from the releases.
+## Downloads
+
+Binaries can directly downloaded from the releases.
 
 * [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
 * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
 * [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
+* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 
 ## Images
 
@@ -78,3 +90,8 @@ Binaries can also be directly downloaded from the releases.
 * [Modified BASIC ROM source files](basicmod/)
 * [Launcher and Flasher programs](src/)
 * [Custom programs](programs/)
+
+## License
+
+* All software is shared under the [GPL v3 license](https://www.gnu.org/licenses/gpl-3.0).
+* All hardware (e.g. KiCAD files and .stl files) are shared under the [CC-BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
