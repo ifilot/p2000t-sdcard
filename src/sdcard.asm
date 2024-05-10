@@ -35,6 +35,7 @@ SDCACHE1        EQU  $0200
 SDCACHE2        EQU  $0400
 
 PUBLIC _init_sdcard
+PUBLIC _test_presence_sdcard
 
 PUBLIC _cmd0
 PUBLIC _cmd8
@@ -110,7 +111,22 @@ hosttry:
     ret
 
 ;-------------------------------------------------------------------------------
+; Initialize the SD card
+;
+; uint8_t test_presence_sdcard(void);
+;-------------------------------------------------------------------------------
+_test_presence_sdcard:
+    in a,(SELECT)               ; pull MISO low via 10k resistor
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a, (SERIAL)              ; read value
+    ld l,a                      ; store result in l
+    ret
+
+;-------------------------------------------------------------------------------
 ; CMD0: Reset the SD Memory Card
+;
+; garbles: a,b,hl
+; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd0:
     ld hl,cmd0str
@@ -119,6 +135,9 @@ _cmd0:
 
 ;-------------------------------------------------------------------------------
 ; CMD8: Sends interface condition
+;
+; garbles: a,b,hl
+; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd8:
     pop iy                      ; retrieve return address
@@ -133,6 +152,9 @@ _cmd8:
 ; CMD17: Read block
 ;
 ; void cmd17(uint32_t addr);
+;
+; garbles: a,b,de,hl,iy
+; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd17:
     pop iy                      ; retrieve return address
@@ -175,6 +197,9 @@ cmd17next:
 
 ;-------------------------------------------------------------------------------
 ; CMD55: Next command is application specific command
+;
+; garbles: a,b,hl
+; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd55:
     ld hl,cmd55str
@@ -183,6 +208,9 @@ _cmd55:
 
 ;-------------------------------------------------------------------------------
 ; CMD58: Read OCR register
+;
+; garbles: a,b,hl
+; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd58:
     pop iy                      ; retrieve return address
@@ -196,7 +224,8 @@ _cmd58:
 ;-------------------------------------------------------------------------------
 ; ACMD41: Send host capacity support information
 ;
-; Return value stored in l (received from sendr1)
+; garbles: a,b,hl
+; result of R1 is stored in l
 ;-------------------------------------------------------------------------------
 _acmd41:
     ld hl,acmd41str
@@ -206,7 +235,8 @@ _acmd41:
 ;-------------------------------------------------------------------------------
 ; Send command and receive R1 combined
 ;
-; Return value stored in l
+; garbles: a,b,hl
+; result of R1 is stored in l
 ;-------------------------------------------------------------------------------
 sendr1:
     call sendcommand
@@ -215,6 +245,8 @@ sendr1:
 
 ;-------------------------------------------------------------------------------
 ; Send a command to the SD card
+;
+; garbles: a,b,hl
 ;-------------------------------------------------------------------------------
 sendcommand:
     ld b,6                      ; number of bytes to send
@@ -228,6 +260,8 @@ sendnextbyte:
 
 ;-------------------------------------------------------------------------------
 ; Obtain R1 response from SD card
+;
+; uint8_t receive_R1(void);
 ;
 ; Result is stored in l
 ;-------------------------------------------------------------------------------
@@ -262,6 +296,8 @@ recvbyte:
 
 ;-------------------------------------------------------------------------------
 ; Read block from SD card
+;
+; void read_block(void);
 ;-------------------------------------------------------------------------------
 _read_block:
     ld a,0x02
@@ -294,6 +330,8 @@ blocknext:
 
 ;-------------------------------------------------------------------------------
 ; Copy the first 0x100 bytes from a block to external RAM
+;
+; void fast_sd_to_ram_first_0x100(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_first_0x100:
     di
@@ -330,6 +368,8 @@ nb11:
 
 ;-------------------------------------------------------------------------------
 ; Copy the last 0x100 bytes from a block to external RAM
+;
+; void fast_sd_to_ram_last_0x100(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_last_0x100:
     di
@@ -366,6 +406,8 @@ nb21:
 
 ;-------------------------------------------------------------------------------
 ; Copy the full 0x200 bytes from a block to external RAM
+;
+; void fast_sd_to_ram_full(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_full:
     di
@@ -402,6 +444,8 @@ nb30:
 
 ;-------------------------------------------------------------------------------
 ; Copy the full 0x200 bytes from a block to internal RAM
+;
+; void fast_sd_to_intram_full(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_intram_full:
     di
@@ -427,7 +471,7 @@ fstifinner:
     ret
 
 ;-------------------------------------------------------------------------------
-; void open_command(void)
+; void open_command(void);
 ;-------------------------------------------------------------------------------
 _open_command:
     ld a,0xFF
@@ -438,7 +482,7 @@ _open_command:
     ret
 
 ;-------------------------------------------------------------------------------
-; void close_command(void)
+; void close_command(void);
 ;-------------------------------------------------------------------------------
 _close_command:
     ld a,0xFF
@@ -449,29 +493,29 @@ _close_command:
     ret
 
 ;-------------------------------------------------------------------------------
-; void sdout_set(void)
+; void sdout_set(void);
 ;-------------------------------------------------------------------------------
 _sdout_set:
-    in a,(DESELECT)             ; value is ignored
+    in a,(DESELECT)             ; value in a is ignored when setting
     ret
 
 ;-------------------------------------------------------------------------------
-; void sdout_reset(void)
+; void sdout_reset(void);
 ;-------------------------------------------------------------------------------
 _sdout_reset:
-    in a,(SELECT)               ; value is ignored
+    in a,(SELECT)               ; value in a is ignored when setting
     ret
 
 ;-------------------------------------------------------------------------------
-; void sdcs_set(void)
+; void sdcs_set(void);
 ;-------------------------------------------------------------------------------
 _sdcs_set:
-    out (DESELECT),a            ; value is ignored
+    out (DESELECT),a            ; value in a is ignored when setting
     ret
 
 ;-------------------------------------------------------------------------------
-; void sdcs_reset(void)
+; void sdcs_reset(void);
 ;-------------------------------------------------------------------------------
 _sdcs_reset:
-    out (SELECT),a              ; value is ignored
+    out (SELECT),a              ; value in a is ignored when setting
     ret

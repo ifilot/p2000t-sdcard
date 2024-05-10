@@ -48,11 +48,12 @@ extern uint8_t _flag_sdcard_mounted;
 void init_sdcard(uint8_t *resp8, uint8_t *resp58) __z88dk_callee;
 
 /**
- * @brief Send a byte to the SD card
+ * @brief Test the presence of the SD card to see whether the result follow
+ *        the SDOUT value (absent) or not (present)
  * 
- * @param val 
+ * @return uint8_t 0x00 if not present, 0xFF if present
  */
-void send_byte(uint8_t val);
+uint8_t test_presence_sdcard(void) __z88dk_callee;
 
 /******************************************************************************
  * RECEIVE OPERATIONS
