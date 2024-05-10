@@ -43,7 +43,7 @@ jobs:
       image: z88dk/z88dk
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Build launcher application
       run: |
         cd src
@@ -73,7 +73,7 @@ jobs:
         cmake ../src
         make -j
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{env.LAUNCHER_BIN}}
         path: ./
@@ -93,7 +93,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download LAUNCHER
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{env.LAUNCHER_BIN}}
         path: ./
@@ -117,7 +117,7 @@ jobs:
       image: z88dk/z88dk
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Build launcher application
       run: |
         cd src
@@ -137,7 +137,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{env.FLASHER_BIN}}
         path: ./
@@ -159,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Install dependencies
       run: sudo apt install -y python3 python3-numpy z80asm make
     - name: Build modified basic cartridge
@@ -169,7 +169,7 @@ jobs:
         z80asm launcher.asm -o launcher.bin
         python hackrom.py
     - name: Upload
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: ${{env.BASICROM_BIN}}
         path: basicmod/${{env.BASICROM_BIN}}
@@ -181,7 +181,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{env.BASICROM_BIN}}
         path: ./
@@ -205,14 +205,14 @@ jobs:
     steps:
     - name: Install dependencies
       run: sudo apt install -y wget
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Download modified BASIC rom
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{env.BASICROM_BIN}}
         path: ./
     - name: Download flasher
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{env.FLASHER_BIN}}
         path: ./
@@ -223,7 +223,7 @@ jobs:
         truncate -s 16k ${{env.FLASHER_BIN}}
         cat ${{env.BASICROM_BIN}} ${{env.FLASHER_BIN}} RAMTEST.BIN basicmod/BASICROM.BIN > MULTIROM.BIN
     - name: Upload
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: ${{env.MULTIROM_BIN}}
         path: ${{env.MULTIROM_BIN}}
@@ -235,7 +235,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{env.MULTIROM_BIN}}
         path: ./
@@ -259,7 +259,7 @@ jobs:
       image: z88dk/z88dk
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Build helloworld PRG
       run: |
         cd programs/helloworld
@@ -276,7 +276,7 @@ jobs:
     needs: [build-prg-helloworld]
     permissions: write-all
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Install dependencies
       run: sudo apt install -y python3
     - name: Download artifact
@@ -301,7 +301,7 @@ jobs:
       image: z88dk/z88dk
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Build CRC16 PRG
       run: |
         cd programs/crcmonitor
@@ -318,7 +318,7 @@ jobs:
     needs: [build-prg-moncrc16]
     permissions: write-all
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Install dependencies
       run: sudo apt install -y python3
     - name: Download artifact
@@ -334,3 +334,48 @@ jobs:
       with:
         name: MONCRC16.PRG
         path: MONCRC16.PRG
+
+  packaging-programs:
+    runs-on: ubuntu-latest
+    needs: [sign-prg-helloworld, sign-prg-moncrc16]
+    permissions: write-all
+    steps:
+    - name: Download MONCRC16
+      uses: actions/download-artifact@v4
+      with:
+        name: MONCRC16.PRG
+        path: ./
+    - name: Download HELLOWORLD.PRG
+      uses: actions/download-artifact@v4
+      with:
+        name: HELLOWORLD.PRG
+        path: ./
+    - name: Packaging into ZIP file
+      run: zip PROGRAMS.zip *.PRG
+    - name: Upload PROGRAMS.zip
+      uses: actions/upload-artifact@v4
+      with:
+        name: PROGRAMS.zip
+        path: PROGRAMS.zip
+
+  deploy-programs:
+    runs-on: ubuntu-latest
+    needs: [packaging-programs]
+    permissions: write-all
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download program package
+      uses: actions/download-artifact@v4
+      with:
+        name: PROGRAMS.zip
+        path: ./
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: PROGRAMS.zip
+        asset_name: PROGRAMS.zip
+        asset_content_type: application/octet-stream
