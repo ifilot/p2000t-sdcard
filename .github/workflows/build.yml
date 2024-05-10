@@ -354,13 +354,12 @@ jobs:
       with:
         name: HELLOWORLD.PRG
         path: ./
-    - name: Packaging into ZIP file
-      run: zip PROGRAMS.zip *.PRG
     - name: Upload PROGRAMS.zip
       uses: actions/upload-artifact@v4
       with:
         name: PROGRAMS.zip
-        path: PROGRAMS.zip
+        path: |
+          *.PRG
 
   deploy-programs:
     runs-on: ubuntu-latest
