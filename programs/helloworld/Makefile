@@ -27,5 +27,4 @@ helloworld: main.c util.c
 	-create-app -m \
 	&& mv -v HELLOWORLD.BIN HELLOWORLD.PRG \
 	&& sleep 0.01 \
-	&& wc -c < HELLOWORLD.PRG \
-	&& z88dk-dis HELLOWORLD.PRG > HELLOWORLD.asm
+	&& wc -c < HELLOWORLD.PRG
