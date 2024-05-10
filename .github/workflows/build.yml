@@ -287,8 +287,7 @@ jobs:
         path: ./
     - name: Sign binary
       run: |
-        python3 scripts/signprg.py HELLOWORLD-UNSIGNED.PRG
-        mv -v HELLOWORLD-UNSIGNED.PRG HELLOWORLD.PRG
+        python3 scripts/signprg.py HELLOWORLD.PRG
     - name: Upload HELLOWORLD.PRG
       uses: actions/upload-artifact@v4
       with:
@@ -331,8 +330,7 @@ jobs:
         path: ./
     - name: Sign binary
       run: |
-        python3 scripts/signprg.py MONCRC16-UNSIGNED.PRG
-        mv -v MONCRC16-UNSIGNED.PRG MONCRC16.PRG
+        python3 scripts/signprg.py MONCRC16.PRG
     - name: Upload MONCRC16.PRG
       uses: actions/upload-artifact@v4
       with:
