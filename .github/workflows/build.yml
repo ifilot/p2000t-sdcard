@@ -249,3 +249,42 @@ jobs:
         asset_path: ${{env.MULTIROM_BIN}}
         asset_name: ${{env.MULTIROM_BIN}}
         asset_content_type: application/octet-stream
+
+################################################################################
+
+  # custom programs
+  build-prg-helloworld:
+    runs-on: ubuntu-latest
+    container: 
+      image: z88dk/z88dk
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build helloworld PRG
+      run: |
+        cd programs/helloworld
+        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
+        make
+    - name: Upload helloworld
+      uses: actions/upload-artifact@v3
+      with:
+        name: HELLOWORLD.PRG
+        path: programs/helloworld/HELLOWORLD.PRG
+
+  build-prg-moncrc16:
+    runs-on: ubuntu-latest
+    container: 
+      image: z88dk/z88dk
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build CRC16 PRG
+      run: |
+        cd programs/crcmonitor
+        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
+        make
+    - name: Upload helloworld
+      uses: actions/upload-artifact@v3
+      with:
+        name: MONCRC16.PRG
+        path: programs/crcmonitor/MONCRC16.PRG

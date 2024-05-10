@@ -35,6 +35,7 @@
 #include "ram.h"
 #include "leds.h"
 #include "util.h"
+#include "crc16.h"
 
 #define __clock_freq 2500000
 

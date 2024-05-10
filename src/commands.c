@@ -182,6 +182,12 @@ void command_run(void) {
             return;
         }
 
+        // verify that the filesize is not too big
+        if(_filesize_current_file > 0x3D00) {
+            print_error("File too large to load");
+            return;
+        }
+
         // copy program
         sprintf(termbuffer, "Deploying program at %c0xA000", COL_CYAN);
         terminal_printtermbuffer();
@@ -193,8 +199,10 @@ void command_run(void) {
             return;
         }
 
-        if(_filesize_current_file > 0x3D00) {
-            print_error("File too large to load");
+        // verify that the CRC-16 checksum matches
+        if(crc16_intram(&memory[0xA010], read_uint16_t(&memory[0xA001])) != 
+                        read_uint16_t(&memory[0xA003])) {
+            print_error("CRC16 checksum failed");
             return;
         }
 
