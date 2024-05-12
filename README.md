@@ -16,6 +16,9 @@ hosted on a FAT32 partition. This repository contains the PCB for interfacing
 a P2000T with an SD-card and the necessary software routines to grab .CAS files
 from said SD card and load them into memory.
 
+> [!WARNING]
+> The SD-cartridge uses I/O ports `0x60-0x6F` and is mutually incompatible with expansion cards that also use this port.
+
 > [!TIP]
 > **Documentation**
 > * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
