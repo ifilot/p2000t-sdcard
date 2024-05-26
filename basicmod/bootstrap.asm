@@ -38,13 +38,13 @@
 ; VARIABLES
 ;-------------------------------------------------------------------------------
 EXCODE:         EQU $7000       ; address to put and launch external code from
-LED_IO:         EQU $64         ; LED I/O
-ROM_IO:         EQU $6C         ; external ROM
-RAM_IO:         EQU $6D         ; external RAM
-IO_AL:          EQU $68         ; address low
-IO_AH:          EQU $69         ; address high
-ROM_BANK:       EQU $6A         ; address ROM bank
-RAM_BANK:       EQU $6B         ; address RAM bank
+LED_IO:         EQU $44         ; LED I/O
+ROM_IO:         EQU $4C         ; external ROM
+RAM_IO:         EQU $4D         ; external RAM
+IO_AL:          EQU $48         ; address low
+IO_AH:          EQU $49         ; address high
+ROM_BANK:       EQU $4A         ; address ROM bank
+RAM_BANK:       EQU $4B         ; address RAM bank
 NUMBYTES:       EQU $2D00       ; hardcoded length of launcher program
 PROGADDR:       EQU $0000       ; location on ROM where program resides
 DEPLOYADDR:     EQU $6152       ; storage location of deploy addr
