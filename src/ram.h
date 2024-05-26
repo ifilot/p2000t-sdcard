@@ -26,11 +26,6 @@
 
 #include "memory.h"
 
-#define PORT_ADDR_LOW   0x68
-#define PORT_ADDR_HIGH  0x69
-#define PORT_RAM_BANK   0x6B
-#define PORT_RAM        0x6D
-
 #define SDCACHE0 0x0000
 #define SDCACHE1 0x0200
 #define SDCACHE2 0x0400

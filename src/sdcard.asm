@@ -20,16 +20,8 @@
 
 SECTION code_user
 
-SERIAL          EQU  $60
-CLKSTART        EQU  $61
-DESELECT        EQU  $62
-SELECT          EQU  $63
+INCLUDE "ports.inc"
 
-ADDR_LOW        EQU  $68
-ADDR_HIGH       EQU  $69
-RAM_BANK        EQU  $6B
-RAM_IO          EQU  $6D
-LED_IO          EQU  $64
 SDCACHE0        EQU  $0000
 SDCACHE1        EQU  $0200
 SDCACHE2        EQU  $0400

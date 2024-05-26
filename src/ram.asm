@@ -20,11 +20,7 @@
 
 SECTION code_user
 
-ADDR_LOW        EQU  $68
-ADDR_HIGH       EQU  $69
-RAM_BANK        EQU  $6B
-RAM_IO          EQU  $6D
-LED_IO          EQU  $64
+INCLUDE "ports.inc"
 
 PUBLIC _crc16_ramchip
 PUBLIC _copy_to_ram

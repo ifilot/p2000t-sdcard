@@ -27,7 +27,7 @@
 #include "constants.h"
 #include "ascii.h"
 #include "config.h"
-#include "leds.h"
+#include "ports.h"
 
 // set printf io
 #pragma printf "%i %X %lX %c %s %lu %u"
@@ -100,7 +100,7 @@ void init(void) {
     memset(__lastinput, 0x00, INPUTLENGTH);
 
     // turn LEDs off
-    z80_outp(LED_IO, 0x00);
+    z80_outp(PORT_LED_IO, 0x00);
 
     // check if SD card is present; if not, throw an error
     if(test_presence_sdcard() != 0xFF) {

@@ -20,16 +20,7 @@
 
 SECTION code_user
 
-; SD-card ports
-SERIAL          EQU  $60
-CLKSTART        EQU  $61
-
-; ROM ports
-ADDR_LOW        EQU  $68
-ADDR_HIGH       EQU  $69
-ROM_BANK        EQU  $6A
-ROM_IO          EQU  $6C
-LED_IO          EQU  $64
+INCLUDE "ports.inc"
 
 PUBLIC _crc16_romchip
 PUBLIC _copy_to_rom

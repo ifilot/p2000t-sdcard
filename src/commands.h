@@ -33,7 +33,7 @@
 #include "terminal_ext.h"
 #include "fat32.h"
 #include "ram.h"
-#include "leds.h"
+#include "ports.h"
 #include "util.h"
 #include "crc16.h"
 

@@ -249,13 +249,13 @@ void command_hexdump(void) {
  * 
  */
 void command_ledtest(void) {
-    z80_outp(LED_IO, 0x00);
+    z80_outp(PORT_LED_IO, 0x00);
     z80_delay_ms(500);
-    z80_outp(LED_IO, 0x01);
+    z80_outp(PORT_LED_IO, 0x01);
     z80_delay_ms(500);
-    z80_outp(LED_IO, 0x02);
+    z80_outp(PORT_LED_IO, 0x02);
     z80_delay_ms(500);
-    z80_outp(LED_IO, 0x00);
+    z80_outp(PORT_LED_IO, 0x00);
 }
 
 /**

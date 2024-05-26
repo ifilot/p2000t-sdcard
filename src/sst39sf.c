@@ -27,9 +27,9 @@
  * @param byte byte to send
  */
 void sst39sf_send_byte(uint16_t addr, uint8_t byte) {
-    z80_outp(ROM_ADDR_LOW, addr  & 0xFF);
-    z80_outp(ROM_ADDR_HIGH, (addr >> 8) & 0xFF);
-    z80_outp(ROM_IO, byte);
+    z80_outp(PORT_ADDR_LOW, addr  & 0xFF);
+    z80_outp(PORT_ADDR_HIGH, (addr >> 8) & 0xFF);
+    z80_outp(PORT_ROM_IO, byte);
 }
 
 /**
@@ -52,9 +52,9 @@ void sst39sf_write_byte(uint16_t addr, uint8_t byte) {
  * @return uint8_t 
  */
 uint8_t sst39sf_read_byte(uint16_t addr) {
-    z80_outp(ROM_ADDR_LOW, addr  & 0xFF);
-    z80_outp(ROM_ADDR_HIGH, (addr >> 8) & 0xFF);
-    return z80_inp(ROM_IO);
+    z80_outp(PORT_ADDR_LOW, addr  & 0xFF);
+    z80_outp(PORT_ADDR_HIGH, (addr >> 8) & 0xFF);
+    return z80_inp(PORT_ROM_IO);
 }
 
 /**

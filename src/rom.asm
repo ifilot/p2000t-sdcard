@@ -20,10 +20,7 @@
 
 SECTION code_user
 
-ADDR_LOW        EQU  $68
-ADDR_HIGH       EQU  $69
-ROM_BANK        EQU  $6A
-ROM_IO          EQU  $6C
+INCLUDE "ports.inc"
 
 PUBLIC _rom_read_byte
 PUBLIC _set_rom_bank
