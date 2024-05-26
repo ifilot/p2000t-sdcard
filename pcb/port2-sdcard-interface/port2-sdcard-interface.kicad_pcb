@@ -9,8 +9,8 @@
 	(paper "A4")
 	(title_block
 		(title "Philips P2000T SD-CARD SLOT2 cartridge")
-		(date "2024-05-10")
-		(rev "rev5")
+		(date "2024-05-26")
+		(rev "rev6")
 	)
 	(layers
 		(0 "F.Cu" signal)
@@ -9129,7 +9129,7 @@
 			)
 		)
 		(property "Value" "3.3k"
-			(at -3.5 -0.25 270)
+			(at -3.5 -0.25 -90)
 			(layer "B.SilkS")
 			(uuid "baccbbc5-d6a8-47b5-a5e5-44b71ece984e")
 			(effects
@@ -9285,7 +9285,7 @@
 			(uuid "3385f521-e8a4-4097-9409-1fa065c7000a")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 0 270)
+			(at 0 0 -90)
 			(layer "B.Fab")
 			(uuid "0380cdfe-9f3f-4b51-95f7-9af3569307c5")
 			(effects
@@ -10276,7 +10276,7 @@
 			)
 		)
 		(property "Value" "3.3k"
-			(at 0 -1.65 270)
+			(at 0 -1.65 -90)
 			(layer "B.Fab")
 			(uuid "f7420fd5-0e5c-462a-a49c-0f6ad213ef48")
 			(effects
@@ -10432,7 +10432,7 @@
 			(uuid "69c072ab-ccda-4611-ac8c-474ea2f263cf")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 0 270)
+			(at 0 0 -90)
 			(layer "B.Fab")
 			(uuid "5532a438-a8fa-4421-8fe3-adad0a920a42")
 			(effects
@@ -20195,7 +20195,7 @@
 		(descr "Resistor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC_7351 nominal with elongated pad for handsoldering. (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "resistor handsolder")
 		(property "Reference" "R11"
-			(at -3.25 0 270)
+			(at -3.25 0 -90)
 			(layer "B.SilkS")
 			(uuid "a262f03e-1ec5-4f75-9683-104b233be2da")
 			(effects
@@ -20207,7 +20207,7 @@
 			)
 		)
 		(property "Value" "3.3k"
-			(at 0 -1.65 270)
+			(at 0 -1.65 -90)
 			(layer "B.Fab")
 			(uuid "473838ce-2a0b-4cc1-92f6-d85659e14285")
 			(effects
@@ -20363,7 +20363,7 @@
 			(uuid "2dcf84cc-0210-4110-bcc2-bed5f3e10e19")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 0 270)
+			(at 0 0 -90)
 			(layer "B.Fab")
 			(uuid "b284cdbb-1e6a-4225-945c-7767c7615f5a")
 			(effects
