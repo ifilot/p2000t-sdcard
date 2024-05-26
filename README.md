@@ -3,6 +3,7 @@
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/ifilot/p2000t-sdcard?label=version)
 [![build](https://github.com/ifilot/p2000t-sdcard/actions/workflows/build.yml/badge.svg)](https://github.com/ifilot/p2000t-sdcard/actions/workflows/build.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: CC-BY-SA v4](https://img.shields.io/badge/license-CC--4.0--BY--SA-lightgrey)](https://creativecommons.org/licenses/by-sa/4.0/deed.en)
 
 ## Purpose
 
@@ -14,6 +15,9 @@ port of the P2000T as well as a software solution to navigate through the files
 hosted on a FAT32 partition. This repository contains the PCB for interfacing
 a P2000T with an SD-card and the necessary software routines to grab .CAS files
 from said SD card and load them into memory.
+
+> [!WARNING]
+> The SD-cartridge uses I/O ports `0x60-0x6F` and is mutually incompatible with expansion cards that also use this port.
 
 > [!TIP]
 > **Documentation**

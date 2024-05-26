@@ -116,6 +116,7 @@ hosttry:
 ; uint8_t test_presence_sdcard(void);
 ;-------------------------------------------------------------------------------
 _test_presence_sdcard:
+<<<<<<< HEAD
     ld b, 100
 retry_sdcard:
     in a,(SELECT)               ; pull MISO low via 10k resistor
@@ -132,6 +133,13 @@ sdcardfound:
 nosdcard:
     ld l,0
     ret
+=======
+    in a,(SELECT)               ; pull MISO low via 10k resistor
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a, (SERIAL)              ; read value
+    ld l,a                      ; store result in l
+    ret
+>>>>>>> master
 
 ;-------------------------------------------------------------------------------
 ; CMD0: Reset the SD Memory Card

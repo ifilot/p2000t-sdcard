@@ -195,12 +195,17 @@ void init(void) {
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
     print_info("System booted.", 0);
 
+<<<<<<< HEAD
     // turn LEDs off
     z80_outp(LED_IO, 0x00);
 
     // check if SD card is present; if not, throw an error
     if(test_presence_sdcard() != 0xFF) {
         print_error("No SD-card inserted. Aborting.");
+=======
+    if(test_presence_sdcard() != 0xFF) {
+        print_error("No SD-card inserted.");
+>>>>>>> master
         for(;;) {}
     }
 
