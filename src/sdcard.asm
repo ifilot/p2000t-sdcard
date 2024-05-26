@@ -116,10 +116,21 @@ hosttry:
 ; uint8_t test_presence_sdcard(void);
 ;-------------------------------------------------------------------------------
 _test_presence_sdcard:
+    ld b, 100
+retry_sdcard:
     in a,(SELECT)               ; pull MISO low via 10k resistor
     out (CLKSTART),a            ; pulse clock, does not care about value of a
     in a, (SERIAL)              ; read value
+    cp 0xFF                     ; check if response is all ones
+    jp z,sdcardfound            ; if so, there is an SD card and end this routine
+    dec b                       ; if not, decrement try counter
+    jp z, nosdcard              ; if no more tries, return with bad result
+    jp retry_sdcard             ; if not, try again
+sdcardfound:
     ld l,a                      ; store result in l
+    ret
+nosdcard:
+    ld l,0
     ret
 
 ;-------------------------------------------------------------------------------
