@@ -33,18 +33,26 @@ from said SD card and load them into memory.
 
 Compatible with PCB rev6 or newer.
 
-* [BASICBOOTSTRAP-0x40](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x40)
-* [FLASHER-0x40](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40)
-* [LAUNCHER-0x40](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40)
+> [!NOTE] 
+> Do not forget to change the `LAUNCHER-0x40.BIN` to `LAUNCHER.BIN` when copying
+> the file to the SD-card.
+
+* [BASICBOOTSTRAP-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x40)
+* [FLASHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40)
+* [LAUNCHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40)
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 
 ### 0x60 version
 
 Compatible with PCB rev0-rev5.
 
-* [BASICBOOTSTRAP-0x60](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x60)
-* [FLASHER-0x60](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60)
-* [LAUNCHER-0x60](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60)
+> [!NOTE] 
+> Do not forget to change the `LAUNCHER-0x60.BIN` to `LAUNCHER.BIN` when copying
+> the file to the SD-card.
+
+* [BASICBOOTSTRAP-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x60.BIN)
+* [FLASHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60.BIN)
+* [LAUNCHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60.BIN)
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 
 ## Commands

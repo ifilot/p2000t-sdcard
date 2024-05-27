@@ -107,7 +107,7 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.LAUNCHER_BIN}}
-        asset_name: LAUNCHER-0x60
+        asset_name: LAUNCHER-0x60.BIN
         asset_content_type: application/octet-stream
 
 #-------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.LAUNCHER_BIN}}
-        asset_name: LAUNCHER-0x40
+        asset_name: LAUNCHER-0x40.BIN
         asset_content_type: application/octet-stream
 
 ################################################################################
@@ -226,8 +226,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: FLASHER-0x60
-        asset_name: ${{env.FLASHER_BIN}}
+        asset_path: ${{env.FLASHER_BIN}}
+        asset_name: FLASHER-0x60.BIN
         asset_content_type: application/octet-stream
 
 #-------------------------------------------------------------------------------
@@ -270,8 +270,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: FLASHER-0x40
-        asset_name: ${{env.FLASHER_BIN}}
+        asset_path: ${{env.FLASHER_BIN}}
+        asset_name: FLASHER-0x40.BIN
         asset_content_type: application/octet-stream
 
 ################################################################################
@@ -316,7 +316,7 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.BASICROM_BIN}}
-        asset_name: BASICBOOTSTRAP-0x60
+        asset_name: BASICBOOTSTRAP-0x60.BIN
         asset_content_type: application/octet-stream
   
 #-------------------------------------------------------------------------------
@@ -360,7 +360,7 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.BASICROM_BIN}}
-        asset_name: BASICBOOTSTRAP-0x40
+        asset_name: BASICBOOTSTRAP-0x40.BIN
         asset_content_type: application/octet-stream
 
 ################################################################################
@@ -414,7 +414,7 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-0x60
+        asset_name: MULTIROM-0x60.BIN
         asset_content_type: application/octet-stream
   
 #-------------------------------------------------------------------------------
@@ -468,7 +468,7 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-0x40
+        asset_name: MULTIROM-0x40.BIN
         asset_content_type: application/octet-stream
 
 ################################################################################
