@@ -20,10 +20,8 @@
 
 SECTION code_user
 
-ADDR_LOW        EQU  $68
-ADDR_HIGH       EQU  $69
-ROM_IO          EQU  $6C
-ROMBANK         EQU  $6A
+INCLUDE "ports.inc"
+
 CHECKSUM_BUFFER EQU  $8000
 CHECKSUM_STORE  EQU  $90
 

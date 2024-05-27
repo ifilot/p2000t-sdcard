@@ -3,19 +3,19 @@
     "GenerationSoftware": {
       "Vendor": "KiCad",
       "Application": "Pcbnew",
-      "Version": "7.0.10"
+      "Version": "8.0.2"
     },
-    "CreationDate": "2024-04-27T11:37:16+02:00"
+    "CreationDate": "2024-05-14T20:05:04+02:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "port2-sdcard-interface",
       "GUID": "706f7274-322d-4736-9463-6172642d696e",
-      "Revision": "rev3"
+      "Revision": "rev5"
     },
     "Size": {
-      "X": 80.05,
-      "Y": 100.05
+      "X": 85.14,
+      "Y": 100.075
     },
     "LayerNumber": 4,
     "BoardThickness": 1.6,

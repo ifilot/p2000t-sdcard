@@ -16,20 +16,36 @@ hosted on a FAT32 partition. This repository contains the PCB for interfacing
 a P2000T with an SD-card and the necessary software routines to grab .CAS files
 from said SD card and load them into memory.
 
-> [!WARNING]
-> The SD-cartridge uses I/O ports `0x60-0x6F` and is mutually incompatible with expansion cards that also use this port.
+> [!WARNING] 
+> Since version rev6 of the PCB, the I/O port has been changed to `0x40-0x4F`,
+> while older versions of the PCB use I/O port `0x60-0x6F`. Depending on which
+> version of the PCB you have, you need to use the right software packages.
+> The different versions are indicated by `0x40` and `0x60`.
 
 > [!TIP]
 > **Documentation**
 > * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
 > * There is also a [manual in Dutch](https://github.com/ifilot/P2000T-SD-kaart-handleiding) available.
 
-> [!TIP]
-> **Downloads**
-> * [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
-> * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
-> * [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
-> * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
+## Downloads 
+
+### 0x40 version
+
+Compatible with PCB rev6 or newer.
+
+* [BASICBOOTSTRAP-0x40](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x40)
+* [FLASHER-0x40](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40)
+* [LAUNCHER-0x40](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40)
+* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
+
+### 0x60 version
+
+Compatible with PCB rev0-rev5.
+
+* [BASICBOOTSTRAP-0x60](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x60)
+* [FLASHER-0x60](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60)
+* [LAUNCHER-0x60](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60)
+* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 
 ## Commands
 

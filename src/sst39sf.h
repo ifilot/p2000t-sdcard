@@ -23,10 +23,7 @@
 
 #include <z80.h>
 
-#define ROM_ADDR_LOW  0x68
-#define ROM_ADDR_HIGH 0x69
-#define ROM_BANK      0x6A
-#define ROM_IO        0x6C
+#include "ports.h"
 
 /**
  * @brief Send a byte to the ROM chip

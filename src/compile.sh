@@ -8,6 +8,10 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if [[ "$1" == "launcher" ]]; then
         ../../../CPP/crc16sign/build/crc16sign -i LAUNCHER.BIN -o LAUNCHER.BIN -s
     fi
+
+    if [[ "$1" == "" ]]; then
+        ../../../CPP/crc16sign/build/crc16sign -i LAUNCHER.BIN -o LAUNCHER.BIN -s
+    fi
 else
     echo "Unknown operating system"
 fi
