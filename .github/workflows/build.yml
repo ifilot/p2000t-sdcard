@@ -368,7 +368,7 @@ jobs:
   # Multirom cartridge
   build-multirom-0x60:
     runs-on: ubuntu-latest
-    needs: [build-basic-0x60, build-flasher]
+    needs: [build-basic-0x60, build-flasher-0x60]
     steps:
     - name: Install dependencies
       run: sudo apt install -y wget
@@ -422,7 +422,7 @@ jobs:
   # Multirom cartridge
   build-multirom-0x40:
     runs-on: ubuntu-latest
-    needs: [build-basic-0x40, build-flasher]
+    needs: [build-basic-0x40, build-flasher-0x40]
     steps:
     - name: Install dependencies
       run: sudo apt install -y wget
