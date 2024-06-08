@@ -18,40 +18,21 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _TERMINAL_H
-#define _TERMINAL_H
+#ifndef _CONSTANTS_H
+#define _CONSTANTS_H
 
-#include <stdio.h>
-#include <string.h>
-#include "memory.h"
-#include "commands.h"
-#include "util.h"
+#define COL_NONE    0x00
+#define COL_RED     0x01
+#define COL_GREEN   0x02
+#define COL_YELLOW  0x03
+#define COL_BLUE    0x04
+#define COL_MAGENTA 0x05
+#define COL_CYAN    0x06
+#define COL_WHITE   0x07
+#define TEXT_DOUBLE 0x0D
 
-#define LINELENGTH 40
-#define BLINK_INTERVAL 500 // ms
-#define TIMER_INTERVAL 20
+#define INPUTLENGTH 20
 
-// these (global) variables are used to track the terminal
-extern uint8_t _terminal_curline;
-extern uint8_t _terminal_maxlines;
-extern uint8_t _terminal_startline;
-extern uint8_t _terminal_endline;
-extern uint16_t _prevcounter;
+#define ROM_BANK_DEFAULT 0
 
-extern char __input[INPUTLENGTH+1];
-extern uint8_t __inputpos;
-
-extern char termbuffer[LINELENGTH];
-
-void terminal_init(uint8_t, uint8_t);
-void terminal_printtermbuffer(void);
-void terminal_redoline(void);
-void terminal_scrollup(void);
-void terminal_backup_line(void);
-
-void print_error(char* str);
-void print_info(char* str, uint8_t backup_line);
-
-void terminal_cursor_blink(void);
-
-#endif // _TERMINAL_H
+#endif

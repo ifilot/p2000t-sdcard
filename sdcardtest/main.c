@@ -23,14 +23,17 @@
 #include <stdio.h>
 #include <z80.h>
 
-#include "commands.h"
 #include "constants.h"
-#include "ascii.h"
 #include "config.h"
 #include "ports.h"
+#include "memory.h"
+#include "terminal.h"
+#include "ram.h"
+#include "util.h"
+#include "sdcard.h"
 
 // set printf io
-#pragma printf "%i %X %lX %c %s %lu %u"
+#pragma printf "%c %X %s"
 
 // definitions
 void init(void);
@@ -39,43 +42,24 @@ void main(void) {
     // initialize environment
     init();
 
-    // put in infinite loop and wait for user commands
-    // only terminate the loop when a program should be executed
-    while(__bootcas == 0) {
-        if(keymem[0x0C] > 0) {
-            for(uint8_t i=0; i<keymem[0x0C]; i++) {
-                if(keymem[i] == 52) { // return key
-                    memset(keymem, 0x00, 0x0D); // flush key buffer
-                    execute_command();
-                    break;
-                }
-
-                if(keymem[i] == 44) { // backspace key
-                    if(__inputpos > 0) {
-                        __inputpos--;
-                        __input[__inputpos] = 0x00;
-                    }
-                    break;
-                }
-
-                if(__inputpos < INPUTLENGTH) {
-                    __input[__inputpos] = __ascii[keymem[i]];
-                    __inputpos++;
-                }
-            }
-
-            // flush key buffer
-            memset(keymem, 0x00, 0x0D);
-
-            // place command on command line
-            __input[__inputpos] = 0x00;
-            sprintf(termbuffer, "%c>%c%s", COL_CYAN, COL_WHITE, __input);
-            terminal_redoline();
-        }
-
-        // add a blinking cursor
-        terminal_cursor_blink();
+    // mount sd card
+    print_info("Initializing SD card..", 1);
+    if(init_sdcard(_resp8, _resp58) != 0) {
+        print_error("Error detecting SD card");
+        for(;;){}
+    } else {
+        print_info("Initialization successfull", 0);
     }
+
+    sprintf(termbuffer, "resp8: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", 
+            _resp8[0], _resp8[1], _resp8[2], _resp8[3], _resp8[4]);
+    terminal_printtermbuffer();
+
+    sprintf(termbuffer, "resp58: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", 
+            _resp58[0], _resp58[1], _resp58[2], _resp58[3], _resp58[4]);
+    terminal_printtermbuffer();
+
+    for(;;){}
 }
 
 void init(void) {
@@ -91,37 +75,10 @@ void init(void) {
     //                   3 --> 40 KiB (0x6000 - 0xFFFF)
     const uint8_t nrkb = memory[0x605C] <= 2 ? memory[0x605C] * 16 : 40;   
 
-    sprintf(&vidmem[0x50], "%c%cSDCARD READER", TEXT_DOUBLE, COL_CYAN);
+    sprintf(&vidmem[0x50], "%c%cSDCARD TEST", TEXT_DOUBLE, COL_CYAN);
     sprintf(&vidmem[0x50*22], "Version: %s. Memory model: %i kb.", __VERSION__, nrkb);
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
 
-    // initialize command line
-    memset(__input, 0x00, INPUTLENGTH+1);
-    memset(__lastinput, 0x00, INPUTLENGTH);
-
     // turn LEDs off
     z80_outp(PORT_LED_IO, 0x00);
-
-    // mount sd card
-    print_info("Initializing SD card..", 1);
-    if(init_sdcard(_resp8, _resp58) != 0) {
-        print_error("Cannot connect to SD-CARD.");
-        for(;;){}
-    }
-
-    // inform user that the SD card is initialized and that we are ready to read
-    // the first block from the SD card and print it to the screen
-    print_info("SD Card initialized", 0);
-
-    print_info("Mounting partition 1..", 1);
-    uint32_t lba0 = read_mbr();
-    read_partition(lba0);
-
-    // sd card successfully mounted
-    print_info("Partition 1 mounted", 0);
-    print_info("System ready.", 0);
-
-    // insert cursor
-    sprintf(termbuffer, "%c>%c", COL_CYAN, COL_WHITE);
-    terminal_redoline();
 }

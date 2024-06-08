@@ -18,40 +18,25 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _TERMINAL_H
-#define _TERMINAL_H
+#include "sdcard.h"
 
-#include <stdio.h>
-#include <string.h>
-#include "memory.h"
-#include "commands.h"
-#include "util.h"
+// shared buffer object to store the data of a single sector on the SD card
+uint8_t _resp8[5];
+uint8_t _resp58[5];
+uint8_t _flag_sdcard_mounted = 0;
 
-#define LINELENGTH 40
-#define BLINK_INTERVAL 500 // ms
-#define TIMER_INTERVAL 20
+/******************************************************************************
+ * BLOCK OPERATIONS
+ ******************************************************************************/
 
-// these (global) variables are used to track the terminal
-extern uint8_t _terminal_curline;
-extern uint8_t _terminal_maxlines;
-extern uint8_t _terminal_startline;
-extern uint8_t _terminal_endline;
-extern uint16_t _prevcounter;
-
-extern char __input[INPUTLENGTH+1];
-extern uint8_t __inputpos;
-
-extern char termbuffer[LINELENGTH];
-
-void terminal_init(uint8_t, uint8_t);
-void terminal_printtermbuffer(void);
-void terminal_redoline(void);
-void terminal_scrollup(void);
-void terminal_backup_line(void);
-
-void print_error(char* str);
-void print_info(char* str, uint8_t backup_line);
-
-void terminal_cursor_blink(void);
-
-#endif // _TERMINAL_H
+/**
+ * @brief Read a single 512-byte sector
+ * 
+ * @param addr sector address
+ */
+void read_sector(uint32_t addr) {
+    open_command();
+    cmd17(addr);
+    read_block();
+    close_command();
+}

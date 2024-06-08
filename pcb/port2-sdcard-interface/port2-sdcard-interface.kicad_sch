@@ -13233,6 +13233,16 @@
 		)
 		(uuid "733b5354-3cba-4c0f-8b71-acbceed7060c")
 	)
+	(text "in $42"
+		(exclude_from_sim no)
+		(at 268.224 26.416 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "7a74a90c-dee7-4255-9099-c077aba444eb")
+	)
 	(text "in $40: ~{SER_RD} is pulled low, reading from the in register.\nin $41: Does nothing\nin $42: ~{SDOUT_SET} is pulled low, pulling MISO low via a 10k resistor.\nin $43: ~{SDOUT_RESET} is pulled low, pulling MISO high via a 10k resistor.\n\nWhen no card is present, the output of the SD card will follow the output of the SET/RESET latch,\nhowever if a card is present, though unresponsive, it will not follow and the same (high) output\nwill be received."
 		(exclude_from_sim no)
 		(at 19.05 189.865 0)
@@ -13244,6 +13254,16 @@
 		)
 		(uuid "7d35f424-f6b4-41a3-bd17-9c047c1d7e97")
 	)
+	(text "Connected \nto SD-CARD"
+		(exclude_from_sim no)
+		(at 303.784 81.534 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "80c684d7-0774-4327-95f5-68e54337f5ec")
+	)
 	(text "SD CARD"
 		(exclude_from_sim no)
 		(at 199.644 230.886 0)
@@ -13254,6 +13274,28 @@
 			(justify left bottom)
 		)
 		(uuid "93f1d3ff-db45-4291-a859-aea702475781")
+	)
+	(text "~{SDOUT_SET} -> MISO LOW\n~{SDOUT_RESET} -> MISO HIGH"
+		(exclude_from_sim no)
+		(at 277.368 56.388 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "94d70b1d-9984-4d15-a767-6ca92d910460")
+	)
+	(text "~{SDCS_SET} -> ~{CS} HIGH -> SD CARD disabled\n~{SDCS_RESET} -> ~{CS} LOW -> SD CARD active"
+		(exclude_from_sim no)
+		(at 260.604 104.394 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "991ad5ac-b338-4cc9-8af2-64223d315ceb")
 	)
 	(text "SELECTION COMPONENT"
 		(exclude_from_sim no)
@@ -13309,6 +13351,16 @@
 			(justify left bottom)
 		)
 		(uuid "b26a0f9e-ef57-40f1-8b59-1dd186996fbf")
+	)
+	(text "in $43"
+		(exclude_from_sim no)
+		(at 267.208 44.45 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "bbab2a2d-e5d7-4e50-934d-440eacbe0f82")
 	)
 	(text "Both CEP and CET need\nto be high for count\nto be enabled."
 		(exclude_from_sim no)
@@ -13386,6 +13438,26 @@
 			(justify left bottom)
 		)
 		(uuid "e2e77bca-8fba-4f2c-832f-2c88b40c4091")
+	)
+	(text "out $42"
+		(exclude_from_sim no)
+		(at 268.732 73.914 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ec5d44bb-75e8-48f0-8cad-64f14bb83a17")
+	)
+	(text "out $43"
+		(exclude_from_sim no)
+		(at 267.716 91.948 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "f1732d47-d723-4517-828f-7c5f363ead54")
 	)
 	(text "Two LEDS show whether the SD card is selected via the CS line and \nwhether signals are sent to the SD card. Another two leds show I/O \non the RAM and ROM chips."
 		(exclude_from_sim no)

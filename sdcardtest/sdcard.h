@@ -44,10 +44,16 @@ extern uint8_t _flag_sdcard_mounted;
 /**
  * @brief Initialize the SD card in such a way that sectors can be read
  *        from the card
- * 
- * Returns 0 on success and 1 on error
  */
 uint8_t init_sdcard(uint8_t *resp8, uint8_t *resp58) __z88dk_callee;
+
+/**
+ * @brief Test the presence of the SD card to see whether the result follow
+ *        the SDOUT value (absent) or not (present)
+ * 
+ * @return uint8_t 0x00 if not present, 0xFF if present
+ */
+uint8_t test_presence_sdcard(void) __z88dk_callee;
 
 /******************************************************************************
  * RECEIVE OPERATIONS
@@ -154,6 +160,11 @@ void read_sector(uint32_t addr);
 /******************************************************************************
  * I/O CONTROL
  ******************************************************************************/
+
+/**
+ * Read single byte from SD card
+ */
+uint8_t read_byte(void) __z88dk_callee;
 
 /**
  * Set the SD CS signal to low (activating the SD card)

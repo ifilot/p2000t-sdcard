@@ -27,6 +27,7 @@
 #include "util.h"
 #include "copy.h"
 #include "config.h"
+#include "sdcard.h"
 
 // set printf io
 #pragma printf "%i %X %lX %c %s %lu %u"
@@ -49,7 +50,10 @@ int main(void) {
 
     // mount sd card
     print_info("Initializing SD card..", 1);
-    init_sdcard(_resp8, _resp58);
+    if(init_sdcard(_resp8, _resp58) != 0) {
+        print_error("Cannot connect to SD-CARD.");
+        for(;;){}
+    }
 
     // inform user that the SD card is initialized and that we are ready to read
     // the first block from the SD card and print it to the screen

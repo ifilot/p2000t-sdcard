@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "memory.h"
-#include "commands.h"
 #include "util.h"
 
 #define LINELENGTH 40

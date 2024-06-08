@@ -27,6 +27,7 @@ SDCACHE1        EQU  $0200
 SDCACHE2        EQU  $0400
 
 PUBLIC _init_sdcard
+PUBLIC _test_presence_sdcard
 
 PUBLIC _cmd0
 PUBLIC _cmd8
@@ -45,6 +46,7 @@ PUBLIC _fast_sd_to_ram_last_0x100
 PUBLIC _fast_sd_to_ram_full
 PUBLIC _fast_sd_to_intram_full
 
+PUBLIC _read_byte
 PUBLIC _sdout_set
 PUBLIC _sdout_reset
 PUBLIC _sdcs_set
@@ -116,6 +118,32 @@ exitinit:
 carderror:
     ld iyl,1                    ; store return value
     jp exitinit
+
+;-------------------------------------------------------------------------------
+; Test the presence of an SD-card
+;
+; uint8_t test_presence_sdcard(void);
+;
+; Procedure: MISO is tied to low, then card is pulsed. If a card is present,
+; it will return 0xFF (card pulls signal up). If no card is present, the signal
+; should follow line-settings, which will be all-low.
+;-------------------------------------------------------------------------------
+_test_presence_sdcard:
+    out (SELECT),a              ; enable SD-card
+    ld a, 0xFF
+    out (SERIAL),a              ; set all ones
+    in a,(DESELECT)             ; pull MISO low via 10k resistor
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a, (SERIAL)              ; read value
+    jp z, nosdcard              ; if signal follows, then no SD card is present
+sdcardfound:
+    ld l,1                      ; store result in l
+    jp tsdend
+nosdcard:
+    ld l,0
+tsdend:
+    out (DESELECT),a            ; disable SD-card
+    ret
 
 ;-------------------------------------------------------------------------------
 ; CMD0: Reset the SD Memory Card
@@ -488,8 +516,21 @@ _close_command:
     ret
 
 ;-------------------------------------------------------------------------------
+; Read single byte from SD card
+; uint8_t read_byte(void) __z88dk_callee;
+;-------------------------------------------------------------------------------
+_read_byte:
+    ld a,0xFF
+    out (SERIAL),a              ; flush shift register with ones
+    out (CLKSTART),a            ; send out
+    out (CLKSTART),a            ; send another byte of ones
+    in a,(SERIAL)               ; load data in shift register into a
+    ld l,a                      ; store return value in l
+    ret
+
+;-------------------------------------------------------------------------------
 ; void sdout_set(void);
-; pull MISO low over 10k resistor
+; pull MISO low over 10k resistor ($X2)
 ;-------------------------------------------------------------------------------
 _sdout_set:
     in a,(DESELECT)             ; value in a is ignored when setting
@@ -497,7 +538,7 @@ _sdout_set:
 
 ;-------------------------------------------------------------------------------
 ; void sdout_reset(void);
-; pull MISO high over 10k resistor
+; pull MISO high over 10k resistor ($X3)
 ;-------------------------------------------------------------------------------
 _sdout_reset:
     in a,(SELECT)               ; value in a is ignored when setting
@@ -505,7 +546,7 @@ _sdout_reset:
 
 ;-------------------------------------------------------------------------------
 ; void sdcs_set(void);
-; pull ~CS high (deactivate SD card)
+; pull ~CS high (deactivate SD card) ($X2)
 ;-------------------------------------------------------------------------------
 _sdcs_set:
     out (DESELECT),a            ; value in a is ignored when setting
@@ -513,7 +554,7 @@ _sdcs_set:
 
 ;-------------------------------------------------------------------------------
 ; void sdcs_reset(void);
-; pull ~CS low (activate SD card)
+; pull ~CS low (activate SD card) ($X3)
 ;-------------------------------------------------------------------------------
 _sdcs_reset:
     out (SELECT),a              ; value in a is ignored when setting
