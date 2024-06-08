@@ -112,5 +112,8 @@ cd src
 
 ## License
 
+![License facts](img/oshw_facts.svg)
+
 * All software is shared under the [GPL v3 license](https://www.gnu.org/licenses/gpl-3.0).
-* All hardware (e.g. KiCAD files and .stl files) are shared under the [CC-BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
+* All hardware (e.g. KiCAD files and .stl files) are shared under the [CERN-OHL-S license](https://ohwr.org/project/cernohl/-/wikis/uploads/819d71bea3458f71fba6cf4fb0f2de6b/cern_ohl_s_v2.txt).
+* All documentation is shared under the [CC-BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
