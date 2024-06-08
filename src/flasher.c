@@ -198,14 +198,6 @@ void init(void) {
     // turn LEDs off
     z80_outp(PORT_LED_IO, 0x00);
 
-    // check if SD card is present; if not, throw an error
-    #ifndef DISABLE_HARDWARE_CHECK
-    if(test_presence_sdcard() != 0xFF) {
-        print_error("No SD-card inserted. Aborting.");
-        for(;;) {}
-    }
-    #endif
-
     // load program using first ram bank
     set_rom_bank(ROM_BANK_DEFAULT);
     set_ram_bank(RAM_BANK_CACHE);

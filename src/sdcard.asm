@@ -103,26 +103,29 @@ hosttry:
     ret
 
 ;-------------------------------------------------------------------------------
-; Initialize the SD card
+; Test the presence of an SD-card
 ;
 ; uint8_t test_presence_sdcard(void);
+;
+; Procedure: MISO is tied to low, then card is pulsed. If a card is present,
+; it will return 0xFF (card pulls signal up). If no card is present, the signal
+; should follow line-settings, which will be all-low.
 ;-------------------------------------------------------------------------------
 _test_presence_sdcard:
-    ld b, 100
-retry_sdcard:
-    in a,(SELECT)               ; pull MISO low via 10k resistor
+    out (SELECT),a              ; enable SD-card
+    ld a, 0xFF
+    out (SERIAL),a              ; set all ones
+    in a,(DESELECT)             ; pull MISO low via 10k resistor
     out (CLKSTART),a            ; pulse clock, does not care about value of a
     in a, (SERIAL)              ; read value
-    cp 0xFF                     ; check if response is all ones
-    jp z,sdcardfound            ; if so, there is an SD card and end this routine
-    dec b                       ; if not, decrement try counter
-    jp z, nosdcard              ; if no more tries, return with bad result
-    jp retry_sdcard             ; if not, try again
+    jp z, nosdcard              ; if signal follows, then no SD card is present
 sdcardfound:
-    ld l,a                      ; store result in l
-    ret
+    ld l,1                      ; store result in l
+    jp tsdend
 nosdcard:
     ld l,0
+tsdend:
+    out (DESELECT),a            ; disable SD-card
     ret
 
 ;-------------------------------------------------------------------------------
@@ -497,6 +500,7 @@ _close_command:
 
 ;-------------------------------------------------------------------------------
 ; void sdout_set(void);
+; pull MISO low over 10k resistor
 ;-------------------------------------------------------------------------------
 _sdout_set:
     in a,(DESELECT)             ; value in a is ignored when setting
@@ -504,6 +508,7 @@ _sdout_set:
 
 ;-------------------------------------------------------------------------------
 ; void sdout_reset(void);
+; pull MISO high over 10k resistor
 ;-------------------------------------------------------------------------------
 _sdout_reset:
     in a,(SELECT)               ; value in a is ignored when setting
@@ -511,6 +516,7 @@ _sdout_reset:
 
 ;-------------------------------------------------------------------------------
 ; void sdcs_set(void);
+; pull ~CS high (deactivate SD card)
 ;-------------------------------------------------------------------------------
 _sdcs_set:
     out (DESELECT),a            ; value in a is ignored when setting
@@ -518,6 +524,7 @@ _sdcs_set:
 
 ;-------------------------------------------------------------------------------
 ; void sdcs_reset(void);
+; pull ~CS low (activate SD card)
 ;-------------------------------------------------------------------------------
 _sdcs_reset:
     out (SELECT),a              ; value in a is ignored when setting

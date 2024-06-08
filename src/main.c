@@ -102,14 +102,6 @@ void init(void) {
     // turn LEDs off
     z80_outp(PORT_LED_IO, 0x00);
 
-    // check if SD card is present; if not, throw an error
-    #ifndef DISABLE_HARDWARE_CHECK
-    if(test_presence_sdcard() != 0xFF) {
-        print_error("No SD-card inserted. Aborting.");
-        for(;;) {}
-    }
-    #endif
-
     // mount sd card
     print_info("Initializing SD card..", 1);
     init_sdcard(_resp8, _resp58);
