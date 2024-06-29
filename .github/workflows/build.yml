@@ -495,7 +495,7 @@ jobs:
 
   build-multirom-4x16k-0x40:
     runs-on: ubuntu-latest
-    needs: [build-basic-4x16k-0x40, build-flasher-0x40]
+    needs: [build-basic-0x40, build-flasher-0x40]
     steps:
     - name: Install dependencies
       run: sudo apt install -y wget
