@@ -500,7 +500,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: MULTIROM-0x40
+        name: MULTIROM-4x16k-0x40
         path: ${{env.MULTIROM_BIN}}
 
   build-multirom-32x16k-0x40:
@@ -530,7 +530,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: MULTIROM-4x16k-0x40
+        name: MULTIROM-32x16k-0x40
         path: ${{env.MULTIROM_BIN}}
 
   deploy-multirom-4x16k-0x40:
