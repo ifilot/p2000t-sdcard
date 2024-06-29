@@ -401,7 +401,7 @@ jobs:
     needs: [build-basic-0x60, build-flasher-0x60]
     steps:
     - name: Install dependencies
-      run: sudo apt install -y wget
+      run: sudo apt install -y wget python3
     - uses: actions/checkout@v3
     - name: Download modified BASIC rom
       uses: actions/download-artifact@v4
@@ -418,7 +418,7 @@ jobs:
         wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
         truncate -s 16k ${{env.BASICROM_BIN}}
         truncate -s 16k ${{env.FLASHER_BIN}}
-        bash roms/build_rom.sh
+        python3 roms/build_rom.py
         truncate -s 512k MULTIROM.BIN # resize to 512kb
     - name: Upload
       uses: actions/upload-artifact@v4
@@ -508,7 +508,7 @@ jobs:
     needs: [build-basic-0x40, build-flasher-0x40]
     steps:
     - name: Install dependencies
-      run: sudo apt install -y wget
+      run: sudo apt install -y wget python3
     - uses: actions/checkout@v3
     - name: Download modified BASIC rom
       uses: actions/download-artifact@v4
@@ -525,7 +525,7 @@ jobs:
         wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
         truncate -s 16k ${{env.BASICROM_BIN}}
         truncate -s 16k ${{env.FLASHER_BIN}}
-        bash roms/build_rom.sh
+        python3 roms/build_rom.py
         truncate -s 512k MULTIROM.BIN # resize to 512kb
     - name: Upload
       uses: actions/upload-artifact@v4
