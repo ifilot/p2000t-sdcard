@@ -416,29 +416,29 @@ jobs:
     - name: Build modified basic cartridge
       run: |
         wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
-        truncate -s 16k ${{env.BASICROM_BIN}}
-        truncate -s 16k ${{env.FLASHER_BIN}}
-        cat \
-        basicmod/BASICROM.BIN \       # regular BASIC NL v1.1    (00)
-        roms/basic_nl_v1_1_a2.bin \   # regular BASIC NL v1.1a2  (01)
-        roms/basic_en_v1_0.bin \      # regular BASIC EN v1.1a2  (02)
-        roms/JWSBasic.bin \           # JWS Basic                (03)
-        ${{env.BASICROM_BIN}}         # SD-CARD BASIC            (04)
-        ${{env.FLASHER_BIN}} \        # flasher utility          (05)
-        RAMTEST.BIN \                 # ram test                 (06)
-        roms/maintenance_v2.bin \     # maintenance utility      (07)
-        roms/bildschirmtext.bin \     # bildschirmtext           (08)
-        roms/Forth.bin \              # Forth programming lang   (09)
-        roms/assembler_v5_9.bin \     # Assembler 5.9            (0A)
-        roms/zemon_v1_4.bin \         # Zemon v1.4               (0B)
-        roms/flexbase_v1_6.bin \      # Flexbase v1.6            (0C)
-        roms/familiegeheugen_v4.bin \ # Familiegeheugen v4       (0D)
-        roms/tekst_v1.bin \           # Tekst v1                 (0E)
-        roms/text2000_v3.bin \        # Text2000 v3              (0F)
-        roms/text2_de.bin \           # Text2 DE v2              (10)
-        roms/wordproc_v2.bin \        # Wordproc v2              (11)
-        > MULTIROM.BIN
-        truncate -s 512k MULTIROM.BIN # resize to 512kb
+          truncate -s 16k ${{env.BASICROM_BIN}}
+          truncate -s 16k ${{env.FLASHER_BIN}}
+          cat \
+          basicmod/BASICROM.BIN \       # regular BASIC NL v1.1    (00)
+          roms/basic_nl_v1_1_a2.bin \   # regular BASIC NL v1.1a2  (01)
+          roms/basic_en_v1_0.bin \      # regular BASIC EN v1.1a2  (02)
+          roms/JWSBasic.bin \           # JWS Basic                (03)
+          ${{env.BASICROM_BIN}}         # SD-CARD BASIC            (04)
+          ${{env.FLASHER_BIN}} \        # flasher utility          (05)
+          RAMTEST.BIN \                 # ram test                 (06)
+          roms/maintenance_v2.bin \     # maintenance utility      (07)
+          roms/bildschirmtext.bin \     # bildschirmtext           (08)
+          roms/Forth.bin \              # Forth programming lang   (09)
+          roms/assembler_v5_9.bin \     # Assembler 5.9            (0A)
+          roms/zemon_v1_4.bin \         # Zemon v1.4               (0B)
+          roms/flexbase_v1_6.bin \      # Flexbase v1.6            (0C)
+          roms/familiegeheugen_v4.bin \ # Familiegeheugen v4       (0D)
+          roms/tekst_v1.bin \           # Tekst v1                 (0E)
+          roms/text2000_v3.bin \        # Text2000 v3              (0F)
+          roms/text2_de.bin \           # Text2 DE v2              (10)
+          roms/wordproc_v2.bin \        # Wordproc v2              (11)
+          > MULTIROM.BIN
+          truncate -s 512k MULTIROM.BIN # resize to 512kb
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
@@ -545,25 +545,25 @@ jobs:
         truncate -s 16k ${{env.BASICROM_BIN}}
         truncate -s 16k ${{env.FLASHER_BIN}}
         cat \
-        basicmod/BASICROM.BIN \       # regular BASIC NL v1.1    (00)
-        roms/basic_nl_v1_1_a2.bin \   # regular BASIC NL v1.1a2  (01)
-        roms/basic_en_v1_0.bin \      # regular BASIC EN v1.1a2  (02)
-        roms/JWSBasic.bin \           # JWS Basic                (03)
-        ${{env.BASICROM_BIN}}         # SD-CARD BASIC            (04)
-        ${{env.FLASHER_BIN}} \        # flasher utility          (05)
-        RAMTEST.BIN \                 # ram test                 (06)
-        roms/maintenance_v2.bin \     # maintenance utility      (07)
-        roms/bildschirmtext.bin \     # bildschirmtext           (08)
-        roms/Forth.bin \              # Forth programming lang   (09)
-        roms/assembler_v5_9.bin \     # Assembler 5.9            (0A)
-        roms/zemon_v1_4.bin \         # Zemon v1.4               (0B)
-        roms/flexbase_v1_6.bin \      # Flexbase v1.6            (0C)
-        roms/familiegeheugen_v4.bin \ # Familiegeheugen v4       (0D)
-        roms/tekst_v1.bin \           # Tekst v1                 (0E)
-        roms/text2000_v3.bin \        # Text2000 v3              (0F)
-        roms/text2_de.bin \           # Text2 DE v2              (10)
-        roms/wordproc_v2.bin \        # Wordproc v2              (11)
-        > MULTIROM.BIN
+          basicmod/BASICROM.BIN \       # regular BASIC NL v1.1    (00)
+          roms/basic_nl_v1_1_a2.bin \   # regular BASIC NL v1.1a2  (01)
+          roms/basic_en_v1_0.bin \      # regular BASIC EN v1.1a2  (02)
+          roms/JWSBasic.bin \           # JWS Basic                (03)
+          ${{env.BASICROM_BIN}}         # SD-CARD BASIC            (04)
+          ${{env.FLASHER_BIN}} \        # flasher utility          (05)
+          RAMTEST.BIN \                 # ram test                 (06)
+          roms/maintenance_v2.bin \     # maintenance utility      (07)
+          roms/bildschirmtext.bin \     # bildschirmtext           (08)
+          roms/Forth.bin \              # Forth programming lang   (09)
+          roms/assembler_v5_9.bin \     # Assembler 5.9            (0A)
+          roms/zemon_v1_4.bin \         # Zemon v1.4               (0B)
+          roms/flexbase_v1_6.bin \      # Flexbase v1.6            (0C)
+          roms/familiegeheugen_v4.bin \ # Familiegeheugen v4       (0D)
+          roms/tekst_v1.bin \           # Tekst v1                 (0E)
+          roms/text2000_v3.bin \        # Text2000 v3              (0F)
+          roms/text2_de.bin \           # Text2 DE v2              (10)
+          roms/wordproc_v2.bin \        # Wordproc v2              (11)
+          > MULTIROM.BIN
         truncate -s 512k MULTIROM.BIN # resize to 512kb
     - name: Upload
       uses: actions/upload-artifact@v4
