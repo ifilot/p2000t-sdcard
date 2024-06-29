@@ -365,8 +365,9 @@ jobs:
 
 ################################################################################
 
-  # Multirom cartridge
-  build-multirom-0x60:
+  # Multirom cartridges 0x60
+
+  build-multirom-4x16k-0x60:
     runs-on: ubuntu-latest
     needs: [build-basic-0x60, build-flasher-0x60]
     steps:
@@ -392,19 +393,73 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: MULTIROM-0x60
+        name: MULTIROM-4x16k-0x60
+        path: ${{env.MULTIROM_BIN}}
+    
+  build-multirom-32x16k-0x60:
+    runs-on: ubuntu-latest
+    needs: [build-basic-0x60, build-flasher-0x60]
+    steps:
+    - name: Install dependencies
+      run: sudo apt install -y wget
+    - uses: actions/checkout@v3
+    - name: Download modified BASIC rom
+      uses: actions/download-artifact@v4
+      with:
+        name: BASICBOOTSTRAP-0x60
+        path: ./
+    - name: Download flasher
+      uses: actions/download-artifact@v4
+      with:
+        name: FLASHER-0x60
+        path: ./
+    - name: Build modified basic cartridge
+      run: |
+        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
+        truncate -s 16k ${{env.BASICROM_BIN}}
+        truncate -s 16k ${{env.FLASHER_BIN}}
+        cat \
+        basicmod/BASICROM.BIN \       # regular BASIC NL v1.1    (00)
+        roms/basic_nl_v1_1_a2.bin \   # regular BASIC NL v1.1a2  (01)
+        roms/basic_en_v1_0.bin \      # regular BASIC EN v1.1a2  (02)
+        roms/JWSBasic.bin \           # JWS Basic                (03)
+        ${{env.BASICROM_BIN}}         # SD-CARD BASIC            (04)
+        ${{env.FLASHER_BIN}} \        # flasher utility          (05)
+        RAMTEST.BIN \                 # ram test                 (06)
+        roms/maintenance_v2.bin \     # maintenance utility      (07)
+        roms/bildschirmtext.bin \     # bildschirmtext           (08)
+        roms/Forth.bin \              # Forth programming lang   (09)
+        roms/assembler_v5_9.bin \     # Assembler 5.9            (0A)
+        roms/zemon_v1_4.bin \         # Zemon v1.4               (0B)
+        roms/flexbase_v1_6.bin \      # Flexbase v1.6            (0C)
+        roms/familiegeheugen_v4.bin \ # Familiegeheugen v4       (0D)
+        roms/tekst_v1.bin \           # Tekst v1                 (0E)
+        roms/text2000_v3.bin \        # Text2000 v3              (0F)
+        roms/text2_de.bin \           # Text2 DE v2              (10)
+        roms/wordproc_v2.bin \        # Wordproc v2              (11)
+        > MULTIROM.BIN
+        truncate -s 512k MULTIROM.BIN # resize to 512kb
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: MULTIROM-32x16k-0x60
         path: ${{env.MULTIROM_BIN}}
 
   deploy-multirom-0x60:
     runs-on: ubuntu-latest
-    needs: [build-multirom-0x60, create-release]
+    needs: [build-multirom-4x16k-0x60, build-multirom-32x16k-0x60, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name:  MULTIROM-0x60
+        name:  MULTIROM-4x16k-0x60
+        path: ./
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name:  MULTIROM-32x16k-0x60
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -414,15 +469,26 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-0x60.BIN
+        asset_name: MULTIROM-4x16k-0x60.BIN
+        asset_content_type: application/octet-stream
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ${{env.MULTIROM_BIN}}
+        asset_name: MULTIROM-4x32-0x60.BIN
         asset_content_type: application/octet-stream
   
 #-------------------------------------------------------------------------------
 
-  # Multirom cartridge
-  build-multirom-0x40:
+  # Multirom cartridges 0x40
+
+  build-multirom-4x16k-0x40:
     runs-on: ubuntu-latest
-    needs: [build-basic-0x40, build-flasher-0x40]
+    needs: [build-basic-4x16k-0x40, build-flasher-0x40]
     steps:
     - name: Install dependencies
       run: sudo apt install -y wget
@@ -449,16 +515,70 @@ jobs:
         name: MULTIROM-0x40
         path: ${{env.MULTIROM_BIN}}
 
+  build-multirom-32x16k-0x60:
+    runs-on: ubuntu-latest
+    needs: [build-basic-0x60, build-flasher-0x60]
+    steps:
+    - name: Install dependencies
+      run: sudo apt install -y wget
+    - uses: actions/checkout@v3
+    - name: Download modified BASIC rom
+      uses: actions/download-artifact@v4
+      with:
+        name: BASICBOOTSTRAP-0x60
+        path: ./
+    - name: Download flasher
+      uses: actions/download-artifact@v4
+      with:
+        name: FLASHER-0x60
+        path: ./
+    - name: Build modified basic cartridge
+      run: |
+        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
+        truncate -s 16k ${{env.BASICROM_BIN}}
+        truncate -s 16k ${{env.FLASHER_BIN}}
+        cat \
+        basicmod/BASICROM.BIN \       # regular BASIC NL v1.1    (00)
+        roms/basic_nl_v1_1_a2.bin \   # regular BASIC NL v1.1a2  (01)
+        roms/basic_en_v1_0.bin \      # regular BASIC EN v1.1a2  (02)
+        roms/JWSBasic.bin \           # JWS Basic                (03)
+        ${{env.BASICROM_BIN}}         # SD-CARD BASIC            (04)
+        ${{env.FLASHER_BIN}} \        # flasher utility          (05)
+        RAMTEST.BIN \                 # ram test                 (06)
+        roms/maintenance_v2.bin \     # maintenance utility      (07)
+        roms/bildschirmtext.bin \     # bildschirmtext           (08)
+        roms/Forth.bin \              # Forth programming lang   (09)
+        roms/assembler_v5_9.bin \     # Assembler 5.9            (0A)
+        roms/zemon_v1_4.bin \         # Zemon v1.4               (0B)
+        roms/flexbase_v1_6.bin \      # Flexbase v1.6            (0C)
+        roms/familiegeheugen_v4.bin \ # Familiegeheugen v4       (0D)
+        roms/tekst_v1.bin \           # Tekst v1                 (0E)
+        roms/text2000_v3.bin \        # Text2000 v3              (0F)
+        roms/text2_de.bin \           # Text2 DE v2              (10)
+        roms/wordproc_v2.bin \        # Wordproc v2              (11)
+        > MULTIROM.BIN
+        truncate -s 512k MULTIROM.BIN # resize to 512kb
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: MULTIROM-4x16k-0x60
+        path: ${{env.MULTIROM_BIN}}
+
   deploy-multirom-0x40:
     runs-on: ubuntu-latest
-    needs: [build-multirom-0x40, create-release]
+    needs: [build-multirom-4x16k-0x40, build-multirom-32x16k-0x40, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: MULTIROM-0x40
+        name: MULTIROM-4x16k-0x40
+        path: ./
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: MULTIROM-32x16k-0x40
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -468,7 +588,17 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-0x40.BIN
+        asset_name: MULTIROM-4x16k-0x40.BIN
+        asset_content_type: application/octet-stream
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ${{env.MULTIROM_BIN}}
+        asset_name: MULTIROM-32x16k-0x40.BIN
         asset_content_type: application/octet-stream
 
 ################################################################################
