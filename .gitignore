@@ -32,3 +32,5 @@ fp-info-cache
 *.step
 *.lck
 .vscode/*
+*.BIN
+*.bin

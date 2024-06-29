@@ -418,24 +418,7 @@ jobs:
         wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
         truncate -s 16k ${{env.BASICROM_BIN}}
         truncate -s 16k ${{env.FLASHER_BIN}}
-        cat basicmod/BASICROM.BIN \
-            roms/basic_nl_v1_1_a2.bin \
-            roms/basic_en_v1_0.bin \
-            roms/JWSBasic.bin \
-            ${{env.BASICROM_BIN}} \  
-            ${{env.FLASHER_BIN}} \
-            RAMTEST.BIN \
-            roms/maintenance_v2.bin \
-            roms/bildschirmtext.bin \
-            roms/Forth.bin \
-            roms/assembler_v5_9.bin \
-            roms/zemon_v1_4.bin \
-            roms/flexbase_v1_6.bin \
-            roms/familiegeheugen_v4.bin \
-            roms/tekst_v1.bin \
-            roms/text2000_v3.bin \
-            roms/text2_de.bin \
-            roms/wordproc_v2.bin > MULTIROM.BIN
+        bash roms/build_rom.sh
         truncate -s 512k MULTIROM.BIN # resize to 512kb
     - name: Upload
       uses: actions/upload-artifact@v4
@@ -542,24 +525,7 @@ jobs:
         wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
         truncate -s 16k ${{env.BASICROM_BIN}}
         truncate -s 16k ${{env.FLASHER_BIN}}
-        cat basicmod/BASICROM.BIN \
-            roms/basic_nl_v1_1_a2.bin \
-            roms/basic_en_v1_0.bin \
-            roms/JWSBasic.bin \
-            ${{env.BASICROM_BIN}} \  
-            ${{env.FLASHER_BIN}} \
-            RAMTEST.BIN \
-            roms/maintenance_v2.bin \
-            roms/bildschirmtext.bin \
-            roms/Forth.bin \
-            roms/assembler_v5_9.bin \
-            roms/zemon_v1_4.bin \
-            roms/flexbase_v1_6.bin \
-            roms/familiegeheugen_v4.bin \
-            roms/tekst_v1.bin \
-            roms/text2000_v3.bin \
-            roms/text2_de.bin \
-            roms/wordproc_v2.bin > MULTIROM.BIN
+        bash roms/build_rom.sh
         truncate -s 512k MULTIROM.BIN # resize to 512kb
     - name: Upload
       uses: actions/upload-artifact@v4
