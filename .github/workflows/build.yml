@@ -365,8 +365,9 @@ jobs:
 
 ################################################################################
 
-  # Multirom cartridge
-  build-multirom-0x60:
+  # Multirom cartridges 0x60
+
+  build-multirom-4x16k-0x60:
     runs-on: ubuntu-latest
     needs: [build-basic-0x60, build-flasher-0x60]
     steps:
@@ -392,19 +393,50 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: MULTIROM-0x60
+        name: MULTIROM-4x16k-0x60
         path: ${{env.MULTIROM_BIN}}
-
-  deploy-multirom-0x60:
+    
+  build-multirom-32x16k-0x60:
     runs-on: ubuntu-latest
-    needs: [build-multirom-0x60, create-release]
+    needs: [build-basic-0x60, build-flasher-0x60]
+    steps:
+    - name: Install dependencies
+      run: sudo apt install -y wget python3
+    - uses: actions/checkout@v3
+    - name: Download modified BASIC rom
+      uses: actions/download-artifact@v4
+      with:
+        name: BASICBOOTSTRAP-0x60
+        path: ./
+    - name: Download flasher
+      uses: actions/download-artifact@v4
+      with:
+        name: FLASHER-0x60
+        path: ./
+    - name: Build modified basic cartridge
+      run: |
+        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
+        truncate -s 16k ${{env.BASICROM_BIN}}
+        truncate -s 16k ${{env.FLASHER_BIN}}
+        python3 roms/build_rom.py
+        truncate -s 512k MULTIROM.BIN # resize to 512kb
+        mv MULTIROM.BIN MULTIROM-32x16k-0x60.BIN
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: MULTIROM-32x16k-0x60
+        path: MULTIROM-32x16k-0x60.BIN
+
+  deploy-multirom-4x16k-0x60:
+    runs-on: ubuntu-latest
+    needs: [build-multirom-4x16k-0x60, build-multirom-32x16k-0x60, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name:  MULTIROM-0x60
+        name:  MULTIROM-4x16k-0x60
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -414,13 +446,36 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-0x60.BIN
+        asset_name: MULTIROM-4x16k-0x60.BIN
+        asset_content_type: application/octet-stream
+
+  deploy-multirom-32x16k-0x60:
+    runs-on: ubuntu-latest
+    needs: [build-multirom-4x16k-0x60, build-multirom-32x16k-0x60, create-release]
+    permissions: write-all
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name:  MULTIROM-32x16k-0x60
+        path: ./
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: MULTIROM-32x16k-0x60.BIN
+        asset_name: MULTIROM-32x16k-0x60.BIN
         asset_content_type: application/octet-stream
   
 #-------------------------------------------------------------------------------
 
-  # Multirom cartridge
-  build-multirom-0x40:
+  # Multirom cartridges 0x40
+
+  build-multirom-4x16k-0x40:
     runs-on: ubuntu-latest
     needs: [build-basic-0x40, build-flasher-0x40]
     steps:
@@ -446,19 +501,50 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: MULTIROM-0x40
+        name: MULTIROM-4x16k-0x40
         path: ${{env.MULTIROM_BIN}}
 
-  deploy-multirom-0x40:
+  build-multirom-32x16k-0x40:
     runs-on: ubuntu-latest
-    needs: [build-multirom-0x40, create-release]
+    needs: [build-basic-0x40, build-flasher-0x40]
+    steps:
+    - name: Install dependencies
+      run: sudo apt install -y wget python3
+    - uses: actions/checkout@v3
+    - name: Download modified BASIC rom
+      uses: actions/download-artifact@v4
+      with:
+        name: BASICBOOTSTRAP-0x40
+        path: ./
+    - name: Download flasher
+      uses: actions/download-artifact@v4
+      with:
+        name: FLASHER-0x40
+        path: ./
+    - name: Build modified basic cartridge
+      run: |
+        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
+        truncate -s 16k ${{env.BASICROM_BIN}}
+        truncate -s 16k ${{env.FLASHER_BIN}}
+        python3 roms/build_rom.py
+        truncate -s 512k MULTIROM.BIN # resize to 512kb
+        mv MULTIROM.BIN MULTIROM-32x16k-0x40.BIN
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: MULTIROM-32x16k-0x40
+        path: MULTIROM-32x16k-0x40.BIN
+
+  deploy-multirom-4x16k-0x40:
+    runs-on: ubuntu-latest
+    needs: [build-multirom-4x16k-0x40, build-multirom-32x16k-0x40, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: MULTIROM-0x40
+        name:  MULTIROM-4x16k-0x40
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -468,8 +554,69 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-0x40.BIN
+        asset_name: MULTIROM-4x16k-0x40.BIN
         asset_content_type: application/octet-stream
+
+  deploy-multirom-32x16k-0x40:
+    runs-on: ubuntu-latest
+    needs: [build-multirom-4x16k-0x40, build-multirom-32x16k-0x40, create-release]
+    permissions: write-all
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name:  MULTIROM-32x16k-0x40
+        path: ./
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: MULTIROM-32x16k-0x40.BIN
+        asset_name: MULTIROM-32x16k-0x40.BIN
+        asset_content_type: application/octet-stream
+
+################################################################################
+
+  build-card:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install dependencies
+      run: sudo apt install -y python3 python3-pil
+    - uses: actions/checkout@v3
+    - name: Build card
+      run: |
+        python3 roms/card/card_creator.py
+    - name: Upload card
+      uses: actions/upload-artifact@v4
+      with:
+        name: multirom-card.png
+        path: card.png
+
+  deploy-card:
+    runs-on: ubuntu-latest
+    needs: [build-card, create-release]
+    permissions: write-all
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name:  multirom-card.png
+        path: ./
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: multirom-card.png
+        asset_name: multirom-card.png
+        asset_content_type: image/png  
 
 ################################################################################
 

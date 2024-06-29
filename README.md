@@ -31,7 +31,7 @@ from said SD card and load them into memory.
 
 ### 0x40 version
 
-Compatible with PCB rev6 or newer.
+**Compatible with PCB rev6 or newer.**
 
 > [!NOTE] 
 > Do not forget to change the `LAUNCHER-0x40.BIN` to `LAUNCHER.BIN` when copying
@@ -41,10 +41,12 @@ Compatible with PCB rev6 or newer.
 * [FLASHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40.BIN)
 * [LAUNCHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40.BIN)
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
+* [MULTIROM-4x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x40.BIN) (W27C512 / 64 KiB)
+* [MULTIROM-32x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x40.BIN) (SST39SF040 / 512 KiB)
 
 ### 0x60 version
 
-Compatible with PCB rev0-rev5.
+**Compatible with PCB rev0-rev5.**
 
 > [!NOTE] 
 > Do not forget to change the `LAUNCHER-0x60.BIN` to `LAUNCHER.BIN` when copying
@@ -54,6 +56,8 @@ Compatible with PCB rev0-rev5.
 * [FLASHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60.BIN)
 * [LAUNCHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60.BIN)
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
+* [MULTIROM-4x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x60.BIN) (W27C512 / 64 KiB)
+* [MULTIROM-32x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x60.BIN) (SST39SF040 / 512 KiB)
 
 ## Commands
 
