@@ -590,11 +590,12 @@ jobs:
     - name: Build card
       run: |
         python3 roms/card/card_creator.py
+        mv card.png multirom-card.png
     - name: Upload card
       uses: actions/upload-artifact@v4
       with:
         name: multirom-card.png
-        path: card.png
+        path: multirom-card.png
 
   deploy-card:
     runs-on: ubuntu-latest
