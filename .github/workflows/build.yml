@@ -420,11 +420,12 @@ jobs:
         truncate -s 16k ${{env.FLASHER_BIN}}
         python3 roms/build_rom.py
         truncate -s 512k MULTIROM.BIN # resize to 512kb
+        mv MULTIROM.BIN MULTIROM-32x16k-0x60.BIN
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: MULTIROM-32x16k-0x60
-        path: ${{env.MULTIROM_BIN}}
+        path: MULTIROM-32x16k-0x60.BIN
 
   deploy-multirom-4x16k-0x60:
     runs-on: ubuntu-latest
@@ -466,7 +467,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{env.MULTIROM_BIN}}
+        asset_path: MULTIROM-32x16k-0x60.BIN
         asset_name: MULTIROM-32x16k-0x60.BIN
         asset_content_type: application/octet-stream
   
@@ -527,11 +528,12 @@ jobs:
         truncate -s 16k ${{env.FLASHER_BIN}}
         python3 roms/build_rom.py
         truncate -s 512k MULTIROM.BIN # resize to 512kb
+        mv MULTIROM.BIN MULTIROM-32x16k-0x40.BIN
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: MULTIROM-32x16k-0x40
-        path: ${{env.MULTIROM_BIN}}
+        path: MULTIROM-32x16k-0x40.BIN
 
   deploy-multirom-4x16k-0x40:
     runs-on: ubuntu-latest
@@ -573,7 +575,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{env.MULTIROM_BIN}}
+        asset_path: MULTIROM-32x16k-0x40.BIN
         asset_name: MULTIROM-32x16k-0x40.BIN
         asset_content_type: application/octet-stream
 
