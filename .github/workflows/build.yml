@@ -586,6 +586,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: sudo apt install -y python3 python3-pil
+    - uses: actions/checkout@v3
     - name: Build card
       run: |
         python3 roms/card/card_creator.py
