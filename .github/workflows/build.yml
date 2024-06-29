@@ -581,7 +581,7 @@ jobs:
 
 ################################################################################
 
- build-card:
+  build-card:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
