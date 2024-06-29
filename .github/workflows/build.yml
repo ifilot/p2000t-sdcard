@@ -515,9 +515,9 @@ jobs:
         name: MULTIROM-0x40
         path: ${{env.MULTIROM_BIN}}
 
-  build-multirom-32x16k-0x60:
+  build-multirom-32x16k-0x40:
     runs-on: ubuntu-latest
-    needs: [build-basic-0x60, build-flasher-0x60]
+    needs: [build-basic-0x40, build-flasher-0x40]
     steps:
     - name: Install dependencies
       run: sudo apt install -y wget
@@ -525,12 +525,12 @@ jobs:
     - name: Download modified BASIC rom
       uses: actions/download-artifact@v4
       with:
-        name: BASICBOOTSTRAP-0x60
+        name: BASICBOOTSTRAP-0x40
         path: ./
     - name: Download flasher
       uses: actions/download-artifact@v4
       with:
-        name: FLASHER-0x60
+        name: FLASHER-0x40
         path: ./
     - name: Build modified basic cartridge
       run: |
@@ -561,7 +561,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: MULTIROM-4x16k-0x60
+        name: MULTIROM-4x16k-0x40
         path: ${{env.MULTIROM_BIN}}
 
   deploy-multirom-0x40:
