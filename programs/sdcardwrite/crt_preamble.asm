@@ -27,7 +27,7 @@
 DB 0x50,0x00,0x00,0x00,0x00
 
 ; name of the program (8+3 bytes)
-DB 'C','R','C','M','O','N','I','T','O','R',' '
+DB 'H','E','L','L','O','W','O','R','P','R','G'
 
 ; first address to call is thus $A210
 jp __Start

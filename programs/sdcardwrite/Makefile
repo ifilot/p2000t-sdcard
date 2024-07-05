@@ -1,4 +1,4 @@
-all: crcmon
+all: sdcardwrite
 
 #
 # Compilation settings explained
@@ -9,10 +9,19 @@ all: crcmon
 # CRT_ENABLE_EIDI=0x22 ; set ei on both start and exit, ei is required for
 #                        the keyboard to function
 
-crcmon: main.c util.c memory.c terminal.c util.asm crc16.asm
+sdcardwrite: *.c *.asm
 	zcc \
 	+embedded -clib=sdcc_iy \
-	main.c memory.c util.c terminal.c util.asm crc16.asm \
+	main.c \
+	memory.c \
+	util.c \
+	terminal.c \
+	util.asm \
+	crc16.asm \
+	fat32.c \
+	sdcard.c \
+	sdcard.asm \
+	ram.asm \
 	-startup=0 \
 	-pragma-define:CRT_ORG_CODE=0xA000 \
 	-pragma-define:REGISTER_SP=0xDEFF \
@@ -22,8 +31,8 @@ crcmon: main.c util.c memory.c terminal.c util.asm crc16.asm
 	-pragma-define:CRT_INCLUDE_PREAMBLE=1 \
 	--max-allocs-per-node2000 \
 	--opt-code-size \
-	-SO3 -bn MONCRC16.BIN \
+	-SO3 -bn SDCARDWR.BIN \
 	-create-app -m \
-	&& mv -v MONCRC16.bin MONCRC16.PRG \
+	&& mv -v SDCARDWR.bin SDCARDWR.PRG \
 	&& sleep 0.01 \
-	&& wc -c < MONCRC16.PRG
+	&& wc -c < SDCARDWR.PRG
