@@ -10,6 +10,7 @@
 void init(void);
 
 int main(void) {
+    sdcs_set();
     init();
 
     print_info("This program aims to write data to a", 0);

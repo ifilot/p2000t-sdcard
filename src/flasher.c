@@ -190,6 +190,7 @@ uint8_t store_file_rom(uint32_t faddr, uint16_t rom_addr, uint8_t verbose) {
 }
 
 void init(void) {
+    sdcs_set(); // disable SD card
     clear_screen();
     terminal_init(3, 20);
     vidmem[0x50] = TEXT_DOUBLE;

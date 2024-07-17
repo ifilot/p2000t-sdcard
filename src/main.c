@@ -79,6 +79,9 @@ void main(void) {
 }
 
 void init(void) {
+    // disable SD-card
+    sdcs_set();
+
     // set the CACHE bank
     set_ram_bank(RAM_BANK_CACHE);
 

@@ -98,6 +98,12 @@ void command_ramdump(void);
 void command_dump(void);
 
 /**
+ * @brief Show brief help message on screen
+ * 
+ */
+void command_help(void);
+
+/**
  * @brief Execute the command given by instruction
  * 
  */

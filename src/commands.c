@@ -36,6 +36,7 @@ char* __commands[] = {
     "romdump",
     "ramdump",
     "dump",
+    "help",
 };
 
 // set list of function pointers
@@ -51,6 +52,7 @@ void (*__operations[])(void) = {
     command_romdump,
     command_ramdump,
     command_dump,
+    command_help,
 };
 
 // *****************************************************************************
@@ -309,6 +311,22 @@ void command_dump(void) {
     terminal_hexdump(addr, DUMP_INTRAM);
 }
 
+/**
+ * @brief Dump system RAM to the screen
+ * 
+ */
+void command_help(void) {
+    print_info("List of commands:", 0);
+    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
+        sprintf(termbuffer, "  * %s", __commands[i]);
+        terminal_printtermbuffer();
+    }
+    print_info("For more information, see:", 0);
+    print_info("https://github.com/ifilot/p2000t-sdcard", 0);
+    // print_info("or visit", 0);
+    // print_info("https://philips-p2000t.nl/", 0);
+}
+
 // *****************************************************************************
 // COMMAND PARSER
 // *****************************************************************************
@@ -336,14 +354,6 @@ void execute_command(void) {
     // if so, execute the command
     for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
         if(strcmp(__lastinput, __commands[i]) == 0) {
-            __operations[i]();
-            return;
-        }
-    }
-
-    // try the same thing, but now only for the first n bytes
-    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
-        if(memcmp(__lastinput, __commands[i], strlen(__commands[i])) == 0) {
             __operations[i]();
             return;
         }
