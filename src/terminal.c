@@ -79,14 +79,31 @@ void print_error(char* str) {
     terminal_printtermbuffer();
 }
 
-void print_info(char* str, uint8_t backup_line) {
-    sprintf(termbuffer, str);
-    terminal_printtermbuffer();
-    if(backup_line == 1) {
-        terminal_backup_line();
-    }
+/**
+ * @brief Print a line to regular terminal, but overwrite the line when a new
+ *        line is going to be printed.
+ * 
+ * @param str 
+ */
+void print_recall(char* str) {
+    print(str);
+    terminal_backup_line();
 }
 
+/**
+ * @brief Print a line to the terminal
+ * 
+ * @param str 
+ */
+void print(char* str) {
+    strcpy(termbuffer, str);
+    terminal_printtermbuffer();
+}
+
+/**
+ * @brief Produce a blinking cursor
+ * 
+ */
 void terminal_cursor_blink(void) {
     uint16_t counter = read_uint16_t(&memory[0x6010]);
 

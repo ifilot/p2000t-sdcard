@@ -50,8 +50,26 @@ void terminal_scrollup(void);
 void terminal_backup_line(void);
 
 void print_error(char* str);
-void print_info(char* str, uint8_t backup_line);
 
+/**
+ * @brief Print a line to the terminal
+ * 
+ * @param str 
+ */
+void print(char* str);
+
+/**
+ * @brief Print a line to regular terminal, but overwrite the line when a new
+ *        line is going to be printed.
+ * 
+ * @param str 
+ */
+void print_recall(char* str);
+
+/**
+ * @brief Produce a blinking cursor
+ * 
+ */
 void terminal_cursor_blink(void);
 
 #endif // _TERMINAL_H

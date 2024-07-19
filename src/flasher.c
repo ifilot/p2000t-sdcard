@@ -43,13 +43,13 @@ int main(void) {
     // initialize environment
     init();
 
-    print_info("Press any key to search SD card for", 0);
-    print_info("flashable file.", 0);
+    print("Press any key to search SD card for");
+    print("flashable file.");
 
     wait_for_key();
 
     // mount sd card
-    print_info("Initializing SD card..", 1);
+    print_recall("Initializing SD card..");
     if(init_sdcard(_resp8, _resp58) != 0) {
         print_error("Cannot connect to SD-CARD.");
         for(;;){}
@@ -57,15 +57,15 @@ int main(void) {
 
     // inform user that the SD card is initialized and that we are ready to read
     // the first block from the SD card and print it to the screen
-    print_info("SD Card initialized", 0);
+    print("SD Card initialized");
 
-    print_info("Mounting partition 1..", 1);
+    print_recall("Mounting partition 1..");
     uint32_t lba0 = read_mbr();
     read_partition(lba0);
 
     // sd card successfully mounted
-    print_info("Partition 1 mounted", 0);
-    print_info("", 0);
+    print("Partition 1 mounted");
+    print("");
 
     // read the root directory
     uint32_t faddr = find_file(_root_dir_first_cluster, LAUNCHERNAME, LAUNCHEREXT);
@@ -92,10 +92,10 @@ int main(void) {
 
         if(rom_id == 0xB5BF || rom_id == 0xB6BF || rom_id == 0xB7BF) {
             // copying from RAM to ROM
-            print_info("Connection to ROM chip established.", 0);
+            print("Connection to ROM chip established.");
             sprintf(termbuffer, "Device signature%c%04X%c: %s", COL_CYAN, rom_id, COL_WHITE, devicestring);
             terminal_printtermbuffer();
-            print_info("Wiping 0x0000-0x3FFF.", 0);
+            print("Wiping 0x0000-0x3FFF.");
             for(uint8_t i=0; i<4; i++) {
                 sst39sf_wipe_sector(0x1000 * i);
             }
@@ -104,20 +104,20 @@ int main(void) {
             sprintf(termbuffer, "Copying %s.%s, please wait...", LAUNCHERNAME, LAUNCHEREXT);
             terminal_printtermbuffer();
             uint8_t sectors_stored = store_file_rom(faddr, 0x0000, 1);
-            print_info("",0); // empty line
+            print(""); // empty line
 
-            print_info("Calculating CRC16, please wait...", 0);
+            print("Calculating CRC16, please wait...");
             uint16_t checksum = crc16_romchip(0x0000, _filesize_current_file);
 
             if(checksum == 0x0000) {
-                print_info("Checksum successfully validated.", 0);
+                print("Checksum successfully validated.");
 
-                print_info("",0); // empty line
+                print(""); // empty line
                 sprintf(termbuffer, "%cFLASHING COMPLETED!", COL_GREEN);
                 terminal_printtermbuffer();
             } else {
                 print_error("Invalid checksum encountered.");
-                print_info("Please try again.", 0);
+                print("Please try again.");
             }
         } else {
             sprintf(termbuffer, "Invalid device id: %04X", rom_id);
@@ -198,7 +198,7 @@ void init(void) {
     sprintf(&vidmem[0x50+2], "SDCARD FLASHER");
     sprintf(&vidmem[0x50*22], "Version: %s", __VERSION__);
     sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
-    print_info("System booted.", 0);
+    print("System booted.");
 
     // turn LEDs off
     z80_outp(PORT_LED_IO, 0x00);
