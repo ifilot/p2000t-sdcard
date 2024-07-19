@@ -54,7 +54,7 @@ uint32_t read_mbr(void) {
  */
 void read_partition(uint32_t lba0) {
     // inform the reader that we are about to read partition 1
-    print("Reading partition 1");
+    print_info("Reading partition 1", 0);
 
     // read the volume ID (first sector of the partition)
     read_sector(lba0);
@@ -215,7 +215,7 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
                         }
 
                         if(fctr % 16 == 0) {
-                            print_recall("-- Press key to continue, q to quit --");
+                            print_info("-- Press key to continue, q to quit --", 1);
                             if(wait_for_key_fixed(3) == 1) {
                                 stopreading = 1;
                                 break;

@@ -18,58 +18,9 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _TERMINAL_H
-#define _TERMINAL_H
+#ifndef _CRC16_H
+#define _CRC16_H
 
-#include <stdio.h>
-#include <string.h>
-#include "memory.h"
-#include "commands.h"
-#include "util.h"
+uint16_t crc16(uint16_t addr, uint16_t nrbytes) __z88dk_callee;
 
-#define LINELENGTH 40
-#define BLINK_INTERVAL 500 // ms
-#define TIMER_INTERVAL 20
-
-// these (global) variables are used to track the terminal
-extern uint8_t _terminal_curline;
-extern uint8_t _terminal_maxlines;
-extern uint8_t _terminal_startline;
-extern uint8_t _terminal_endline;
-extern uint16_t _prevcounter;
-
-extern char __input[INPUTLENGTH+1];
-extern uint8_t __inputpos;
-
-extern char termbuffer[LINELENGTH];
-
-void terminal_init(uint8_t, uint8_t);
-void terminal_printtermbuffer(void);
-void terminal_redoline(void);
-void terminal_scrollup(void);
-void terminal_backup_line(void);
-
-void print_error(char* str);
-
-/**
- * @brief Print a line to the terminal
- * 
- * @param str 
- */
-void print(char* str);
-
-/**
- * @brief Print a line to regular terminal, but overwrite the line when a new
- *        line is going to be printed.
- * 
- * @param str 
- */
-void print_recall(char* str);
-
-/**
- * @brief Produce a blinking cursor
- * 
- */
-void terminal_cursor_blink(void);
-
-#endif // _TERMINAL_H
+#endif // _CRC16_H

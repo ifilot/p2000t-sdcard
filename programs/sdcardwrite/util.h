@@ -18,58 +18,75 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _TERMINAL_H
-#define _TERMINAL_H
+#ifndef _UTIL_H
+#define _UTIL_H
 
-#include <stdio.h>
-#include <string.h>
-#include "memory.h"
-#include "commands.h"
-#include "util.h"
-
-#define LINELENGTH 40
-#define BLINK_INTERVAL 500 // ms
-#define TIMER_INTERVAL 20
-
-// these (global) variables are used to track the terminal
-extern uint8_t _terminal_curline;
-extern uint8_t _terminal_maxlines;
-extern uint8_t _terminal_startline;
-extern uint8_t _terminal_endline;
-extern uint16_t _prevcounter;
-
-extern char __input[INPUTLENGTH+1];
-extern uint8_t __inputpos;
-
-extern char termbuffer[LINELENGTH];
-
-void terminal_init(uint8_t, uint8_t);
-void terminal_printtermbuffer(void);
-void terminal_redoline(void);
-void terminal_scrollup(void);
-void terminal_backup_line(void);
-
-void print_error(char* str);
+#include "terminal.h"
 
 /**
- * @brief Print a line to the terminal
+ * @brief Replace all bytes in a string
  * 
- * @param str 
+ * @param str original string
+ * @param org byte to replace
+ * @param rep replacement byte
+ * @param nrbytes number of bytes to check
  */
-void print(char* str);
+void replace_bytes(uint8_t *str, uint8_t org, uint8_t rep, uint16_t nrbytes) __z88dk_callee;
 
 /**
- * @brief Print a line to regular terminal, but overwrite the line when a new
- *        line is going to be printed.
+ * @brief Read a 16 bit value from memory
  * 
- * @param str 
+ * @param data memory location
+ * @return uint16_t 16-bit value
  */
-void print_recall(char* str);
+uint16_t read_uint16_t(const uint8_t* data) __z88dk_callee;
 
 /**
- * @brief Produce a blinking cursor
+ * @brief Read a 32 bit value from memory
+ * 
+ * @param data memory location
+ * @return uint32_t 32-bit value
+ */
+uint32_t read_uint32_t(const uint8_t* data) __z88dk_callee;
+
+/**
+ * @brief Wait for key-press
+ *
+ */
+void wait_for_key(void);
+
+/**
+ * @brief Wait but check for a specific key press
+ *
+ */
+uint8_t wait_for_key_fixed(uint8_t quitkey);
+
+/**
+ * @brief Clear the screen
  * 
  */
-void terminal_cursor_blink(void);
+void clear_screen(void);
 
-#endif // _TERMINAL_H
+/**
+ * @brief Get the stack location object
+ * 
+ * @return uint16_t 
+ */
+uint16_t get_stack_location(void) __z88dk_callee;
+
+/**
+ * @brief Call program at location
+ * 
+ * @param location 
+ */
+void call_program(uint16_t ramptr) __z88dk_callee;
+
+/**
+ * @brief Convert hexcode to unsigned 16 bit integer
+ * 
+ * @param addr 
+ * @return uint16_t 
+ */
+uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
+
+#endif //_UTIL_H

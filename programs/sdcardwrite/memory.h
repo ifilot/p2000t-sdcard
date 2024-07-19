@@ -18,58 +18,28 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _TERMINAL_H
-#define _TERMINAL_H
+#ifndef _MEMORY_H
+#define _MEMORY_H
 
-#include <stdio.h>
-#include <string.h>
-#include "memory.h"
-#include "commands.h"
-#include "util.h"
+#include <z80.h>
+#include "constants.h"
 
-#define LINELENGTH 40
-#define BLINK_INTERVAL 500 // ms
-#define TIMER_INTERVAL 20
+#define LOWMEM          0x6200 // starting point of lower memory
+#define HIGHMEM_START   0xA000 // start address of upper memory
+#define HIGHMEM_STOP    0xDFFF // end address of upper memory
+#define BANKMEM_START   0xE000 // starting point of bankable memory
+#define BANKMEM_STOP    0xFFFF // starting point of bankable memory
+#define BANK_BYTES      0x2000 // number of bytes per bank
+#define STACK           0x9F00 // lower position of the stack
+#define NUMBANKS        6      // assuming 64kb memory expansion
+#define MEMBANK         0x94   // Z80 I/O address for memory banking
 
-// these (global) variables are used to track the terminal
-extern uint8_t _terminal_curline;
-extern uint8_t _terminal_maxlines;
-extern uint8_t _terminal_startline;
-extern uint8_t _terminal_endline;
-extern uint16_t _prevcounter;
+#define PROGRAM_LOCATION 0xA000  // where to store custom programs
 
-extern char __input[INPUTLENGTH+1];
-extern uint8_t __inputpos;
+extern char* memory;
+extern char* vidmem;
+extern char* keymem;
+extern char* highmem;
+extern char* bankmem;
 
-extern char termbuffer[LINELENGTH];
-
-void terminal_init(uint8_t, uint8_t);
-void terminal_printtermbuffer(void);
-void terminal_redoline(void);
-void terminal_scrollup(void);
-void terminal_backup_line(void);
-
-void print_error(char* str);
-
-/**
- * @brief Print a line to the terminal
- * 
- * @param str 
- */
-void print(char* str);
-
-/**
- * @brief Print a line to regular terminal, but overwrite the line when a new
- *        line is going to be printed.
- * 
- * @param str 
- */
-void print_recall(char* str);
-
-/**
- * @brief Produce a blinking cursor
- * 
- */
-void terminal_cursor_blink(void);
-
-#endif // _TERMINAL_H
+#endif // _MEMORY_H

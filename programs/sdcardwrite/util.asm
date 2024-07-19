@@ -110,11 +110,11 @@ _call_program:
 _hexcode_to_uint16t:
     pop iy                  ; get return address
     pop hl                  ; get pointer to memory address
-    call hex_to_uint8_t     ; returns num in a and increments hl by 2
-    ld d,a                  ; store upper byte
-    call hex_to_uint8_t     ; returns num in a and increments hl by 2
-    ld e,a                  ; store lower byte
-    ex de,hl                ; put ex into hl
+    call hex_to_uint8_t
+    ld d,a
+    call hex_to_uint8_t
+    ld e,a
+    ex de,hl
     push iy                 ; put return address back onto the stack
     ret                     ; return result in HL
 
@@ -132,18 +132,18 @@ hex_to_uint8_t:
     ld a,(hl)
     call hex_to_int         ; convert a
     or a                    ; clear carry
-    rla                     ; shift left four times
+    rla                     ; shift left twice
     rla
     rla
     rla
-    and 0xF0                ; zero lower bits
-    ld c,a                  ; store upper nibble
-    inc hl                  ; increment pointer
-    ld a,(hl)               ; load next char
-    call hex_to_int         ; convert to num and store in a
-    or c                    ; place upper nibble into a
+    ld c,a
     inc hl
-    ret                     ; a contains 8-bit unsigned integer
+    ld a,(hl)
+    call hex_to_int
+    or d
+    ld c,a
+    inc hl
+    ret
 
 ;-------------------------------------------------------------------------------
 ; convert hexadecimal character stored in 'A' to numeric value

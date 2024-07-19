@@ -18,58 +18,20 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _TERMINAL_H
-#define _TERMINAL_H
-
-#include <stdio.h>
-#include <string.h>
 #include "memory.h"
-#include "commands.h"
-#include "util.h"
 
-#define LINELENGTH 40
-#define BLINK_INTERVAL 500 // ms
-#define TIMER_INTERVAL 20
+// set video memory
+__at (0x0000) char MEMORY[];
+char* memory = MEMORY;
 
-// these (global) variables are used to track the terminal
-extern uint8_t _terminal_curline;
-extern uint8_t _terminal_maxlines;
-extern uint8_t _terminal_startline;
-extern uint8_t _terminal_endline;
-extern uint16_t _prevcounter;
+__at (0x5000) char VIDMEM[];
+char* vidmem = VIDMEM;
 
-extern char __input[INPUTLENGTH+1];
-extern uint8_t __inputpos;
+__at (0x6000) char KEYMEM[];
+char* keymem = KEYMEM;
 
-extern char termbuffer[LINELENGTH];
+__at (0xA000) char HIGHMEM[];
+char* highmem = HIGHMEM;
 
-void terminal_init(uint8_t, uint8_t);
-void terminal_printtermbuffer(void);
-void terminal_redoline(void);
-void terminal_scrollup(void);
-void terminal_backup_line(void);
-
-void print_error(char* str);
-
-/**
- * @brief Print a line to the terminal
- * 
- * @param str 
- */
-void print(char* str);
-
-/**
- * @brief Print a line to regular terminal, but overwrite the line when a new
- *        line is going to be printed.
- * 
- * @param str 
- */
-void print_recall(char* str);
-
-/**
- * @brief Produce a blinking cursor
- * 
- */
-void terminal_cursor_blink(void);
-
-#endif // _TERMINAL_H
+__at (0xE000) char BANKMEM[];
+char* bankmem = BANKMEM;

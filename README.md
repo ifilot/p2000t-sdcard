@@ -59,6 +59,14 @@ from said SD card and load them into memory.
 * [MULTIROM-4x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x60.BIN) (W27C512 / 64 KiB)
 * [MULTIROM-32x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x60.BIN) (SST39SF040 / 512 KiB)
 
+## Images
+
+SLOT2 cartridge enclosure and populated PCB.
+![Image of cartridge and PCB](img/p2000t-sdcard-cartridge.jpg)
+
+Screenshots of navigation and execution of .CAS files.
+![Image of cartridge and PCB](img/p2000t-sdcard-interface.jpg)
+
 ## Commands
 
 Upon booting into the LAUNCHER application, the user interfaces with the SD-card
@@ -99,12 +107,6 @@ and for the flasher utility
 cd src
 ./compile flasher
 ```
-
-## Images
-
-![P2000T SD-card PCB screenshots](img/p2000t-sdcard-pcb-rev4.jpg)
-
-![P2000T SD-card cartridge set and monitor](img/p2000t-sdcard-cartridge-and-monitor.jpg)
 
 ## Contents
 

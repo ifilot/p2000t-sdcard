@@ -10,7 +10,7 @@ void init(void);
 int main(void) {
     init();
 
-    print_info("This programm calculates the CRC-16", 0);
+    print_info("This program calculates the CRC-16", 0);
     print_info("checksum of the P2000T monitor routines.", 0);
     print_info("", 0); // empty line
 

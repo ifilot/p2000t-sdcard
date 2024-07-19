@@ -36,6 +36,7 @@ char* __commands[] = {
     "romdump",
     "ramdump",
     "dump",
+    "help",
 };
 
 // set list of function pointers
@@ -51,6 +52,7 @@ void (*__operations[])(void) = {
     command_romdump,
     command_ramdump,
     command_dump,
+    command_help,
 };
 
 // *****************************************************************************
@@ -114,7 +116,7 @@ void command_fileinfo(void) {
     terminal_printtermbuffer();
     sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
     terminal_printtermbuffer();
-    print_info("Clusters:", 0);
+    print("Clusters:");
     for(uint8_t i=0; i<LINKEDLIST_SIZE; i++) {
         uint32_t cluster_id = _linkedlist[i];
 
@@ -132,7 +134,7 @@ void command_fileinfo(void) {
  * 
  */
 void command_run(void) {
-    print_info("Searching file...", 1);
+    print_recall("Searching file...");
 
     int fileid = atoi(&__lastinput[3]);
 
@@ -160,16 +162,16 @@ void command_run(void) {
         sprintf(termbuffer, "Top RAM: %c0x%04X", COL_CYAN, deploy_addr + file_length);
         terminal_printtermbuffer();
 
-        print_info("Press c to calculate checksum or any", 0);
-        print_info("other key to launch program.", 0);
+        print("Press c to calculate checksum or any");
+        print("other key to launch program.");
         if(wait_for_key_fixed(28) == 1) {
             // calculate CRC16 checksum
-            print_info("Calculating CRC16 checksum...", 1);
+            print_recall("Calculating CRC16 checksum...");
             uint16_t crc16 = crc16_ramchip(0x0000, file_length);
             sprintf(termbuffer, "CRC16 checksum: %c0x%04X", COL_CYAN, crc16);
             terminal_printtermbuffer();
 
-            print_info("Press any key to start program", 0);
+            print("Press any key to start program");
             wait_for_key();
         }
 
@@ -178,7 +180,7 @@ void command_run(void) {
     } else if(memcmp(_ext, "PRG", 3) == 0) {
         if(memory[0x605C] < 2) {
             print_error("Insufficient memory.");
-            print_info("At least 32kb of memory required.", 0);
+            print("At least 32kb of memory required.");
             return;
         }
 
@@ -207,7 +209,7 @@ void command_run(void) {
         }
 
         // wait on user key push
-        print_info("Press any key to run", 0);
+        print("Press any key to run");
         wait_for_key();
 
         // transfer copy of current screen to external RAM
@@ -307,6 +309,22 @@ void command_ramdump(void) {
 void command_dump(void) {
     uint16_t addr = hexcode_to_uint16t(&__lastinput[4]);
     terminal_hexdump(addr, DUMP_INTRAM);
+}
+
+/**
+ * @brief Dump system RAM to the screen
+ * 
+ */
+void command_help(void) {
+    print("List of commands:");
+    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
+        sprintf(termbuffer, "  * %s", __commands[i]);
+        terminal_printtermbuffer();
+    }
+    print("For more information, see:");
+    print("https://github.com/ifilot/p2000t-sdcard");
+    // print("or visit");
+    // print("https://philips-p2000t.nl/");
 }
 
 // *****************************************************************************

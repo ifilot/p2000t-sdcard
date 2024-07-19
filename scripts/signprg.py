@@ -50,6 +50,9 @@ def main():
             print('Writing to: %s' % args.filename)
             print('Signed file: 0x%04X 0x%04X' % (length, crc))
 
+    else:
+        print('File does not exist: %s')
+
 def crc16(data):
     crc = int(0)
     
