@@ -321,8 +321,8 @@ void command_help(void) {
         sprintf(termbuffer, "  * %s", __commands[i]);
         terminal_printtermbuffer();
     }
-    print_info("For more information, see:", 0);
-    print_info("https://github.com/ifilot/p2000t-sdcard", 0);
+    // print_info("For more information, see:", 0);
+    // print_info("https://github.com/ifilot/p2000t-sdcard", 0);
     // print_info("or visit", 0);
     // print_info("https://philips-p2000t.nl/", 0);
 }
@@ -353,10 +353,14 @@ void execute_command(void) {
     // loop over all commmands until a match is found;
     // if so, execute the command
     for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
-        // if(strcmp(__lastinput, __commands[i]) == 0) {
-        //     __operations[i]();
-        //     return;
-        // }
+        if(strcmp(__lastinput, __commands[i]) == 0) {
+            __operations[i]();
+            return;
+        }
+    }
+
+    // try the same thing, but now only for the first n bytes
+    for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
         if(memcmp(__lastinput, __commands[i], strlen(__commands[i])) == 0) {
             __operations[i]();
             return;
