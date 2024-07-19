@@ -353,7 +353,11 @@ void execute_command(void) {
     // loop over all commmands until a match is found;
     // if so, execute the command
     for(uint8_t i=0; i<(sizeof(__operations) / sizeof(void*)); i++) {
-        if(strcmp(__lastinput, __commands[i]) == 0) {
+        // if(strcmp(__lastinput, __commands[i]) == 0) {
+        //     __operations[i]();
+        //     return;
+        // }
+        if(memcmp(__lastinput, __commands[i], strlen(__commands[i])) == 0) {
             __operations[i]();
             return;
         }
