@@ -25,7 +25,7 @@ from said SD card and load them into memory.
 > [!TIP]
 > **Documentation**
 > * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
-> * There is also a [manual in Dutch](https://github.com/ifilot/P2000T-SD-kaart-handleiding) available.
+> * There is also a [manual in Dutch](https://github.com/ifilot/P2000T-SD-kaart-handleiding) ![Dutch flag](img/nl_flag.png) available.
 
 ## Downloads 
 
