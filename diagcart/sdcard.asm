@@ -28,6 +28,7 @@ SDCACHE2        EQU  $0400
 
 PUBLIC _init_sdcard
 
+PUBLIC _sdpulse
 PUBLIC _cmd0
 PUBLIC _cmd8
 PUBLIC _cmd17
@@ -58,6 +59,7 @@ defb 0 |0x40,0x00,0x00,0x00,0x00,0x94|0x01
 
 cmd8str:
 defb 8 |0x40,0x00,0x00,0x01,0xaa,0x86|0x01
+;                      VHS  CHK  CRC
 
 cmd55str:
 defb 55|0x40,0x00,0x00,0x00,0x00,0x00|0x01
@@ -89,10 +91,7 @@ pulse:
     djnz pulse
     call _open_command
     call _cmd0
-    call _close_command
-    call _open_command
-    call _cmd8                  ; this command will retrieve resp8 from stack
-    call _close_command
+    call _cmd8                  ; this command will retrieves resp8 from stack
     ld b,5
 decde:                          ; decrement address counter by 5
     dec de
@@ -101,20 +100,15 @@ decde:                          ; decrement address counter by 5
     cp 0x02                     ; bigger than 1?
     jp nc,carderror
 hosttry:
-    call _open_command
     call _cmd55
-    call _close_command
-    call _open_command
     call _acmd41                ; value in l
-    call _close_command
     ld a,l
     cp 0
     jr nz,hosttry               ; if not zero, try again
-    call _open_command
     call _cmd58                 ; this command will retrieve resp58 from stack
-    call _close_command
     ld iyl,0                    ; store return value
 exitinit:
+    call _close_command
     exx                         ; swap back from shadow registers
     push hl                     ; put return address back onto stack
     ei                          ; enable interrupts
@@ -124,6 +118,18 @@ exitinit:
 carderror:
     ld iyl,1                    ; store return value
     jp exitinit
+
+;-------------------------------------------------------------------------------
+; Send pulses to the SD-card to trigger it into a reset state
+;-------------------------------------------------------------------------------
+_sdpulse:
+    ld b,12
+    ld a,0xFF
+    out (SERIAL),a
+nextpulse:
+    out (CLKSTART),a
+    djnz nextpulse
+    ret
 
 ;-------------------------------------------------------------------------------
 ; CMD0: Reset the SD Memory Card
@@ -140,7 +146,6 @@ _cmd0:
 ; CMD8: Sends interface condition
 ;
 ; garbles: a,b,hl
-; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd8:
     pop iy                      ; retrieve return address
@@ -475,6 +480,9 @@ fstifinner:
 
 ;-------------------------------------------------------------------------------
 ; void open_command(void);
+;
+; See also this post: 
+; https://electronics.stackexchange.com/questions/303745/sd-card-initialization-problem-cmd8-wrong-response
 ;-------------------------------------------------------------------------------
 _open_command:
     ld a,0xFF

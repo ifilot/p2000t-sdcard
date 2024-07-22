@@ -18,9 +18,25 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#ifndef _TERMINAL_EXT_H
+#define _TERMINAL_EXT_H
 
-#define __VERSION__ "0.8.0"
+#include <stdio.h>
+#include <string.h>
+#include "ram.h"
+#include "terminal.h"
+
+#define DUMP_INTRAM 0
+#define DUMP_EXTRAM 1
+#define DUMP_EXTROM 2
+
+/**
+ * @brief Perform hexdump from part of external RAM
+ * 
+ * @param addr external RAM address
+ */
+void terminal_hexdump(uint16_t addr, uint8_t mode);
+
+uint8_t bytegrab(uint16_t addr, uint8_t mode);
 
 #endif

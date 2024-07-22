@@ -18,9 +18,50 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#include "terminal_ext.h"
 
-#define __VERSION__ "0.8.0"
+/**
+ * @brief Perform hexdump from part of external RAM
+ * 
+ * @param addr external RAM address
+ */
+void terminal_hexdump(uint16_t addr, uint8_t mode) {
 
-#endif
+    for(uint16_t j=0; j<16; j++) {  // loop over lines
+
+        // show address
+        sprintf(termbuffer, "%c%04X", COL_YELLOW, addr);
+
+        // show bytes
+        for(uint8_t i=0; i<8; i++) {    // loop over bytes
+            uint8_t val = bytegrab(addr, mode);
+            sprintf(&termbuffer[5+i*3], "%c%02X", COL_WHITE, val);
+
+            // show ASCII value
+            if(val >= 32 && val <= 127) {
+                termbuffer[6+8*3+i] = val;
+            } else {
+                termbuffer[6+8*3+i] = '.';
+            }
+
+            addr++;
+        }
+
+        termbuffer[5+8*3] = COL_CYAN;
+        terminal_printtermbuffer();
+    }
+}
+
+uint8_t bytegrab(uint16_t addr, uint8_t mode) {
+    switch(mode) {
+        case DUMP_INTRAM:
+            return memory[addr];
+        break;
+        case DUMP_EXTRAM:
+            return ram_read_byte(addr);
+        break;
+        default:
+            return 0x00;
+        break;
+    }
+}
