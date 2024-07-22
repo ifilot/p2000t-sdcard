@@ -93,7 +93,7 @@ void read_partition(uint32_t lba0) {
     // each sector can refer to 128 clusters (128 x 32 = 512 bytes)
     // each cluster hosts a number of sectors
     // each sector has a specific sectors size (512 bytes for FAT32)
-    sprintf(termbuffer, "Partition size:%c%lu MiB", COL_GREEN, (_sectors_per_fat * 128 * _sectors_per_cluster * _bytes_per_sector) >> 20 );
+    sprintf(termbuffer, "Partition size:%c%lu MiB", COL_GREEN, (_sectors_per_fat * _sectors_per_cluster * _bytes_per_sector) >> 13 );
     terminal_printtermbuffer();
 
     // sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
