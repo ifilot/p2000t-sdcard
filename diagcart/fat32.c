@@ -93,7 +93,7 @@ void read_partition(uint32_t lba0) {
     // each sector can refer to 128 clusters (128 x 32 = 512 bytes)
     // each cluster hosts a number of sectors
     // each sector has a specific sectors size (512 bytes for FAT32)
-    sprintf(termbuffer, "Partition size:%c%lu MiB", COL_GREEN, (_sectors_per_fat * 128 * _sectors_per_cluster * _bytes_per_sector) >> 20 );
+    sprintf(termbuffer, "Partition size:%c%lu MiB", COL_GREEN, (_sectors_per_fat * _sectors_per_cluster * _bytes_per_sector) >> 13 );
     terminal_printtermbuffer();
 
     // sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
@@ -302,6 +302,69 @@ uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_
                         uint32_t filesize = read_uint32_t(&fileblock[28]);
 
                         _filesize_current_file = filesize;
+
+                        return fc;
+                    }
+                }
+            }
+        }
+        ctr++;
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Find a file identified by BASENAME and EXT in the folder correspond
+ *        to the cluster address
+ * 
+ * @param cluster   cluster address
+ * @param basename  first 8 bytes of the file
+ * @param ext       3 byte extension of the file
+ * @return uint32_t cluster address of the file or 0 if not found
+ */
+uint32_t find_folder(uint32_t cluster, const char* basename_find) {
+    // build linked list for the root directory
+    build_linked_list(cluster);
+
+    // loop over the clusters and read directory contents
+    uint8_t ctr = 0;                // counter over sectors
+    uint8_t stopreading = 0;
+    uint8_t fileblock[32];          // storage for single file
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && stopreading == 0) {
+        
+        // get cluster address
+        const uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
+
+        // loop over all sectors per cluster
+        for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
+            read_sector(caddr + i); // read sector data
+            for(uint16_t j=0; j<16; j++) { // 16 file tables per sector
+
+                // grab file metadata
+                copy_from_ram(j*32, fileblock, 32);
+
+                // early exit if a zero is read
+                if(fileblock[0] == 0x00) {
+                    stopreading = 1;
+                    break;
+                }
+
+                // continue if an unused entry is encountered 0xE5
+                if(fileblock[0] == 0xE5) {
+                    continue;
+                }
+
+                const uint8_t attrib = fileblock[0x0B];
+
+                // if lower five bits of byte 0x0B of file table is unset
+                // assume we are reading a file and try to decode it
+                if((attrib & 0x0F) == 0x00 && attrib & (1 << 4)) {
+
+                    if(memcmp(basename_find, fileblock, strlen(basename_find)) == 0) {
+                        const uint16_t fch = read_uint16_t(&fileblock[0x14]);
+                        const uint16_t fcl = read_uint16_t(&fileblock[0x1A]);
+                        const uint32_t fc = (uint32_t)fch << 16 | fcl;
 
                         return fc;
                     }

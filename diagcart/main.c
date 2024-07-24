@@ -27,6 +27,7 @@
 #include "ascii.h"
 #include "config.h"
 #include "ports.h"
+#include "fat32.h"
 #include "ram.h"
 #include "sdcard.h"
 #include "terminal_ext.h"
@@ -92,11 +93,33 @@ void main(void) {
     sprintf(termbuffer, "CMD58: %02X %02X %02X %02X %02X", _resp58[0], _resp58[1], _resp58[2], _resp58[3], _resp58[4]);
     terminal_printtermbuffer();
 
-    // read MBR
-    read_sector(0x00000000);
+    // inform user that the SD card is initialized and that we are ready to read
+    // the first block from the SD card and print it to the screen
+    print("SD Card initialized");
 
-    // output MBR to screen
-    terminal_hexdump(0x0180, DUMP_EXTRAM);
+    uint32_t lba0 = read_mbr();
+    read_partition(lba0);
+
+    // sd card successfully mounted
+    print("Partition 1 mounted");
+
+    // look for the folder dumps and try to find the tile "TEST" in that folder
+    uint32_t faddr = find_folder(_root_dir_first_cluster, "DUMPS");
+    if(faddr != 0) {
+        // reporting if file is found
+        sprintf(termbuffer, "%c%s found", COL_GREEN, "DUMPS");
+        terminal_printtermbuffer();
+        _current_folder_cluster = faddr;
+        faddr = find_file(_current_folder_cluster, "TEST    ", "   ");
+        if(faddr != 0) {
+            sprintf(termbuffer, "%c TEST file found: %lu Bytes", COL_GREEN, _filesize_current_file);
+            terminal_printtermbuffer();
+        } else {
+            print_error("No file TEST found in DUMPS folder");
+        }
+    } else {
+        print_error("No folder DUMPS found in root dir");
+    }
 
     for(;;){}
 }

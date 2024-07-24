@@ -76,7 +76,7 @@ void read_partition(uint32_t lba0);
 uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun);
 
 /**
- * @brief Find a file identified by BASENAME and EXT in the folder correspond
+ * @brief Find a file identified by BASENAME and EXT in the folder corresponding
  *        to the cluster address
  * 
  * @param cluster   cluster address
@@ -85,6 +85,16 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun);
  * @return uint32_t cluster address of the file or 0 if not found
  */
 uint32_t find_file(uint32_t cluster, const char* basename, const char* ext);
+
+/**
+ * @brief Find a file identified by BASENAME in the folder corresponding
+ *        to the cluster address
+ * 
+ * @param cluster   cluster address
+ * @param basename  first 8 bytes of the file
+ * @return uint32_t cluster address of the file or 0 if not found
+ */
+uint32_t find_folder(uint32_t cluster, const char* basename);
 
 /**
  * @brief Build a linked list of sector addresses starting from a root address
