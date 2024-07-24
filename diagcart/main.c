@@ -112,7 +112,7 @@ void main(void) {
         _current_folder_cluster = faddr;
         faddr = find_file(_current_folder_cluster, "TEST    ", "   ");
         if(faddr != 0) {
-            sprintf(termbuffer, "%c TEST file found: %lu Bytes", COL_GREEN, _filesize_current_file);
+            sprintf(termbuffer, "%cTEST file found: %lu Bytes", COL_GREEN, _filesize_current_file);
             terminal_printtermbuffer();
         } else {
             print_error("No file TEST found in DUMPS folder");

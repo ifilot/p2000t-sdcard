@@ -70,23 +70,23 @@ void read_partition(uint32_t lba0) {
     uint16_t signature = ram_read_uint16_t(SDCACHE0 + 0x1FE);
 
     // print data
-    // sprintf(termbuffer, "LBA partition 1:%c%08lX", COL_GREEN, lba0);
-    // terminal_printtermbuffer();
+    sprintf(termbuffer, "LBA partition 1:%c%08lX", COL_GREEN, lba0);
+    terminal_printtermbuffer();
 
     sprintf(termbuffer, "Bytes per sector:%c%i", COL_GREEN, _bytes_per_sector);
     terminal_printtermbuffer();
 
-    // sprintf(termbuffer, "Sectors per cluster:%c%i", COL_GREEN, _sectors_per_cluster);
-    // terminal_printtermbuffer();
+    sprintf(termbuffer, "Sectors per cluster:%c%i", COL_GREEN, _sectors_per_cluster);
+    terminal_printtermbuffer();
 
-    // sprintf(termbuffer, "Reserved sectors:%c%i", COL_GREEN, _reserved_sectors);
-    // terminal_printtermbuffer();
+    sprintf(termbuffer, "Reserved sectors:%c%i", COL_GREEN, _reserved_sectors);
+    terminal_printtermbuffer();
 
-    // sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
-    // terminal_printtermbuffer();
+    sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
+    terminal_printtermbuffer();
 
-    // sprintf(termbuffer, "Sectors per FAT:%c%lu", COL_GREEN, _sectors_per_fat);
-    // terminal_printtermbuffer();
+    sprintf(termbuffer, "Sectors per FAT:%c%lu", COL_GREEN, _sectors_per_fat);
+    terminal_printtermbuffer();
 
     // calculate the total capacity on the partition; this corresponds to the
     // each FAT holds a number of sectors
@@ -96,11 +96,11 @@ void read_partition(uint32_t lba0) {
     sprintf(termbuffer, "Partition size:%c%lu MiB", COL_GREEN, (_sectors_per_fat * _sectors_per_cluster * _bytes_per_sector) >> 13 );
     terminal_printtermbuffer();
 
-    // sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
-    // terminal_printtermbuffer();
+    sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
+    terminal_printtermbuffer();
 
-    // sprintf(termbuffer, "Signature:%c%04X", COL_GREEN, signature);
-    // terminal_printtermbuffer();
+    sprintf(termbuffer, "Signature:%c%04X", COL_GREEN, signature);
+    terminal_printtermbuffer();
 
     // consolidate variables
     _fat_begin_lba = lba0 + _reserved_sectors;
