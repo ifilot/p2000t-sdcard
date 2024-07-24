@@ -14,7 +14,8 @@ diagcart: main.c fat32.c memory.c terminal.c sdcard.c sdcard.asm util.asm
 	-pragma-define:CLIB_FOPEN_MAX=0 \
 	--max-allocs-per-node2000 \
 	--opt-code-size \
-	-SO3 -bn DIAGSDCARD.BIN \
+	-SO3 -bn SDWRITETEST.BIN \
 	-create-app -m \
-	&& mv DIAGSDCARD.bin DIAGSDCARD.BIN \
-	&& wc -c < DIAGSDCARD.BIN
+	&& mv SDWRITETEST.bin SDWRITETEST.BIN \
+	&& wc -c < SDWRITETEST.BIN \
+	&& truncate -s 16k SDWRITETEST.BIN
