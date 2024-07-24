@@ -407,7 +407,7 @@ void build_linked_list(uint32_t nextcluster) {
  * @return uint32_t sector address (512 byte address)
  */
 uint32_t get_sector_addr(uint32_t cluster, uint8_t sector) {
-    return _SECTOR_begin_lba + (cluster - 2) * _sectors_per_cluster + sector;   
+    return _SECTOR_begin_lba + (cluster - 2) * _sectors_per_cluster + sector;
 }
 
 /**

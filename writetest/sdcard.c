@@ -18,25 +18,40 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _TERMINAL_EXT_H
-#define _TERMINAL_EXT_H
+#include "sdcard.h"
 
-#include <stdio.h>
-#include <string.h>
-#include "ram.h"
-#include "terminal.h"
+// shared buffer object to store the data of a single sector on the SD card
+uint8_t _resp8[5];
+uint8_t _resp58[5];
+uint8_t _flag_sdcard_mounted = 0;
 
-#define DUMP_INTRAM 0
-#define DUMP_EXTRAM 1
-#define DUMP_EXTROM 2
+/******************************************************************************
+ * BLOCK OPERATIONS
+ ******************************************************************************/
 
 /**
- * @brief Perform hexdump from part of external RAM
+ * @brief Read a single 512-byte sector
  * 
- * @param addr external RAM address
+ * @param addr sector address
  */
-void terminal_hexdump(uint16_t addr, uint8_t mode);
+void read_sector(uint32_t addr) {
+    open_command();
+    cmd17(addr);
+    read_block();
+    close_command();
+}
 
-uint8_t bytegrab(uint16_t addr, uint8_t mode);
-
-#endif
+/**
+ * @brief Read a single 512-byte sector
+ * 
+ * @param addr sector address
+ */
+uint8_t write_sector(uint32_t addr) {
+    uint8_t token = 0x00;
+    open_command();
+    if(cmd24(addr) == SD_READY) {
+        token = write_block();
+    }
+    close_command();
+    return token;
+}

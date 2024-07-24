@@ -32,6 +32,7 @@ PUBLIC _sdpulse
 PUBLIC _cmd0
 PUBLIC _cmd8
 PUBLIC _cmd17
+PUBLIC _cmd24
 PUBLIC _cmd55
 PUBLIC _cmd58
 PUBLIC _acmd41
@@ -41,6 +42,7 @@ PUBLIC _open_command
 PUBLIC _close_command
 
 PUBLIC _read_block
+PUBLIC _write_block
 PUBLIC _fast_sd_to_ram_first_0x100
 PUBLIC _fast_sd_to_ram_last_0x100
 PUBLIC _fast_sd_to_ram_full
@@ -204,6 +206,46 @@ cmd17next:
     ret
 
 ;-------------------------------------------------------------------------------
+; CMD24: Write block
+;
+; void cmd24(uint32_t addr);
+;
+; garbles: a,b,de,hl,iy
+; result of R1 is stored in l
+;-------------------------------------------------------------------------------
+_cmd24:
+    pop iy                      ; retrieve return address
+    pop hl                      ; retrieve upper bytes of 32 bit address
+    pop de                      ; retrieve lower bytes of 32 bit address
+    ld a,24|0x40
+    out (SERIAL),a
+    out (CLKSTART),a            ; send out
+
+    ld a,d
+    out (SERIAL),a              ; byte 0
+    out (CLKSTART),a            ; send out
+
+    ld a,e
+    out (SERIAL),a              ; byte 1
+    out (CLKSTART),a            ; send out
+
+    ld a,h
+    out (SERIAL),a              ; byte 2
+    out (CLKSTART),a            ; send out
+
+    ld a,l
+    out (SERIAL),a              ; byte 3
+    out (CLKSTART),a            ; send out
+
+    ld a,0x00|0x01
+    out (SERIAL),a
+    out (CLKSTART),a            ; send out
+
+    call _receive_R1
+    push iy                     ; put return address back on stack
+    ret
+
+;-------------------------------------------------------------------------------
 ; CMD55: Next command is application specific command
 ;
 ; garbles: a,b,hl
@@ -334,6 +376,43 @@ blocknext:
     ei
     ld a,0x00
     out (LED_IO),a              ; turn write led off
+    ret
+
+;-------------------------------------------------------------------------------
+; Write block to SD card
+;
+; uint8_t write_block(void);
+;-------------------------------------------------------------------------------
+_write_block:
+    di                          ; disable interrupts
+    ld hl,SDCACHE1              ; set external RAM address
+    ld a,0xFE                   ; send start block token
+    out (SERIAL),a              ; store in shift register
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    ld c,2                      ; number of outer loops
+wblockouter:
+    ld b,0                      ; 256 iterations for inner loop
+wblocknext:
+    ld a,h
+    out (ADDR_HIGH),a           ; set high byte
+    ld a,l
+    out (ADDR_LOW),a            ; set low byte
+    in a,(RAM_IO)               ; read from RAM
+    out (SERIAL),a              ; store in shift register
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    inc hl                      ; increment RAM pointer
+    djnz wblocknext
+    dec c
+    jp nz, wblockouter
+nexttoken:
+    ld a,0xFF                   ; flush serial register
+    out (SERIAL),a              ; store in shift register
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a,(SERIAL)               ; read from register
+    cp 0xFF                     ; is token equal to ones?
+    jp z,nexttoken              ; try again until non-0xFF is being read
+    ld l,a                      ; store in l register (return value)
+    ei
     ret
 
 ;-------------------------------------------------------------------------------

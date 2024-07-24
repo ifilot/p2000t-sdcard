@@ -103,17 +103,64 @@ void main(void) {
     // sd card successfully mounted
     print("Partition 1 mounted");
 
+    print("");
+    print("Hit -space- to find test file");
+    wait_for_key_fixed(17); // space
+
     // look for the folder dumps and try to find the tile "TEST" in that folder
     uint32_t faddr = find_folder(_root_dir_first_cluster, "DUMPS");
+
+    // check if folder is found
     if(faddr != 0) {
         // reporting if file is found
         sprintf(termbuffer, "%c%s found", COL_GREEN, "DUMPS");
         terminal_printtermbuffer();
         _current_folder_cluster = faddr;
         faddr = find_file(_current_folder_cluster, "TEST    ", "   ");
+
+        // check if file is found
         if(faddr != 0) {
             sprintf(termbuffer, "%cTEST file found: %lu Bytes", COL_GREEN, _filesize_current_file);
             terminal_printtermbuffer();
+            
+            // report first sector
+            uint32_t sec_addr = get_sector_addr(faddr, 0);
+            sprintf(termbuffer, "%cSector address: %lu Bytes", COL_GREEN, sec_addr);
+
+            print("");
+            print("Hit -space- to read TEST file");
+            wait_for_key_fixed(17); // space
+
+            // read from first sector
+            read_sector(sec_addr); // result stored in SDCACHE0
+            terminal_hexdump(SDCACHE0, 4, DUMP_EXTRAM);
+
+            print("");
+            print("Hit -space- to write to TEST file");
+            wait_for_key_fixed(17); // space
+
+            // populate SDCACHE1 with the data from SDCACH0, incremented by 1
+            for(uint16_t i=0; i<512; i++) {
+                c = ram_read_byte(SDCACHE0+i);
+                ram_write_byte(SDCACHE1+i, c+1);
+            }
+
+            uint8_t write_token = write_sector(sec_addr) & 0x1F;
+            sprintf(termbuffer, "Write token: %02X", write_token);
+            terminal_printtermbuffer();
+
+            if(write_token == 0x05) {
+                print("Correct write token received!");
+                print("");
+                print("Hit -space- to check written data");
+                wait_for_key_fixed(17); // space
+
+                // read from first sector
+                read_sector(sec_addr); // result stored in SDCACHE0
+                terminal_hexdump(SDCACHE0, 4, DUMP_EXTRAM);
+            } else {
+                print_error("Error in write token");
+            }
         } else {
             print_error("No file TEST found in DUMPS folder");
         }
