@@ -39,11 +39,14 @@ PUBLIC _ram_set
 
 ;-------------------------------------------------------------------------------
 ; uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
+;
+; Input: hl - ram address
+; Garbles: a,bc,hl
+; Return: hl - result
 ;-------------------------------------------------------------------------------
 _ram_read_uint16_t:
-    pop iy                      ; return address
-    pop bc                      ; ramptr
-    push iy                     ; push return address back onto stack
+    ld b,h                      ; store address in bc
+    ld c,l
     ld a,b
     out (ADDR_HIGH), a
     ld a,c
@@ -61,21 +64,20 @@ _ram_read_uint16_t:
 
 ;-------------------------------------------------------------------------------
 ; uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_callee;
+;
+; Input: hl - ram address
+; Garbles: a,bc,de,hl
+; Return: hl - result
 ;-------------------------------------------------------------------------------
 _ram_read_uint32_t:
-    di
-    pop hl                      ; return address
-    exx
-    call _ram_read_uint16_t     ; retrieve low address in hl (little endian)
-    ex de,hl                    ; low address placed in de
-    inc bc                      ; note that bc is already incremented once
-    push bc                     ; put back onto stack for next call
-    call _ram_read_uint16_t     ; retrieve high address in hl
-    ex de,hl                    ; high address in de, low address in hl
-    exx
-    push hl                     ; push return address back onto stack
-    exx
-    ei
+    push hl                     ; put ram pointer on stack
+    call _ram_read_uint16_t     ; retrieve low word in hl (little endian)
+    ex de,hl                    ; low word placed in de
+    pop hl                      ; retrieve ram pointer from stack
+    inc hl                      ; increment ram pointer twice
+    inc hl
+    call _ram_read_uint16_t     ; retrieve high word in hl, low word still in de
+    ex de,hl                    ; high word in de, low word in hl
     ret                         ; result stored in DEHL
 
 ;-------------------------------------------------------------------------------

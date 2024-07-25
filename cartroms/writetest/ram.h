@@ -84,7 +84,7 @@ void ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;
  * @param addr  external memory address
  * @return uint16_t value to receive
  */
-uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
+uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_fastcall;
 
 /**
  * @brief Retrieve 32 bit value from external RAM
@@ -92,7 +92,7 @@ uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
  * @param addr  external memory address
  * @return uint32_t value to receive
  */
-uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_callee;
+uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_fastcall;
 
 /**
  * @brief Set the ram bank

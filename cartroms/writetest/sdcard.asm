@@ -48,6 +48,9 @@ PUBLIC _fast_sd_to_ram_last_0x100
 PUBLIC _fast_sd_to_ram_full
 PUBLIC _fast_sd_to_intram_full
 
+PUBLIC _read_sector
+PUBLIC _write_sector
+
 PUBLIC _sdout_set
 PUBLIC _sdout_reset
 PUBLIC _sdcs_set
@@ -167,9 +170,6 @@ _cmd8:
 ; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd17:
-    pop iy                      ; retrieve return address
-    pop hl                      ; retrieve upper bytes of 32 bit address
-    pop de                      ; retrieve lower bytes of 32 bit address
     ld a,17|0x40
     out (SERIAL),a
     out (CLKSTART),a            ; send out
@@ -202,7 +202,6 @@ cmd17next:
     in a,(SERIAL)
     cp 0xFE
     jr nz,cmd17next
-    push iy                     ; put return address back on stack
     ret
 
 ;-------------------------------------------------------------------------------
@@ -214,9 +213,6 @@ cmd17next:
 ; result of R1 is stored in l
 ;-------------------------------------------------------------------------------
 _cmd24:
-    pop iy                      ; retrieve return address
-    pop hl                      ; retrieve upper bytes of 32 bit address
-    pop de                      ; retrieve lower bytes of 32 bit address
     ld a,24|0x40
     out (SERIAL),a
     out (CLKSTART),a            ; send out
@@ -242,7 +238,6 @@ _cmd24:
     out (CLKSTART),a            ; send out
 
     call _receive_R1
-    push iy                     ; put return address back on stack
     ret
 
 ;-------------------------------------------------------------------------------
@@ -313,7 +308,8 @@ sendnextbyte:
 ;
 ; uint8_t receive_R1(void);
 ;
-; Result is stored in l
+; Garbles: A
+; Return: R1 value in l
 ;-------------------------------------------------------------------------------
 _receive_R1:
     ld a,0xFF
@@ -348,6 +344,10 @@ recvbyte:
 ; Read block from SD card
 ;
 ; void read_block(void);
+;
+; Input: None
+; Garbles: a,c,hl
+; Output: None
 ;-------------------------------------------------------------------------------
 _read_block:
     ld a,0x02
@@ -382,6 +382,10 @@ blocknext:
 ; Write block to SD card
 ;
 ; uint8_t write_block(void);
+;
+; Input: None
+; Garbles: a,bc,hl
+; Returns: Return value in l
 ;-------------------------------------------------------------------------------
 _write_block:
     di                          ; disable interrupts
@@ -413,6 +417,34 @@ nexttoken:
     jp z,nexttoken              ; try again until non-0xFF is being read
     ld l,a                      ; store in l register (return value)
     ei
+    ret
+
+;-------------------------------------------------------------------------------
+; Read a sector from the SD card
+;
+; INPUT: DEHL - 32 bit SD card sector address
+;-------------------------------------------------------------------------------
+_read_sector:
+    call _open_command
+    call _cmd17
+    call _read_block
+    call _close_command
+    ret
+
+;-------------------------------------------------------------------------------
+; Write a sector to the SD card
+;
+; INPUT: DEHL - 32 bit SD card sector address
+;-------------------------------------------------------------------------------
+_write_sector:
+    call _open_command
+    call _cmd24                 ; call CMD24, token is stored in l
+    ld a,l
+    cp 0x00                     ; check if return value is 0x00
+    jp nz,wrsecexit             ; if not, exit function
+    call _write_block           ; call write block, token value stored in l
+wrsecexit:
+    call _close_command         ; return with token value from write block in l
     ret
 
 ;-------------------------------------------------------------------------------
@@ -562,6 +594,8 @@ fstifinner:
 ;
 ; See also this post: 
 ; https://electronics.stackexchange.com/questions/303745/sd-card-initialization-problem-cmd8-wrong-response
+;
+; Garbles: a
 ;-------------------------------------------------------------------------------
 _open_command:
     ld a,0xFF
@@ -573,6 +607,8 @@ _open_command:
 
 ;-------------------------------------------------------------------------------
 ; void close_command(void);
+;
+; Garbles: a
 ;-------------------------------------------------------------------------------
 _close_command:
     ld a,0xFF

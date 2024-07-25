@@ -28,7 +28,8 @@ uint32_t _sectors_per_fat = 0;
 uint32_t _root_dir_first_cluster = 0;
 uint32_t _linkedlist[16];
 uint32_t _fat_begin_lba = 0;
-uint32_t _SECTOR_begin_lba = 0;
+uint32_t _shadow_fat_begin_lba = 0;
+uint32_t _sector_begin_lba = 0;
 uint32_t _lba_addr_root_dir = 0;
 uint32_t _filesize_current_file = 0;
 uint32_t _current_folder_cluster = 0;
@@ -40,7 +41,7 @@ uint8_t _current_attrib = 0;
  * @brief Read the Master Boot Record
  * 
  * @param verbose whether to return verbose output to terminal
- * @return uint32_t start sector-address of the first sector
+ * @return uint32_t sector-address of the first partition
  */
 uint32_t read_mbr(void) {
     read_sector(0x00000000);
@@ -60,13 +61,31 @@ void read_partition(uint32_t lba0) {
     read_sector(lba0);
 
     // collect data
+    //-------------
+    // number of bytes per sector, typically 512
     _bytes_per_sector = ram_read_uint16_t(SDCACHE0 + 0x0B);
+
+    // number of sectors per cluster, is determined upon SD card formatting
     _sectors_per_cluster = ram_read_byte(SDCACHE0 + 0x0D);
+
+    // number of reserved sectors, typically 2
     _reserved_sectors = ram_read_uint16_t(SDCACHE0 + 0x0E);
+
+    // number of FATs, typically 2, the second FAT serves as a SHADOW fat
+    // used for data retention
     _number_of_fats = ram_read_byte(SDCACHE0 + 0x10);
+
+    // number of sectors per FAT, this can be used to determine the start
+    // position of the second FAT
     _sectors_per_fat = ram_read_uint32_t(SDCACHE0 + 0x24);
+
+    // cluster address of the root directory
     _root_dir_first_cluster = ram_read_uint32_t(SDCACHE0 + 0x2C);
+
+    // cluster address of the current folder
     _current_folder_cluster = _root_dir_first_cluster;
+
+    // partition signature, should be 0x55AA
     uint16_t signature = ram_read_uint16_t(SDCACHE0 + 0x1FE);
 
     // print data
@@ -79,16 +98,16 @@ void read_partition(uint32_t lba0) {
     sprintf(termbuffer, "Sectors per cluster:%c%i", COL_GREEN, _sectors_per_cluster);
     terminal_printtermbuffer();
 
-    sprintf(termbuffer, "Reserved sectors:%c%i", COL_GREEN, _reserved_sectors);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Reserved sectors:%c%i", COL_GREEN, _reserved_sectors);
+    // terminal_printtermbuffer();
 
-    sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
+    // terminal_printtermbuffer();
 
     sprintf(termbuffer, "Sectors per FAT:%c%lu", COL_GREEN, _sectors_per_fat);
     terminal_printtermbuffer();
 
-    // calculate the total capacity on the partition; this corresponds to the
+    // calculate the total capacity on the partition
     // each FAT holds a number of sectors
     // each sector can refer to 128 clusters (128 x 32 = 512 bytes)
     // each cluster hosts a number of sectors
@@ -104,8 +123,20 @@ void read_partition(uint32_t lba0) {
 
     // consolidate variables
     _fat_begin_lba = lba0 + _reserved_sectors;
-    _SECTOR_begin_lba = lba0 + _reserved_sectors + (_number_of_fats * _sectors_per_fat);
+    _shadow_fat_begin_lba = _fat_begin_lba + _sectors_per_fat;
+    _sector_begin_lba = _fat_begin_lba + (_number_of_fats * _sectors_per_fat);
     _lba_addr_root_dir = get_sector_addr(_root_dir_first_cluster, 0);
+
+    // show prominent sector locations
+    sprintf(termbuffer, "FAT sector: %08lX", get_sector_addr(_fat_begin_lba, 0));
+    terminal_printtermbuffer();
+    sprintf(termbuffer, "Shadow FAT sector: %08lX", get_sector_addr(_shadow_fat_begin_lba, 0));
+    terminal_printtermbuffer();
+    sprintf(termbuffer, "First cluster LBA: %08lX", get_sector_addr(0, 0));
+    terminal_printtermbuffer();
+
+    // sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
+    // terminal_printtermbuffer();
 
     // read first sector of first partition to establish volume name
     read_sector(_lba_addr_root_dir);
@@ -407,7 +438,7 @@ void build_linked_list(uint32_t nextcluster) {
  * @return uint32_t sector address (512 byte address)
  */
 uint32_t get_sector_addr(uint32_t cluster, uint8_t sector) {
-    return _SECTOR_begin_lba + (cluster - 2) * _sectors_per_cluster + sector;
+    return _sector_begin_lba + (cluster - 2) * _sectors_per_cluster + sector;
 }
 
 /**

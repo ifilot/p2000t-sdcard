@@ -36,6 +36,8 @@ extern uint8_t _number_of_fats;
 extern uint32_t _sectors_per_fat;
 extern uint32_t _root_dir_first_cluster;
 extern uint32_t _fat_begin_lba;
+extern uint32_t _shadow_fat_begin_lba;
+extern uint32_t _sector_begin_lba;
 extern uint32_t _cluster_begin_lba;
 extern uint32_t _lba_addr_root_dir;
 extern uint32_t _linkedlist[LINKEDLIST_SIZE];

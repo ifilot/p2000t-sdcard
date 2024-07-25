@@ -25,8 +25,6 @@
 #include "terminal.h"
 #include "memory.h"
 
-#define SD_READY    0x00
-
 /**
  * Perform low-level operations on the SD-card. Note that all functions
  * operate with two globally shared uint8 arrays:
@@ -94,12 +92,12 @@ void cmd8(uint8_t *resp) __z88dk_callee;
 /**
  * CMD17: Read block
  */
-void cmd17(uint32_t addr) __z88dk_callee;
+void cmd17(uint32_t addr) __z88dk_fastcall;
 
 /**
  * CMD24: Write block
  */
-uint8_t cmd24(uint32_t addr) __z88dk_callee;
+uint8_t cmd24(uint32_t addr) __z88dk_fastcall;
 
 /**
  * CMD55: Next command is application specific command
@@ -128,7 +126,7 @@ void read_block(void) __z88dk_callee;
 /**
  * @brief Write a 512 byte block to SD card
  */
-uint8_t write_block(void) __z88dk_callee;
+uint8_t write_block(void) __z88dk_fastcall;
 
 /**
  * @brief Copy the first 0x100 bytes immediately from SD to RAM while discarding
@@ -163,10 +161,9 @@ void fast_sd_to_intram_full(uint16_t ram_addr) __z88dk_callee;
 /**
  * @brief Read a single 512-byte sector
  * 
- * @param addr cluster address
  * @param addr sector address
  */
-void read_sector(uint32_t addr);
+void read_sector(uint32_t addr) __z88dk_fastcall;
 
 /**
  * @brief Write to a single 512-byte sector

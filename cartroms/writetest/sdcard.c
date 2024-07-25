@@ -24,34 +24,3 @@
 uint8_t _resp8[5];
 uint8_t _resp58[5];
 uint8_t _flag_sdcard_mounted = 0;
-
-/******************************************************************************
- * BLOCK OPERATIONS
- ******************************************************************************/
-
-/**
- * @brief Read a single 512-byte sector
- * 
- * @param addr sector address
- */
-void read_sector(uint32_t addr) {
-    open_command();
-    cmd17(addr);
-    read_block();
-    close_command();
-}
-
-/**
- * @brief Read a single 512-byte sector
- * 
- * @param addr sector address
- */
-uint8_t write_sector(uint32_t addr) {
-    uint8_t token = 0x00;
-    open_command();
-    if(cmd24(addr) == SD_READY) {
-        token = write_block();
-    }
-    close_command();
-    return token;
-}
