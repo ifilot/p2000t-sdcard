@@ -106,8 +106,8 @@ void set_ram_bank(uint8_t val) __z88dk_callee;
  * 
  * See: ram.asm
  *
- * @param src      address on external RAM
- * @param dest     internal address
+ * @param src      internal address
+ * @param dest     external address
  * @param nrbytes  number of bytes to copy
  */
 void copy_to_ram(uint8_t *src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;

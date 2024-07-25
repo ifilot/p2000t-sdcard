@@ -122,4 +122,13 @@ uint32_t get_sector_addr(uint32_t cluster, uint8_t sector);
  */
 uint32_t store_file_metadata(uint8_t entry_id);
 
+/**
+ * @brief Create a new file in the current folder
+ * 
+ * @param filename 
+ */
+void create_file(const char* filename, uint32_t filesize);
+
+uint8_t create_file_entry(const char* filename, uint32_t filesize);
+
 #endif // _FAT32_H
