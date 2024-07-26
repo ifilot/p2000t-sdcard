@@ -22,51 +22,91 @@ SECTION code_user
 
 INCLUDE "ports.inc"
 
-PUBLIC _crc16_ramchip
-PUBLIC _copy_to_ram
-PUBLIC _copy_from_ram
-PUBLIC _ram_transfer
+PUBLIC _set_ram_address
+PUBLIC _set_ram_bank
 
-PUBLIC _ram_write_byte
-PUBLIC _ram_read_byte
-
-PUBLIC _ram_write_uint16_t
+PUBLIC _ram_read_uint8_t
 PUBLIC _ram_read_uint16_t
 PUBLIC _ram_read_uint32_t
 
-PUBLIC _set_ram_bank
+PUBLIC _ram_write_uint8_t
+PUBLIC _ram_write_uint16_t
+PUBLIC _ram_write_uint32_t
+
+PUBLIC _copy_to_ram
+PUBLIC _copy_from_ram
+PUBLIC _ram_transfer
 PUBLIC _ram_set
 
+PUBLIC _crc16_ramchip
+
 ;-------------------------------------------------------------------------------
-; uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
+; SETTER FUNCTIONS
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Set the external ram pointer
+;
+; input: hl
+; garbles: a
+;-------------------------------------------------------------------------------
+_set_ram_address:
+    ld a,h
+    out (ADDR_HIGH),a           ; set upper byte address
+    ld a,l
+    out (ADDR_LOW),a            ; set lower byte address
+    ret
+
+;-------------------------------------------------------------------------------
+; void set_ram_bank(uint8_t val) __z88dk_fastcall;
+;
+; input: l - ram bank
+; garbles: a
+;-------------------------------------------------------------------------------
+_set_ram_bank:
+    ld a,l
+    out (RAM_BANK),a
+    ret
+
+;-------------------------------------------------------------------------------
+; READ FUNCTIONS
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Read a byte from external RAM
+;
+; uint8_t ram_read_byte(uint16_t addr);
+;
+; input: hl - pointer to ram address
+;
+; return: l - value stored at memory address
+;-------------------------------------------------------------------------------
+_ram_read_uint8_t:
+    call ram_ptr_hl_ret_a
+    ld l,a                      ; put return value in l-register
+    ret
+
+;-------------------------------------------------------------------------------
+; uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_fastcall;
 ;
 ; Input: hl - ram address
-; Garbles: a,bc,hl
+; Garbles: a,de,hl
 ; Return: hl - result
 ;-------------------------------------------------------------------------------
 _ram_read_uint16_t:
-    ld b,h                      ; store address in bc
-    ld c,l
-    ld a,b
-    out (ADDR_HIGH), a
-    ld a,c
-    out (ADDR_LOW), a
-    in a,(RAM_IO)
-    ld l,a                      ; store lower byte first (little endian)
-    inc bc
-    ld a,b
-    out (ADDR_HIGH), a
-    ld a,c
-    out (ADDR_LOW), a
-    in a,(RAM_IO)
-    ld h,a                      ; then store upper byte
+    call ram_ptr_hl_ret_a
+    ld e,a                      ; store lower byte first (little endian)
+    inc hl
+    call ram_ptr_hl_ret_a
+    ld d,a                      ; then store upper byte
+    ex de,hl                    ; transfer de to return register hl
     ret                         ; result stored in HL
 
 ;-------------------------------------------------------------------------------
-; uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_callee;
+; uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_fastcall;
 ;
 ; Input: hl - ram address
-; Garbles: a,bc,de,hl
+; Garbles: all
 ; Return: hl - result
 ;-------------------------------------------------------------------------------
 _ram_read_uint32_t:
@@ -74,141 +114,78 @@ _ram_read_uint32_t:
     call _ram_read_uint16_t     ; retrieve low word in hl (little endian)
     ex de,hl                    ; low word placed in de
     pop hl                      ; retrieve ram pointer from stack
+    push de                     ; put low word on stack
     inc hl                      ; increment ram pointer twice
     inc hl
-    call _ram_read_uint16_t     ; retrieve high word in hl, low word still in de
-    ex de,hl                    ; high word in de, low word in hl
+    call _ram_read_uint16_t     ; retrieve high word in hl, low word on stack
+    pop de                      ; retrieve low word from stack
+    ex de,hl                    ; swap high and low word
     ret                         ; result stored in DEHL
 
 ;-------------------------------------------------------------------------------
-; PUBLIC _set_ram_bank(uint8_t val)
+; WRITE FUNCTIONS
 ;-------------------------------------------------------------------------------
-_set_ram_bank:
+
+;-------------------------------------------------------------------------------
+; void ram_write_uint8_t(uint16_t addr, uint8_t val) __z88dk_callee;
+;-------------------------------------------------------------------------------
+_ram_write_uint8_t:
     pop de                      ; return address
-    dec sp                      ; increment sp for single byte argument
-    pop af                      ; retrieve argument (stored in reg a)
+    pop hl                      ; ramptr
+    dec sp                      ; decrement sp for 1-byte argument
+    pop bc                      ; byte to write (stored in b)
     push de                     ; push return address back onto stack
-    out (RAM_BANK),a
+    call _set_ram_address
+    ld a,b
+    out (RAM_IO), a
     ret
 
 ;-------------------------------------------------------------------------------
-; ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;
+; void ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;
 ;-------------------------------------------------------------------------------
 _ram_write_uint16_t:
     pop de                      ; return address
     pop hl                      ; ramptr
     pop bc                      ; value to store
     push de                     ; push return address back onto stack
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
+    call _set_ram_address
     ld a,c                      ; grab lower byte
     out (RAM_IO),a              ; store lower byte first (little endian)
-    inc hl                      ; next byte
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
+    inc hl                      ; increment ram pointer
+    call _set_ram_address
     ld a,b                      ; grab upper byte
     out (RAM_IO), a             ; store upper byte next
     ret
 
 ;-------------------------------------------------------------------------------
-; Write a byte to external RAM
-;
-; void ram_write_byte(uint16_t addr, uint8_t val);
-;
-; input:  hl pointer to ram address
-;         b  byte to write
-; return: void
+; void ram_write_uint32_t(uint16_t addr, uint32_t val) __z88dk_callee;
 ;-------------------------------------------------------------------------------
-_ram_write_byte:
-    pop de                      ; return address
+_ram_write_uint32_t:
+    pop iy                      ; return address
     pop hl                      ; ramptr
-    dec sp                      ; decrement sp for 1-byte argument
-    pop bc                      ; byte to write (stored in b)
-    push de                     ; push return address back onto stack
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,b
-    out (RAM_IO), a
+    pop bc                      ; lower word to store
+    pop de                      ; upper word to store
+    call _set_ram_address
+    ld a,c                      ; set byte 1
+    out (RAM_IO), a             ; write byte 1
+    inc hl                      ; increment ram pointer
+    call _set_ram_address
+    ld a,b                      ; set byte 2
+    out (RAM_IO), a             ; write byte 2
+    inc hl                      ; increment ram pointer
+    call _set_ram_address
+    ld a,e                      ; setbyte 3
+    out (RAM_IO), a             ; write byte 3
+    inc hl                      ; increment ram pointer
+    call _set_ram_address
+    ld a,d                      ; set byte 4
+    out (RAM_IO), a             ; write byte 4
+    push iy                     ; put return address back onto stack
     ret
 
 ;-------------------------------------------------------------------------------
-; Read a byte from external RAM
-;
-; uint8_t ram_read_byte(uint16_t addr);
-;
-; input:  hl pointer to ram address
-;
-; return: value stored at memory address
+; COPY FUNCTIONS
 ;-------------------------------------------------------------------------------
-_ram_read_byte:
-    pop de                      ; return address
-    pop hl                      ; ramptr
-    push de                     ; push return address back onto stack
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    in a,(RAM_IO)
-    ld l,a                      ; put return value in l-register
-    ret
-
-;-------------------------------------------------------------------------------
-; Generate a 16 bit checksum
-;
-; input:  bc - number of bytes
-;         hl - start of memory address
-; output: hl - crc16 checksum
-; uses: a, bc, de, hl
-;
-; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
-;-------------------------------------------------------------------------------
-_crc16_ramchip:
-    ld a,0x01
-    out (LED_IO),a              ; turn RAM led on
-    pop de                      ; return address
-    pop hl                      ; ramptr
-    pop bc                      ; number of bytes
-    push de                     ; put return address back on stack
-    ld de,$0000                 ; set de to $0000
-nextbyte:
-    push bc                     ; push counter onto stack
-    ld a,h                      ; set upper address memory
-    out (ADDR_HIGH),a
-    ld a,l                      ; set lower address memory
-    out (ADDR_LOW),a
-    in a, (RAM_IO)              ; read byte from ram chip
-    xor d                       ; xor byte into CRC top byte
-    ld b,8                      ; prepare to rotate 8 bits
-rot:
-    sla e                       ; rotate crc
-    adc a,a
-    jp nc,clr                   ; bit 15 was zero
-    ld d,a                      ; put crc high byte back into d
-    ld a,e                      ; crc = crc ^ $1021 (xmodem polynomic)
-    xor $21
-    ld e,a
-    ld a,d                      ; get crc top byte back into a
-    xor $10
-clr:
-    dec b                       ; decrement bit counter
-    jp nz,rot                 ; loop for 8 bits
-    ld d,a                      ; put crc top byte back into d
-    inc hl                      ; step to next byte
-    pop bc                      ; get counter back from stack
-    dec bc                      ; decrement counter
-    ld a,b                      ; check if counter is zero
-    or c
-    jp nz,nextbyte              ; if not zero, go to next byte
-    ex de,hl                    ; swap de and hl such that hl contains crc
-    ld a,0x00
-    out (LED_IO),a              ; turn RAM led off
-    ret                         ; return value is stored in hl
 
 ;-------------------------------------------------------------------------------
 ; Copy bytes to external RAM chip
@@ -347,4 +324,78 @@ rsnext:
     ei                          ; enable interrupts
     ld a,0
     out (LED_IO),a              ; turn write LED off
+    ret
+
+;-------------------------------------------------------------------------------
+; OTHER FUNCTIONS
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Generate a 16 bit checksum
+;
+; input:  bc - number of bytes
+;         hl - start of memory address
+; output: hl - crc16 checksum
+; uses: a, bc, de, hl
+;
+; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
+;-------------------------------------------------------------------------------
+_crc16_ramchip:
+    ld a,0x01
+    out (LED_IO),a              ; turn RAM led on
+    pop de                      ; return address
+    pop hl                      ; ramptr
+    pop bc                      ; number of bytes
+    push de                     ; put return address back on stack
+    ld de,$0000                 ; set de to $0000
+nextbyte:
+    push bc                     ; push counter onto stack
+    ld a,h                      ; set upper address memory
+    out (ADDR_HIGH),a
+    ld a,l                      ; set lower address memory
+    out (ADDR_LOW),a
+    in a, (RAM_IO)              ; read byte from ram chip
+    xor d                       ; xor byte into CRC top byte
+    ld b,8                      ; prepare to rotate 8 bits
+rot:
+    sla e                       ; rotate crc
+    adc a,a
+    jp nc,clr                   ; bit 15 was zero
+    ld d,a                      ; put crc high byte back into d
+    ld a,e                      ; crc = crc ^ $1021 (xmodem polynomic)
+    xor $21
+    ld e,a
+    ld a,d                      ; get crc top byte back into a
+    xor $10
+clr:
+    dec b                       ; decrement bit counter
+    jp nz,rot                 ; loop for 8 bits
+    ld d,a                      ; put crc top byte back into d
+    inc hl                      ; step to next byte
+    pop bc                      ; get counter back from stack
+    dec bc                      ; decrement counter
+    ld a,b                      ; check if counter is zero
+    or c
+    jp nz,nextbyte              ; if not zero, go to next byte
+    ex de,hl                    ; swap de and hl such that hl contains crc
+    ld a,0x00
+    out (LED_IO),a              ; turn RAM led off
+    ret                         ; return value is stored in hl
+
+;-------------------------------------------------------------------------------
+; AUXILIARY ROUNTINES
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Set the external ram pointer
+;
+; input: hl
+; return: a - result
+;-------------------------------------------------------------------------------
+ram_ptr_hl_ret_a:
+    ld a,h
+    out (ADDR_HIGH),a           ; set upper byte address
+    ld a,l
+    out (ADDR_LOW),a            ; set lower byte address
+    in a,(RAM_IO)
     ret

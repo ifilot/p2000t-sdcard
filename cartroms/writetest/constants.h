@@ -35,7 +35,10 @@
 
 #define ROM_BANK_DEFAULT 0
 
-#define SUCCESS     0x00
-#define ERROR       0x01
+#define SUCCESS             0x00
+#define ERROR               0x01
+#define ERROR_DIR_FULL      0x02
+#define ERROR_CARD_FULL     0x03
+#define ERROR_FILE_EXISTS   0x04
 
 #endif

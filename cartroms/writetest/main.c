@@ -86,49 +86,12 @@ void main(void) {
             print_recall("Hit -space- to continue");
             wait_for_key_fixed(17); // space
 
-            //------------------------------------------------------------------
 
-            // read from first sector
-            read_sector(sec_addr); // result stored in SDCACHE0
-            terminal_hexdump(SDCACHE0, 4, DUMP_EXTRAM);
-
-            print("The first 32 bytes of the file are");
-            print("shown on the screen. We will now ");
-            print("increment all values by 1 and store");
-            print("these back in the first sector.");
-            print("");
-            print_recall("Hit -space- to continue");
-            wait_for_key_fixed(17); // space
-
-            // populate SDCACHE1 with the data from SDCACH0, incremented by 1
-            for(uint16_t i=0; i<512; i++) {
-                ram_write_byte(SDCACHE1+i, ram_read_byte(SDCACHE0+i) + 1);
-            }
-
-            uint8_t write_token = write_sector(sec_addr) & 0x1F;
-            sprintf(termbuffer, "Write token: %02X", write_token);
+            // proceed to create new file
+            uint8_t res = create_new_file("TESTFILETXT", 1024);
+            sprintf(termbuffer, "File creation result: %02X", res);
             terminal_printtermbuffer();
 
-            if(write_token == 0x05) {
-                print("The correct write token was received!");
-                print("We will now read back the first sector");
-                print("and show the first 32 bytes of this");
-                print("sector on the screen.");
-                print("");
-                print("Hit -space- to check written data");
-                wait_for_key_fixed(17); // space
-
-                // read from first sector
-                read_sector(sec_addr); // result stored in SDCACHE0
-                terminal_hexdump(SDCACHE0, 4, DUMP_EXTRAM);
-
-                print("Verify that the bytes have been");
-                print("incremented by one, which concludes");
-                print("this test.");
-                print("   -- END --");
-            } else {
-                print_error("Error in write token");
-            }
         } else {
             print_error("No file TEST found in DUMPS folder.");
         }

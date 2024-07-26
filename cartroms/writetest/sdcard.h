@@ -87,7 +87,7 @@ uint8_t cmd0(void) __z88dk_callee;
 /**
  * CMD8: Sends interface condition
  */
-void cmd8(uint8_t *resp) __z88dk_callee;
+void cmd8(uint8_t *resp) __z88dk_fastcall;
 
 /**
  * CMD17: Read block
@@ -107,7 +107,7 @@ void cmd55(void) __z88dk_callee;
 /**
  * CMD58: Read OCR register
  */
-void cmd58(uint8_t *resp) __z88dk_callee;
+void cmd58(uint8_t *resp) __z88dk_fastcall;
 
 /**
  * ACMD41: Send host capacity support information

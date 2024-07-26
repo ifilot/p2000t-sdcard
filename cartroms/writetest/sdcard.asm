@@ -153,12 +153,10 @@ _cmd0:
 ; garbles: a,b,hl
 ;-------------------------------------------------------------------------------
 _cmd8:
-    pop iy                      ; retrieve return address
-    pop de                      ; retrieve ram pointer
+    ex de,hl
     ld hl,cmd8str               ; load command list
     call sendcommand            ; garbles a,b,hl
     call receiveR7              ; garbles a,b,de
-    push iy                     ; push return address back onto stack
     ret
 
 ;-------------------------------------------------------------------------------
@@ -200,7 +198,7 @@ _cmd17:
 cmd17next:
     out (CLKSTART),a            ; send out
     in a,(SERIAL)
-    cp 0xFE
+    cp 0xFE                     ; wait for 0xFE to be received
     jr nz,cmd17next
     ret
 
@@ -258,12 +256,10 @@ _cmd55:
 ; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd58:
-    pop iy                      ; retrieve return address
-    pop de                      ; retrieve ram pointer
+    ex de,hl
     ld hl,cmd58str              ; load command list
     call sendcommand            ; garbles a,b,hl
     call receiveR3              ; garbles a,b,de
-    push iy                     ; push return address back onto stack
     ret
 
 ;-------------------------------------------------------------------------------
@@ -389,7 +385,7 @@ blocknext:
 ;-------------------------------------------------------------------------------
 _write_block:
     di                          ; disable interrupts
-    ld hl,SDCACHE1              ; set external RAM address
+    ld hl,SDCACHE0              ; set external RAM address
     ld a,0xFE                   ; send start block token
     out (SERIAL),a              ; store in shift register
     out (CLKSTART),a            ; pulse clock, does not care about value of a

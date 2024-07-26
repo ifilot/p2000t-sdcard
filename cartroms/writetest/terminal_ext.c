@@ -58,7 +58,7 @@ uint8_t bytegrab(uint16_t addr, uint8_t mode) {
             return memory[addr];
         break;
         case DUMP_EXTRAM:
-            return ram_read_byte(addr);
+            return ram_read_uint8_t(addr);
         break;
         default:
             return 0x00;

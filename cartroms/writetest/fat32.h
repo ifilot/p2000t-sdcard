@@ -27,6 +27,7 @@
 #include "util.h"
 #include "ram.h"
 #include "util.h"
+#include "terminal_ext.h"
 
 // global variables for the FAT
 extern uint16_t _bytes_per_sector;
@@ -53,15 +54,14 @@ extern uint8_t _current_attrib;
 /**
  * @brief Read the Master Boot Record
  * 
- * @param verbose whether to return verbose output to terminal
- * @return uint32_t start sector-address of the first sector
+ * @return uint32_t sector-address of the first partition
  */
 uint32_t read_mbr(void);
 
 /**
  * @brief Read metadata of the partition
  * 
- * @param lba0 address of the partition
+ * @param lba0 address of the partition (retrieved from read_mbr)
  */
 void read_partition(uint32_t lba0);
 
@@ -125,10 +125,29 @@ uint32_t store_file_metadata(uint8_t entry_id);
 /**
  * @brief Create a new file in the current folder
  * 
- * @param filename 
+ * @param filename 11 byte file name
+ * @param filesize size of the file
  */
-void create_file(const char* filename, uint32_t filesize);
+uint8_t create_new_file(const char* filename, uint32_t filesize);
 
+/**
+ * @brief Create a file entry in the folder
+ * 
+ * @param filename 11 byte file name
+ * @param filesize size of the file
+ * @return uint8_t whether file could be successfully created
+ * 
+ * When a directory does not have a free entry available to create a new file,
+ * the directory needs to be expanded. In that situation, this function returns
+ * an ERROR (0x01).
+ */
 uint8_t create_file_entry(const char* filename, uint32_t filesize);
+
+/**
+ * @brief Find the first available free sector from the FAT
+ * 
+ * @return uint32_t cluster address
+ */
+uint32_t allocate_free_cluster(void);
 
 #endif // _FAT32_H
