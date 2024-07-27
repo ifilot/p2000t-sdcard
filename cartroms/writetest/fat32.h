@@ -150,4 +150,11 @@ uint8_t create_file_entry(const char* filename, uint32_t filesize);
  */
 uint32_t allocate_free_cluster(void);
 
+/**
+ * @brief Construct sector address from file entry
+ * 
+ * @return uint32_t 
+ */
+uint32_t grab_sector_address_from_fileblock(uint16_t loc);
+
 #endif // _FAT32_H

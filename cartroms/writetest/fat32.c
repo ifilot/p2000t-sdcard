@@ -169,53 +169,53 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
     uint16_t fctr = 0;              // counter over directory entries (files and folders)
     uint32_t totalfilesize = 0;
     uint8_t stopreading = 0;
-    uint8_t fileblock[32];          // storage for single file
+    uint16_t loc = 0;               // current entry position
+    uint8_t c = 0;                  // check byte
+    uint8_t filename[11];
+
     while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && stopreading == 0) {
         
         // print cluster number and address
-        const uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
-        // sprintf(termbuffer, "Cluster %i:%c%08lX%c%08lX", ctr+1, COL_YELLOW, _linkedlist[ctr], COL_CYAN, caddr);
-        // terminal_printtermbuffer();
+        uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
 
         // loop over all sectors per cluster
         for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
-            read_sector(caddr + i); // read sector data
+            read_sector(caddr);            // read sector data
+            loc = SDCACHE0;
             for(uint16_t j=0; j<16; j++) { // 16 file tables per sector
-
-                // grab file metadata
-                copy_from_ram(j*32, fileblock, 32);
+                // check first position
+                c = ram_read_uint8_t(loc);
 
                 // early exit if a zero is read
-                if(fileblock[0] == 0x00) {
+                if(c == 0x00) {
                     stopreading = 1;
                     break;
                 }
 
                 // continue if an unused entry is encountered 0xE5
-                if(fileblock[0] == 0xE5) {
+                if(c == 0xE5) {
                     continue;
                 }
 
-                const uint8_t attrib = fileblock[0x0B];
+                c = ram_read_uint8_t(loc + 0x0B);    // attrib byte
 
                 // if lower five bits of byte 0x0B of file table is unset
                 // assume we are reading a file and try to decode it
-                if((attrib & 0x0F) == 0x00) {
+                if((c & 0x0F) == 0x00) {
 
                     // capture metadata
                     fctr++;
-                    const uint16_t fch = read_uint16_t(&fileblock[0x14]);
-                    const uint16_t fcl = read_uint16_t(&fileblock[0x1A]);
-                    const uint32_t fc = (uint32_t)fch << 16 | fcl;
-                    const uint32_t filesize = read_uint32_t(&fileblock[0x1C]);
+                    const uint32_t fc = grab_sector_address_from_fileblock(loc);
+                    const uint32_t filesize = ram_read_uint32_t(loc + 0x1C);
                     totalfilesize += filesize;
 
                     if(file_id < 0) {
-                        if(attrib & (1 << 4)) { // directory entry
-                            sprintf(termbuffer, "%c%3u%c%.8s DIR       %c%08lX", COL_YELLOW, fctr, COL_WHITE, &fileblock[0x00], COL_CYAN, fc);
+                        copy_from_ram(loc, filename, 11);
+                        if(c & (1 << 4)) { // directory entry
+                            sprintf(termbuffer, "%c%3u%c%.8s DIR       %c%08lX", COL_YELLOW, fctr, COL_WHITE, &filename[0x00], COL_CYAN, fc);
                             terminal_printtermbuffer();
                         } else {                // file entry
-                            if(casrun == 1 && memcmp(&fileblock[0x08], "CAS", 3) == 0) {    // cas file
+                            if(casrun == 1 && memcmp(&filename[0x08], "CAS", 3) == 0) {    // cas file
                                 // read from SD card once more and extract CAS data
                                 open_command();
                                 cmd17(get_sector_addr(fc, 0));
@@ -241,7 +241,7 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
                                 terminal_printtermbuffer();
                             } else { // non-cas file or not a cas run
                                 // print result for a regular file
-                                sprintf(termbuffer, "%c%3u%c%.8s.%.3s%c%6lu%c%08lX", COL_GREEN, fctr, COL_WHITE, &fileblock[0x00], &fileblock[0x08], COL_YELLOW, filesize, COL_CYAN, fc);
+                                sprintf(termbuffer, "%c%3u%c%.8s.%.3s%c%6lu%c%08lX", COL_GREEN, fctr, COL_WHITE, &filename[0x00], &filename[0x08], COL_YELLOW, filesize, COL_CYAN, fc);
                                 terminal_printtermbuffer();
                             }
                         }
@@ -260,8 +260,10 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
                         return fc;
                     }
                 }
+                loc += 32;  // next file entry location
             }
         }
+        caddr++;
         ctr++;
     }
 
@@ -428,7 +430,7 @@ void build_linked_list(uint32_t nextcluster) {
         _linkedlist[ctr] = nextcluster;
         read_sector(_fat_begin_lba + (nextcluster >> 7));
         uint8_t item = nextcluster & 0b01111111;
-        nextcluster = ram_read_uint32_t(item * 4);
+        nextcluster = ram_read_uint32_t((nextcluster & 0b01111111) * 4);
         ctr++;
     }
 }
@@ -457,10 +459,7 @@ uint32_t store_file_metadata(uint8_t entry_id) {
     copy_from_ram(entry_id*32+0x08, _ext, 3);
     _ext[3] = 0x00; // terminating byte
     _current_attrib = ram_read_uint8_t(SDCACHE0 + entry_id * 32 + 0x0B);
-    uint16_t fch = ram_read_uint16_t(SDCACHE0 + entry_id * 32 + 0x14);
-    uint16_t fcl = ram_read_uint16_t(SDCACHE0 + entry_id * 32 + 0x1A);
-    uint32_t fc = (uint32_t)fch << 16 | fcl;
-    return fc;
+    return grab_sector_address_from_fileblock(SDCACHE0 + entry_id * 32);
 }
 
 /**
@@ -629,4 +628,14 @@ uint32_t allocate_free_cluster(void) {
     }
 
     return 0;
+}
+
+/**
+ * @brief Construct sector address from file entry
+ * 
+ * @return uint32_t 
+ */
+uint32_t grab_sector_address_from_fileblock(uint16_t loc) {
+    return (uint32_t)ram_read_uint16_t(loc + 0x14) << 16 | 
+                     ram_read_uint16_t(loc + 0x1A);
 }
