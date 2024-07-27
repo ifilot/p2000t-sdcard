@@ -92,7 +92,7 @@ void cmd8(uint8_t *resp) __z88dk_fastcall;
 /**
  * CMD17: Read block
  */
-void cmd17(uint32_t addr) __z88dk_fastcall;
+uint8_t cmd17(uint32_t addr) __z88dk_fastcall;
 
 /**
  * CMD24: Write block
@@ -126,7 +126,7 @@ void read_block(void) __z88dk_callee;
 /**
  * @brief Write a 512 byte block to SD card
  */
-uint8_t write_block(void) __z88dk_fastcall;
+void write_block(void) __z88dk_fastcall;
 
 /**
  * @brief Copy the first 0x100 bytes immediately from SD to RAM while discarding
@@ -163,14 +163,14 @@ void fast_sd_to_intram_full(uint16_t ram_addr) __z88dk_callee;
  * 
  * @param addr sector address
  */
-void read_sector(uint32_t addr) __z88dk_fastcall;
+uint8_t read_sector(uint32_t addr) __z88dk_fastcall;
 
 /**
  * @brief Write to a single 512-byte sector
  * 
  * @param addr sector address
  */
-uint8_t write_sector(uint32_t addr);
+uint8_t write_sector(uint32_t addr) __z88dk_fastcall;
 
 /******************************************************************************
  * I/O CONTROL

@@ -509,6 +509,7 @@ uint8_t create_file_entry(const char* filename, uint32_t filesize) {
     uint8_t ctr = 0;                // counter over clusters
     uint16_t fctr = 0;              // counter over directory entries (files and folders)
     uint8_t fileblock[32];          // storage for single file
+    uint8_t res = 0;                // response test token
 
     // loop over the clusters and read directory contents
     while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16) {
@@ -542,22 +543,44 @@ uint8_t create_file_entry(const char* filename, uint32_t filesize) {
                     uint32_t filecluster = allocate_free_cluster();
                     sprintf(termbuffer, "Free cluster: %08lX", filecluster);
                     terminal_printtermbuffer();
+                    sprintf(termbuffer, "Location: %04X", loc);
+                    terminal_printtermbuffer();
+
+                    print_recall("Hit -space- to continue");
+                    wait_for_key_fixed(17); // space
+
                     if(filecluster != 0) {
-                        sprintf(termbuffer, "Read addr: %08lX", caddr);
+                       
+                        res = 0x00;
+                        while(res != 0xFE) {
+                            res = read_sector(caddr);
+                        }
                         terminal_printtermbuffer();
-                        read_sector(caddr);                                 // reload sector data
+                        terminal_hexdump(loc, 4, DUMP_EXTRAM);
+
                         ram_set(loc, 0x00, 32);                             // wipe file entry data
                         copy_to_ram((uint8_t*)filename, loc, 11);           // write filename entry
                         ram_write_uint16_t(loc + 0x14, filecluster >> 16);  // write upper word
                         ram_write_uint16_t(loc + 0x1A, filecluster);        // write lower word
                         ram_write_uint32_t(loc + 0x1C, filesize);           // write file size
+                        
+                        // check data to be written
                         sprintf(termbuffer, "Write addr: %08lX", caddr);
                         terminal_printtermbuffer();
-                        uint8_t res = write_sector(caddr);
+                        terminal_hexdump(loc, 4, DUMP_EXTRAM);
+                        
+                        // write data
+                        res = write_sector(caddr);
                         sprintf(termbuffer, "Write sector response: %02X", res & 0x1F);
                         terminal_printtermbuffer();
-                        terminal_hexdump(loc, 4, DUMP_EXTRAM);
-                        read_sector(caddr);
+                        
+                        // keep reading data until good read is performed
+                        res = 0x00;
+                        while(res != 0xFE) {
+                            res = read_sector(caddr);
+                        }
+                        sprintf(termbuffer, "Read addr: %08lX", caddr);
+                        terminal_printtermbuffer();
                         terminal_hexdump(loc, 4, DUMP_EXTRAM);
 
                         return SUCCESS;

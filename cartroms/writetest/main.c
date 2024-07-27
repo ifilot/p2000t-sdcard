@@ -45,19 +45,19 @@ void main(void) {
 
     // output SD card information to the user
     show_sdcard_data();
-    print("");
-    print_recall("Hit -space- to continue");
+    // print("");
+    // print_recall("Hit -space- to continue");
 
-    print("This cartridge will attempt to load the");
-    print("first sector of a test file from the sd-");
-    print("card, modify its data, and write it back");
-    print("to the same sector");
-    print("");
-    print("The first stage is to see if we can find");
-    print("a file at location: \"DUMPS/TEST\".");
-    print("");
-    print_recall("Hit -space- to continue");
-    wait_for_key_fixed(17); // space
+    // print("This cartridge will attempt to load the");
+    // print("first sector of a test file from the sd-");
+    // print("card, modify its data, and write it back");
+    // print("to the same sector");
+    // print("");
+    // print("The first stage is to see if we can find");
+    // print("a file at location: \"DUMPS/TEST\".");
+    // print("");
+    // print_recall("Hit -space- to continue");
+    // wait_for_key_fixed(17); // space
 
     // look for the folder dumps and try to find the tile "TEST" in that folder
     uint32_t faddr = find_folder(_root_dir_first_cluster, "DUMPS");
@@ -78,17 +78,42 @@ void main(void) {
             // report first sector
             uint32_t sec_addr = get_sector_addr(faddr, 0);
             sprintf(termbuffer, "%cSector address: %lu Bytes", COL_GREEN, sec_addr);
+            terminal_printtermbuffer();
 
-            print("The file \"DUMPS/TEST\" was correctly");
-            print("found. We now proceed to reading the");
-            print("contents of its first sector.");
-            print("");
+            uint8_t res = 0;
+
+            // res = read_sector(sec_addr);
+            // sprintf(termbuffer, "Read sector response: %02X", res);
+            // terminal_printtermbuffer();
+            // terminal_hexdump(SDCACHE0, 4, DUMP_EXTRAM);
+
+            // // adjust data
+            // for(uint8_t i=0; i<32; i++) {
+            //     ram_write_uint8_t(i, ram_read_uint8_t(i) + 2);
+            // }
+
+            // // write sector and show response
+            // res = write_sector(sec_addr);
+            // sprintf(termbuffer, "Write sector response: %02X", res);
+            // terminal_printtermbuffer();
+            // terminal_hexdump(SDCACHE0, 4, DUMP_EXTRAM);
+        
+            // // read sector again and show response
+            // res = read_sector(sec_addr);
+            // sprintf(termbuffer, "Read sector response: %02X", res);
+            // terminal_printtermbuffer();
+            // terminal_hexdump(SDCACHE0, 4, DUMP_EXTRAM);
+
+            // print("The file \"DUMPS/TEST\" was correctly");
+            // print("found. We now proceed to reading the");
+            // print("contents of its first sector.");
+            // print("");
             print_recall("Hit -space- to continue");
             wait_for_key_fixed(17); // space
 
 
             // proceed to create new file
-            uint8_t res = create_new_file("TESTFILETXT", 1024);
+            res = create_new_file("TESTFILETXT", 1024);
             sprintf(termbuffer, "File creation result: %02X", res);
             terminal_printtermbuffer();
 

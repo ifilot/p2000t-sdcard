@@ -314,7 +314,7 @@ rsnext:
     out (ADDR_HIGH),a           ; set upper byte address
     ld a,l
     out (ADDR_LOW),a            ; set lower byte address
-    ld a,e
+    ld a,e                      ; recall value to write
     out (RAM_IO),a              ; write byte
     inc hl                      ; go to next memory address
     dec bc                      ; decrement counter

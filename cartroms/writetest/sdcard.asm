@@ -25,6 +25,8 @@ INCLUDE "ports.inc"
 SDCACHE0        EQU  $0000
 SDCACHE1        EQU  $0200
 SDCACHE2        EQU  $0400
+TIMEOUT_READ    EQU  4000
+TIMEOUT_WRITE   EQU  10000
 
 PUBLIC _init_sdcard
 
@@ -162,10 +164,10 @@ _cmd8:
 ;-------------------------------------------------------------------------------
 ; CMD17: Read block
 ;
-; void cmd17(uint32_t addr);
+; uint8_t cmd17(uint32_t addr);
 ;
 ; garbles: a,b,de,hl,iy
-; result of R1 is stored in l, but ignored
+; result of R1 is stored in l
 ;-------------------------------------------------------------------------------
 _cmd17:
     ld a,17|0x40
@@ -195,11 +197,20 @@ _cmd17:
     call _receive_R1
     ld a,0xFF                   ; flush with ones
     out (SERIAL),a
+    ld bc,TIMEOUT_READ          ; set timeout timer
 cmd17next:
+    dec bc
+    ld a,b
+    or c
+    jp z,cmd17timeout
     out (CLKSTART),a            ; send out
     in a,(SERIAL)
     cp 0xFE                     ; wait for 0xFE to be received
     jr nz,cmd17next
+    ld l,a
+    ret
+cmd17timeout:
+    ld l,0xFF
     ret
 
 ;-------------------------------------------------------------------------------
@@ -348,7 +359,6 @@ recvbyte:
 _read_block:
     ld a,0x02
     out (LED_IO),a              ; turn write led on
-    di
     ld a,$FF
     out (SERIAL),a              ; flush shift register with ones
     ld hl,SDCACHE0              ; set external RAM address
@@ -369,7 +379,6 @@ blocknext:
     jp nz, blockouter
     out (CLKSTART),a            ; two more pulses for the checksum
     out (CLKSTART),a            ; which are ignored
-    ei
     ld a,0x00
     out (LED_IO),a              ; turn write led off
     ret
@@ -377,14 +386,12 @@ blocknext:
 ;-------------------------------------------------------------------------------
 ; Write block to SD card
 ;
-; uint8_t write_block(void);
+; void write_block(void);
 ;
 ; Input: None
 ; Garbles: a,bc,hl
-; Returns: Return value in l
 ;-------------------------------------------------------------------------------
 _write_block:
-    di                          ; disable interrupts
     ld hl,SDCACHE0              ; set external RAM address
     ld a,0xFE                   ; send start block token
     out (SERIAL),a              ; store in shift register
@@ -404,27 +411,34 @@ wblocknext:
     djnz wblocknext
     dec c
     jp nz, wblockouter
-nexttoken:
     ld a,0xFF                   ; flush serial register
     out (SERIAL),a              ; store in shift register
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    in a,(SERIAL)               ; read from register
-    cp 0xFF                     ; is token equal to ones?
-    jp z,nexttoken              ; try again until non-0xFF is being read
-    ld l,a                      ; store in l register (return value)
-    ei
+    out (CLKSTART),a            ; two more pulses for the checksum
+    out (CLKSTART),a            ; which are ignored
     ret
 
 ;-------------------------------------------------------------------------------
 ; Read a sector from the SD card
 ;
 ; INPUT: DEHL - 32 bit SD card sector address
+; OUTPUT: L - read token (0xFE is success, failure otherwise)
 ;-------------------------------------------------------------------------------
 _read_sector:
+    di
     call _open_command
-    call _cmd17
-    call _read_block
+    call _cmd17                 ; return SD card status
+    ld a,l                      ; load response into a
+    cp 0xFE                     ; check if equal to success token
+    jp nz,readsectorexit        ; if not, exit with an error
+    call _read_block            ; if success token, read block
+    jmp readsectorsuccess
+readsectorfail:
+    jmp readsectorexit
+readsectorsuccess:
+    ld l,0xFE
+readsectorexit:
     call _close_command
+    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -433,14 +447,54 @@ _read_sector:
 ; INPUT: DEHL - 32 bit SD card sector address
 ;-------------------------------------------------------------------------------
 _write_sector:
+    di
     call _open_command
     call _cmd24                 ; call CMD24, token is stored in l
     ld a,l
     cp 0x00                     ; check if return value is 0x00
-    jp nz,wrsecexit             ; if not, exit function
-    call _write_block           ; call write block, token value stored in l
-wrsecexit:
+    jp nz,exitfail              ; if not, exit function
+    call _write_block           ; call write block
+    ; data has been written, now wait until a response from the SD-card is
+    ; being received
+    ld bc,TIMEOUT_WRITE
+writewaitresp:
+    dec bc
+    ld a,b
+    or c
+    jp z,responsetimeout        ; send response wait timeout
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a,(SERIAL)               ; read from register
+    cp 0xFF                     ; is token equal to ones?
+    jp z,writewaitresp          ; try again until non-0xFF is being read
+    ; response from SD-card is received, now check if the data has been accepted
+    ; by comparing response (after ANDING with 0x0F) to 0x05
+    and 0x0F
+    cp 0x05
+    jp nz,exitl2a               ; exit function with value in a put into l
+    ; successfull response received, not wait until write cycle is finished
+    ld bc,TIMEOUT_WRITE
+writewaitdone:
+    dec bc
+    ld a,b
+    or c
+    jp z,exitl2a                ; exit function with value in a put into l
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a,(SERIAL)               ; read from register
+    cp 0x00                     ; check for busy token
+    jp z,writewaitdone          ; if busy token received, try again
+    ld l,0x05                   ; if not, write is complete, exit function
+    jmp exitwrite               ; exit with success write as response
+responsetimeout:
+    ld l,0xFF
+    jmp exitwrite
+exitl2a:
+    ld l,a
+exitfail:
+    or 0x80                     ; set MSB to 1 and return the error code
+    ld l,a
+exitwrite:
     call _close_command         ; return with token value from write block in l
+    ei
     ret
 
 ;-------------------------------------------------------------------------------
