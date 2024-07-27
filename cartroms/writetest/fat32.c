@@ -126,14 +126,14 @@ void read_partition(uint32_t lba0) {
     _fat_begin_lba = lba0 + _reserved_sectors;
     _shadow_fat_begin_lba = _fat_begin_lba + _sectors_per_fat;
     _sector_begin_lba = _fat_begin_lba + (_number_of_fats * _sectors_per_fat);
-    _lba_addr_root_dir = get_sector_addr(_root_dir_first_cluster, 0);
+    _lba_addr_root_dir = calculate_sector_address(_root_dir_first_cluster, 0);
 
     // show prominent sector locations
     sprintf(termbuffer, "FAT sector:%c%08lX", COL_GREEN, _fat_begin_lba);
     terminal_printtermbuffer();
     sprintf(termbuffer, "Shadow FAT sector:%c%08lX", COL_GREEN, _shadow_fat_begin_lba);
     terminal_printtermbuffer();
-    // sprintf(termbuffer, "First cluster sector:%c%08lX", COL_GREEN, get_sector_addr(0, 0));
+    // sprintf(termbuffer, "First cluster sector:%c%08lX", COL_GREEN, calculate_sector_address(0, 0));
     // terminal_printtermbuffer();
 
     // sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
@@ -160,23 +160,24 @@ void read_partition(uint32_t lba0) {
  * @param file_id ith file in the folder
  * @return uint32_t first cluster of the file or directory
  */
-uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
+uint32_t read_folder(int16_t file_id, uint8_t casrun) {
+
     // build linked list for the root directory
-    build_linked_list(cluster);
+    build_linked_list(_current_folder_cluster);
 
     // loop over the clusters and read directory contents
-    uint8_t ctr = 0;                // counter over sectors
+    uint8_t ctr = 0;                // counter over clusters
     uint16_t fctr = 0;              // counter over directory entries (files and folders)
-    uint32_t totalfilesize = 0;
-    uint8_t stopreading = 0;
+    uint32_t totalfilesize = 0;     // collect size of files in folder
+    uint8_t stopreading = 0;        // whether to break of reading procedure
     uint16_t loc = 0;               // current entry position
     uint8_t c = 0;                  // check byte
     uint8_t filename[11];
 
-    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && stopreading == 0) {
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE && stopreading == 0) {
         
         // print cluster number and address
-        uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
+        uint32_t caddr = calculate_sector_address(_linkedlist[ctr], 0);
 
         // loop over all sectors per cluster
         for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
@@ -186,26 +187,27 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
                 // check first position
                 c = ram_read_uint8_t(loc);
 
+                // continue if an unused entry is encountered 0xE5
+                if(c == 0xE5) {
+                    loc += 32;  // next file entry location
+                    continue;
+                }
+
                 // early exit if a zero is read
                 if(c == 0x00) {
                     stopreading = 1;
                     break;
                 }
 
-                // continue if an unused entry is encountered 0xE5
-                if(c == 0xE5) {
-                    continue;
-                }
-
                 c = ram_read_uint8_t(loc + 0x0B);    // attrib byte
 
                 // if lower five bits of byte 0x0B of file table is unset
-                // assume we are reading a file and try to decode it
+                // assume we are reading a file or folder and try to decode it
                 if((c & 0x0F) == 0x00) {
 
                     // capture metadata
                     fctr++;
-                    const uint32_t fc = grab_sector_address_from_fileblock(loc);
+                    const uint32_t fc = grab_cluster_address_from_fileblock(loc);
                     const uint32_t filesize = ram_read_uint32_t(loc + 0x1C);
                     totalfilesize += filesize;
 
@@ -218,7 +220,7 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
                             if(casrun == 1 && memcmp(&filename[0x08], "CAS", 3) == 0) {    // cas file
                                 // read from SD card once more and extract CAS data
                                 open_command();
-                                cmd17(get_sector_addr(fc, 0));
+                                cmd17(calculate_sector_address(fc, 0));
                                 fast_sd_to_ram_first_0x100(SDCACHE1);
                                 close_command();
 
@@ -262,9 +264,9 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
                 }
                 loc += 32;  // next file entry location
             }
+            caddr++;    // next sector
         }
-        caddr++;
-        ctr++;
+        ctr++;  // next cluster
     }
 
     if(file_id < 0) {
@@ -279,69 +281,66 @@ uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun) {
 }
 
 /**
- * @brief Find a file identified by BASENAME and EXT in the folder correspond
- *        to the cluster address
+ * @brief Find a subfolder or a file inside current folder
  * 
- * @param cluster   cluster address
- * @param basename  first 8 bytes of the file
- * @param ext       3 byte extension of the file
- * @return uint32_t cluster address of the file or 0 if not found
+ * @param search    11-byte search pattern
+ * @param which     FIND_FOLDER or FIND_FILE
+ * @return uint32_t cluster address
  */
-uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_find) {
+uint32_t find_in_folder(const char* search, uint8_t which) {
     // build linked list for the root directory
-    build_linked_list(cluster);
+    build_linked_list(_current_folder_cluster);
 
     // loop over the clusters and read directory contents
     uint8_t ctr = 0;                // counter over sectors
-    uint16_t fctr = 0;              // counter over directory entries (files and folders)
     uint8_t stopreading = 0;
-    uint8_t fileblock[32];          // storage for single file
-    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && stopreading == 0) {
+    uint16_t loc = 0;               // current entry position
+    uint8_t c = 0;                  // single byte entry for checking
+    uint32_t caddr = 0;             // sector address
+    uint8_t filename[11];
+
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE && stopreading == 0) {
         
-        // get cluster address
-        uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
+        // get sector address
+        caddr = calculate_sector_address(_linkedlist[ctr], 0);
 
         // loop over all sectors per cluster
         for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
             read_sector(caddr); // read sector data
+            loc = SDCACHE0;
+
             for(uint16_t j=0; j<16; j++) { // 16 file tables per sector
 
-                // grab file metadata
-                copy_from_ram(SDCACHE0 + j * 32, fileblock, 32);
+                // grab first byte
+                c = ram_read_uint8_t(loc);
+
+                // continue if an unused entry is encountered 0xE5
+                if(c == 0xE5) {
+                    loc += 32;
+                    continue;
+                }
 
                 // early exit if a zero is read
-                if(fileblock[0] == 0x00) {
+                if(c == 0x00) {
                     stopreading = 1;
                     break;
                 }
 
-                // continue if an unused entry is encountered 0xE5
-                if(fileblock[0] == 0xE5) {
-                    continue;
-                }
+                // grab filename to check
+                copy_from_ram(loc, filename, 11);
 
-                uint8_t attrib = fileblock[0x0B];
+                if(memcmp(search, filename, 11) == 0) {
+                    c = ram_read_uint8_t(loc + 0x0B);   // grab attrib byte
 
-                // if lower five bits of byte 0x0B of file table is unset
-                // assume we are reading a file and try to decode it
-                if((attrib & 0x0F) == 0x00) {
-                    fctr++;
-
-                    if(memcmp(basename_find, fileblock, 8) == 0 && 
-                       memcmp(ext_find, &fileblock[8], 3) == 0) {
-
-                        uint16_t fch = read_uint16_t(&fileblock[0x14]);
-                        uint16_t fcl = read_uint16_t(&fileblock[0x1A]);
-                        uint32_t fc = (uint32_t)fch << 16 | fcl;
-                        uint32_t filesize = read_uint32_t(&fileblock[28]);
-
-                        _filesize_current_file = filesize;
-
-                        return fc;
+                    // perform either file matching or folder matching
+                    if(((c & 0x0F) == 0x00 && c & (1 << 4) && which == F_FIND_FOLDER) ||
+                       ((c & 0x0F) && which == F_FIND_FILE)) {
+                        return grab_cluster_address_from_fileblock(loc);
                     }
                 }
+                loc += 32;  // increment to next directory entry
             }
-            caddr++;        // increment sector address
+            caddr++;        // increment to next sector
         }
         ctr++;
     }
@@ -350,71 +349,8 @@ uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_
 }
 
 /**
- * @brief Find a file identified by BASENAME and EXT in the folder correspond
- *        to the cluster address
- * 
- * @param cluster   cluster address
- * @param basename  first 8 bytes of the file
- * @param ext       3 byte extension of the file
- * @return uint32_t cluster address of the file or 0 if not found
- */
-uint32_t find_folder(uint32_t cluster, const char* basename_find) {
-    // build linked list for the root directory
-    build_linked_list(cluster);
-
-    // loop over the clusters and read directory contents
-    uint8_t ctr = 0;                // counter over sectors
-    uint8_t stopreading = 0;
-    uint8_t fileblock[32];          // storage for single file
-    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && stopreading == 0) {
-        
-        // get cluster address
-        uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
-
-        // loop over all sectors per cluster
-        for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
-            read_sector(caddr);                 // read sector data
-            for(uint16_t j=0; j<16; j++) {      // 16 file tables per sector
-
-                // grab file metadata
-                copy_from_ram(j*32, fileblock, 32);
-
-                // early exit if a zero is read
-                if(fileblock[0] == 0x00) {
-                    stopreading = 1;
-                    break;
-                }
-
-                // continue if an unused entry is encountered 0xE5
-                if(fileblock[0] == 0xE5) {
-                    continue;
-                }
-
-                const uint8_t attrib = fileblock[0x0B];
-
-                // if lower five bits of byte 0x0B of file table is unset
-                // assume we are reading a file and try to decode it
-                if((attrib & 0x0F) == 0x00 && attrib & (1 << 4)) {
-
-                    if(memcmp(basename_find, fileblock, strlen(basename_find)) == 0) {
-                        const uint16_t fch = read_uint16_t(&fileblock[0x14]);
-                        const uint16_t fcl = read_uint16_t(&fileblock[0x1A]);
-                        const uint32_t fc = (uint32_t)fch << 16 | fcl;
-
-                        return fc;
-                    }
-                }
-            }
-            caddr++;
-        }
-        ctr++;
-    }
-
-    return 0;
-}
-
-/**
- * @brief Build a linked list of sector addresses starting from a root address
+ * @brief Build a linked list of cluster addresses starting from a root address
+ *        Holds up to a maximum of F_LL_SIZE entries
  * 
  * @param nextcluster first cluster in the linked list
  */
@@ -423,10 +359,10 @@ void build_linked_list(uint32_t nextcluster) {
     uint8_t ctr = 0;
 
     // clear previous linked list
-    memset(_linkedlist, 0xFF, LINKEDLIST_SIZE * sizeof(uint32_t));
+    memset(_linkedlist, 0xFF, F_LL_SIZE * sizeof(uint32_t));
 
     // try grabbing next cluster
-    while(nextcluster < 0x0FFFFFF8 && nextcluster != 0 && ctr < LINKEDLIST_SIZE) {
+    while(nextcluster < 0x0FFFFFF8 && nextcluster != 0 && ctr < F_LL_SIZE) {
         _linkedlist[ctr] = nextcluster;
         read_sector(_fat_begin_lba + (nextcluster >> 7));
         uint8_t item = nextcluster & 0b01111111;
@@ -442,7 +378,7 @@ void build_linked_list(uint32_t nextcluster) {
  * @param sector which sector on the cluster (0-Nclusters)
  * @return uint32_t sector address (512 byte address)
  */
-uint32_t get_sector_addr(uint32_t cluster, uint8_t sector) {
+uint32_t calculate_sector_address(uint32_t cluster, uint8_t sector) {
     return _sector_begin_lba + (cluster - 2) * _sectors_per_cluster + sector;
 }
 
@@ -459,7 +395,7 @@ uint32_t store_file_metadata(uint8_t entry_id) {
     copy_from_ram(entry_id*32+0x08, _ext, 3);
     _ext[3] = 0x00; // terminating byte
     _current_attrib = ram_read_uint8_t(SDCACHE0 + entry_id * 32 + 0x0B);
-    return grab_sector_address_from_fileblock(SDCACHE0 + entry_id * 32);
+    return grab_cluster_address_from_fileblock(SDCACHE0 + entry_id * 32);
 }
 
 /**
@@ -467,25 +403,25 @@ uint32_t store_file_metadata(uint8_t entry_id) {
  * 
  * @param filename 
  */
-uint8_t create_new_file(const char* filename, uint32_t filesize) {
-    if(find_file(_current_folder_cluster, filename, &filename[8]) != 0) {
-        return ERROR_FILE_EXISTS;
+uint8_t create_new_file(const char* filename) {
+    if(find_in_folder(filename, F_FIND_FILE) != 0) {
+        return F_ERROR_FILE_EXISTS;
     }
 
-    uint8_t res = create_file_entry(filename, filesize);
+    uint8_t res = create_file_entry(filename);
     switch(res) {
-        case ERROR_DIR_FULL:
+        case F_ERROR_DIR_FULL:
             // expand folder and try again
-            return create_new_file(filename, filesize);
+            return create_new_file(filename);
         break;
-        case ERROR_CARD_FULL:
-            return ERROR_CARD_FULL;
+        case F_ERROR_CARD_FULL:
+            return F_ERROR_CARD_FULL;
         break;
-        case SUCCESS:
-            return SUCCESS;
+        case F_SUCCESS:
+            return F_SUCCESS;
         break;
         default:
-            return ERROR;
+            return F_ERROR;
         break;
     }
 }
@@ -494,97 +430,54 @@ uint8_t create_new_file(const char* filename, uint32_t filesize) {
  * @brief Create a file entry in the folder
  * 
  * @param filename 11 byte file name
- * @param filesize size of the file
  * @return uint8_t whether file could be successfully created
  * 
  * When a directory does not have a free entry available to create a new file,
  * the directory needs to be expanded. In that situation, this function returns
  * an ERROR (0x01).
  */
-uint8_t create_file_entry(const char* filename, uint32_t filesize) {
+uint8_t create_file_entry(const char* filename) {
     // build linked list for this subdirectory
     build_linked_list(_current_folder_cluster);
 
     uint8_t ctr = 0;                // counter over clusters
     uint16_t fctr = 0;              // counter over directory entries (files and folders)
-    uint8_t fileblock[32];          // storage for single file
     uint8_t res = 0;                // response test token
+    uint32_t caddr = 0;
+    uint16_t loc = 0;
+    uint8_t c = 0;
 
     // loop over the clusters and read directory contents
-    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16) {
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE) {
         
         // get cluster address
-        uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
-        sprintf(termbuffer, "Scanning %08lX", caddr);
-        terminal_printtermbuffer();
+        caddr = calculate_sector_address(_linkedlist[ctr], 0);
 
         // loop over all sectors per cluster
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
             read_sector(caddr);                 // read sector data
-            uint16_t loc = SDCACHE0;
+            loc = SDCACHE0;
             for(uint16_t j=0; j<16; j++) {      // 16 file entries per sector
 
                 // grab file metadata
-                copy_from_ram(loc, fileblock, 32);
+                c = ram_read_uint8_t(loc);
 
                 // check if the entry is available, if so, use it!
-                if(fileblock[0] == 0x00 || fileblock[0] == 0xE5) {
-
-                    terminal_printtermbuffer();
-                    terminal_hexdump(loc, 4, DUMP_EXTRAM);
-
-                    sprintf(termbuffer, "Sector %02X hosts free entry", i);
-                    terminal_printtermbuffer();
-                    sprintf(termbuffer, "Entry %02X is available", j);
-                    terminal_printtermbuffer();
+                if(c == 0x00 || c == 0xE5) {
 
                     // find the first available file cluster, this will garble SDCACHE
                     uint32_t filecluster = allocate_free_cluster();
-                    sprintf(termbuffer, "Free cluster: %08lX", filecluster);
-                    terminal_printtermbuffer();
-                    sprintf(termbuffer, "Location: %04X", loc);
-                    terminal_printtermbuffer();
 
-                    print_recall("Hit -space- to continue");
-                    wait_for_key_fixed(17); // space
-
-                    if(filecluster != 0) {
-                       
-                        res = 0x00;
-                        while(res != 0xFE) {
-                            res = read_sector(caddr);
-                        }
-                        terminal_printtermbuffer();
-                        terminal_hexdump(loc, 4, DUMP_EXTRAM);
-
+                    if(filecluster != 0) { 
+                        read_sector(caddr);
                         ram_set(loc, 0x00, 32);                             // wipe file entry data
                         copy_to_ram((uint8_t*)filename, loc, 11);           // write filename entry
                         ram_write_uint16_t(loc + 0x14, filecluster >> 16);  // write upper word
                         ram_write_uint16_t(loc + 0x1A, filecluster);        // write lower word
-                        ram_write_uint32_t(loc + 0x1C, filesize);           // write file size
-                        
-                        // check data to be written
-                        sprintf(termbuffer, "Write addr: %08lX", caddr);
-                        terminal_printtermbuffer();
-                        terminal_hexdump(loc, 4, DUMP_EXTRAM);
-                        
-                        // write data
-                        res = write_sector(caddr);
-                        sprintf(termbuffer, "Write sector response: %02X", res & 0x1F);
-                        terminal_printtermbuffer();
-                        
-                        // keep reading data until good read is performed
-                        res = 0x00;
-                        while(res != 0xFE) {
-                            res = read_sector(caddr);
-                        }
-                        sprintf(termbuffer, "Read addr: %08lX", caddr);
-                        terminal_printtermbuffer();
-                        terminal_hexdump(loc, 4, DUMP_EXTRAM);
-
-                        return SUCCESS;
+                        res = write_sector(caddr);                          // write data
+                        return F_SUCCESS;
                     } else {
-                        return ERROR_CARD_FULL;
+                        return F_ERROR_CARD_FULL;
                     }
                 }
 
@@ -594,7 +487,7 @@ uint8_t create_file_entry(const char* filename, uint32_t filesize) {
         }
         ctr++;
     }
-    return ERROR_DIR_FULL;
+    return F_ERROR_DIR_FULL;
 }
 
 /**
@@ -635,7 +528,7 @@ uint32_t allocate_free_cluster(void) {
  * 
  * @return uint32_t 
  */
-uint32_t grab_sector_address_from_fileblock(uint16_t loc) {
+uint32_t grab_cluster_address_from_fileblock(uint16_t loc) {
     return (uint32_t)ram_read_uint16_t(loc + 0x14) << 16 | 
                      ram_read_uint16_t(loc + 0x1A);
 }

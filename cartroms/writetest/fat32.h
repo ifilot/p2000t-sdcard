@@ -29,6 +29,17 @@
 #include "util.h"
 #include "terminal_ext.h"
 
+#define F_FIND_FOLDER           0x00
+#define F_FIND_FILE             0x01
+
+#define F_SUCCESS               0x00
+#define F_ERROR                 0x01
+#define F_ERROR_DIR_FULL        0x02
+#define F_ERROR_CARD_FULL       0x03
+#define F_ERROR_FILE_EXISTS     0x04
+
+#define F_LL_SIZE               16
+
 // global variables for the FAT
 extern uint16_t _bytes_per_sector;
 extern uint8_t _sectors_per_cluster;
@@ -41,7 +52,7 @@ extern uint32_t _shadow_fat_begin_lba;
 extern uint32_t _sector_begin_lba;
 extern uint32_t _cluster_begin_lba;
 extern uint32_t _lba_addr_root_dir;
-extern uint32_t _linkedlist[LINKEDLIST_SIZE];
+extern uint32_t _linkedlist[F_LL_SIZE];
 extern uint32_t _current_folder_cluster;
 
 // global variables for currently active file or folder
@@ -70,36 +81,23 @@ void read_partition(uint32_t lba0);
  *        by file id. When a negative file_id is supplied, the directory is
  *        simply scanned and the list of files are outputted to the screen.
  * 
- * @param cluster cluster address of the folder
  * @param file_id ith file in the folder
  * @param casrun whether we are performing a run with CAS file metadata scan
  * @return uint32_t first cluster of the file
  */
-uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun);
+uint32_t read_folder(int16_t file_id, uint8_t casrun);
 
 /**
- * @brief Find a file identified by BASENAME and EXT in the folder corresponding
- *        to the cluster address
+ * @brief Find a subfolder or a file inside current folder
  * 
- * @param cluster   cluster address
- * @param basename  first 8 bytes of the file
- * @param ext       3 byte extension of the file
- * @return uint32_t cluster address of the file or 0 if not found
+ * @param search    11-byte search pattern
+ * @param which     FIND_FOLDER or FIND_FILE
+ * @return uint32_t cluster address
  */
-uint32_t find_file(uint32_t cluster, const char* basename, const char* ext);
+uint32_t find_in_folder(const char* search, uint8_t which);
 
 /**
- * @brief Find a file identified by BASENAME in the folder corresponding
- *        to the cluster address
- * 
- * @param cluster   cluster address
- * @param basename  first 8 bytes of the file
- * @return uint32_t cluster address of the file or 0 if not found
- */
-uint32_t find_folder(uint32_t cluster, const char* basename);
-
-/**
- * @brief Build a linked list of sector addresses starting from a root address
+ * @brief Build a linked list of cluster addresses starting from a root address
  * 
  * @param cluster0 first cluster in the linked list
  */
@@ -112,7 +110,7 @@ void build_linked_list(uint32_t nextcluster);
  * @param sector which sector on the cluster (0-Nclusters)
  * @return uint32_t sector address (512 byte address)
  */
-uint32_t get_sector_addr(uint32_t cluster, uint8_t sector);
+uint32_t calculate_sector_address(uint32_t cluster, uint8_t sector);
 
 /**
  * @brief Store entry metadata in special global variables
@@ -126,22 +124,20 @@ uint32_t store_file_metadata(uint8_t entry_id);
  * @brief Create a new file in the current folder
  * 
  * @param filename 11 byte file name
- * @param filesize size of the file
  */
-uint8_t create_new_file(const char* filename, uint32_t filesize);
+uint8_t create_new_file(const char* filename);
 
 /**
  * @brief Create a file entry in the folder
  * 
  * @param filename 11 byte file name
- * @param filesize size of the file
  * @return uint8_t whether file could be successfully created
  * 
  * When a directory does not have a free entry available to create a new file,
  * the directory needs to be expanded. In that situation, this function returns
  * an ERROR (0x01).
  */
-uint8_t create_file_entry(const char* filename, uint32_t filesize);
+uint8_t create_file_entry(const char* filename);
 
 /**
  * @brief Find the first available free sector from the FAT
@@ -151,10 +147,10 @@ uint8_t create_file_entry(const char* filename, uint32_t filesize);
 uint32_t allocate_free_cluster(void);
 
 /**
- * @brief Construct sector address from file entry
+ * @brief Grab cluster address from file entry
  * 
  * @return uint32_t 
  */
-uint32_t grab_sector_address_from_fileblock(uint16_t loc);
+uint32_t grab_cluster_address_from_fileblock(uint16_t loc);
 
 #endif // _FAT32_H
