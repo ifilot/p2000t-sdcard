@@ -29,8 +29,9 @@
 #include "util.h"
 #include "terminal_ext.h"
 
-#define F_FIND_FOLDER           0x00
-#define F_FIND_FILE             0x01
+#define F_FIND_FOLDER_NAME      0x00
+#define F_FIND_FILE_NAME        0x01
+#define F_FIND_FILE_ADDR        0x02
 
 #define F_SUCCESS               0x00
 #define F_ERROR                 0x01
@@ -152,5 +153,22 @@ uint32_t allocate_free_cluster(void);
  * @return uint32_t 
  */
 uint32_t grab_cluster_address_from_fileblock(uint16_t loc);
+
+/**
+ * @brief Set the file pointer by specifying folder address and file address
+ * 
+ * @param folder_addr 
+ * @param file_addr 
+ */
+void set_file_pointer(uint32_t folder_addr, uint32_t file_addr);
+
+/**
+ * @brief Set the current active folder
+ * 
+ * @param folder_addr 
+ */
+inline void set_current_folder(uint32_t folder_addr) {
+    _current_folder_cluster = folder_addr;
+}
 
 #endif // _FAT32_H

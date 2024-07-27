@@ -20,6 +20,7 @@
 
 #include "fat32.h"
 
+// filesystem variables
 uint16_t _bytes_per_sector = 0;
 uint8_t _sectors_per_cluster = 0;
 uint16_t _reserved_sectors = 0;
@@ -36,6 +37,13 @@ uint32_t _current_folder_cluster = 0;
 char _basename[9];
 char _ext[4];
 uint8_t _current_attrib = 0;
+
+// file pointer variables
+uint32_t _fptr_cluster = 0;         // first cluster of a file
+uint32_t _fptr_filesize = 0;        // stored size of file
+uint32_t _fptr_size_allocated = 0;  // storage space currently allocated
+uint32_t _fptr_pos = 0;             // read position
+uint32_t _fptr_folder_addr = 0;     // cluster address of the folder
 
 /**
  * @brief Read the Master Boot Record
@@ -201,8 +209,7 @@ uint32_t read_folder(int16_t file_id, uint8_t casrun) {
 
                 c = ram_read_uint8_t(loc + 0x0B);    // attrib byte
 
-                // if lower five bits of byte 0x0B of file table is unset
-                // assume we are reading a file or folder and try to decode it
+                // check if we are reading a file or a folder
                 if((c & 0x0F) == 0x00) {
 
                     // capture metadata
@@ -329,15 +336,39 @@ uint32_t find_in_folder(const char* search, uint8_t which) {
                 // grab filename to check
                 copy_from_ram(loc, filename, 11);
 
-                if(memcmp(search, filename, 11) == 0) {
-                    c = ram_read_uint8_t(loc + 0x0B);   // grab attrib byte
+                // grab attrib byte
+                c = ram_read_uint8_t(loc + 0x0B);
 
-                    // perform either file matching or folder matching
-                    if(((c & 0x0F) == 0x00 && c & (1 << 4) && which == F_FIND_FOLDER) ||
-                       ((c & 0x0F) && which == F_FIND_FILE)) {
-                        return grab_cluster_address_from_fileblock(loc);
-                    }
+                if((c & 0x0F) != 0x00) {
+                    loc += 32;
+                    continue;
                 }
+
+                switch(which) {
+                    case F_FIND_FOLDER_NAME:
+                    case F_FIND_FILE_NAME:
+                        if(memcmp(search, filename, 11) == 0) {
+
+                            // perform either file matching or folder matching
+                            if(((c & (1 << 4)) && which == F_FIND_FOLDER_NAME) ||
+                               (!(c & (1 << 4)) && which == F_FIND_FILE_NAME)) {
+                                // if found, return cluster address
+                                return grab_cluster_address_from_fileblock(loc);
+                            }
+                        }
+                    break;
+                    case F_FIND_FILE_ADDR:
+                        c = ram_read_uint8_t(loc + 0x0B);
+                        if(!(c & (1 << 4))) {
+                            if(grab_cluster_address_from_fileblock(loc) == _fptr_cluster) {
+                                store_file_metadata(j);
+                                return _fptr_cluster;
+                            }
+                        }
+                        
+                    break;
+                }
+                
                 loc += 32;  // increment to next directory entry
             }
             caddr++;        // increment to next sector
@@ -404,7 +435,7 @@ uint32_t store_file_metadata(uint8_t entry_id) {
  * @param filename 
  */
 uint8_t create_new_file(const char* filename) {
-    if(find_in_folder(filename, F_FIND_FILE) != 0) {
+    if(find_in_folder(filename, F_FIND_FILE_NAME) != 0) {
         return F_ERROR_FILE_EXISTS;
     }
 
@@ -531,4 +562,42 @@ uint32_t allocate_free_cluster(void) {
 uint32_t grab_cluster_address_from_fileblock(uint16_t loc) {
     return (uint32_t)ram_read_uint16_t(loc + 0x14) << 16 | 
                      ram_read_uint16_t(loc + 0x1A);
+}
+
+/**
+ * @brief Set the file pointer by specifying folder address and file address
+ * 
+ * @param folder_addr 
+ * @param file_addr 
+ */
+void set_file_pointer(uint32_t folder_addr, uint32_t file_addr) {
+    // set cluster addresses of files
+    uint32_t _fptr_folder_addr = folder_addr;
+    uint32_t _fptr_cluster = file_addr;
+    
+    // grab total file size
+    set_current_folder(folder_addr);
+    find_in_folder("", F_FIND_FILE_ADDR);
+    _fptr_filesize = _filesize_current_file;
+
+    // determine allocated file size
+    build_linked_list(file_addr);
+    uint8_t ctr = 0;
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE) {
+        ctr++;
+    }
+    ctr++;
+    _fptr_size_allocated = ctr * _sectors_per_cluster * _bytes_per_sector;
+
+    // reset pointer positions
+    _fptr_pos = 0;
+
+    sprintf(termbuffer, "File size: %08lX", _fptr_filesize);
+    terminal_printtermbuffer();
+    sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated >> 10);
+    terminal_printtermbuffer();
+    sprintf(termbuffer, "Folder cluster: %08lX", _fptr_folder_addr);
+    terminal_printtermbuffer();
+    sprintf(termbuffer, "File cluster: %08lX", _fptr_cluster);
+    terminal_printtermbuffer();
 }

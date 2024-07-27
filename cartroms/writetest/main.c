@@ -50,26 +50,24 @@ void main(void) {
     read_folder(-1, 0);
 
     // find dumps folder
-    uint32_t faddr = find_in_folder("DUMPS      ", F_FIND_FOLDER);
+    uint32_t folder_addr = find_in_folder("DUMPS      ", F_FIND_FOLDER_NAME);
 
     // check if folder is found
-    if(faddr != 0) {
+    if(folder_addr != 0) {
         // output folder contents
-        _current_folder_cluster = faddr;
+        set_current_folder(folder_addr);
         read_folder(-1, 0);
 
-        print_recall("Hit -space- to continue");
-        wait_for_key_fixed(17); // space
-
         // proceed to create new file
-        uint8_t res = create_new_file("ANOTHER TXT");
+        uint8_t res = create_new_file("BEVER002TXT");
         sprintf(termbuffer, "File creation result: %02X", res);
         terminal_printtermbuffer();
 
-        print_recall("Hit -space- to continue");
-        wait_for_key_fixed(17); // space
-
         read_folder(-1, 0);
+
+        set_current_folder(folder_addr);
+        uint32_t file_addr = find_in_folder("BEVER001TXT", F_FIND_FOLDER_NAME);
+        set_file_pointer(folder_addr, file_addr);
 
     } else {
         print_error("No folder DUMPS found in root dir.");
