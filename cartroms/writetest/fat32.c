@@ -601,3 +601,74 @@ void set_file_pointer(uint32_t folder_addr, uint32_t file_addr) {
     sprintf(termbuffer, "File cluster: %08lX", _fptr_cluster);
     terminal_printtermbuffer();
 }
+
+/**
+ * @brief Write data to file pointer from external RAM
+ * 
+ * Assumes file pointer has been set
+ * 
+ * @param extramptr external RAM address
+ * @param nrbytes   number of bytes to write
+ */
+void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
+    uint32_t finalpos = _fptr_pos + nrbytes;
+
+    if(finalpos > _fptr_size_allocated) {
+        // allocate more clusters
+    }
+
+    // build the linked list for the file
+    build_linked_list(_fptr_cluster);
+
+    // perform write operations
+    uint32_t blockpos = 0;
+    uint32_t nextblockpos = 0;
+    uint16_t bytes_to_write = 0;
+    uint32_t sector_addr = 0;
+
+    // loop over the clusters
+    uint8_t ctr = 0;    // cluster counter
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE) {
+
+        // loop over the sectors in each cluster
+        for(uint8_t i=0; i<_sectors_per_cluster; i++) {
+            // set position of next block
+            nextblockpos = blockpos + _bytes_per_sector;
+
+            // check if the write position is in this current block
+            if(_fptr_pos >= blockpos && _fptr_pos < nextblockpos) {
+                // determine how many bytes need to be written in this block
+                if(finalpos < nextblockpos) {
+                    bytes_to_write = finalpos - _fptr_pos;
+                } else {
+                    bytes_to_write = nextblockpos - _fptr_pos;
+                }
+
+                // determine sector address
+                sector_addr = calculate_sector_address(_linkedlist[ctr], i);
+
+                // read data from sector in SDCACHE0
+                read_sector(sector_addr);
+
+                // copy new data into sector
+                ram_transfer(extramptr, SDCACHE0 + (_fptr_pos - blockpos), bytes_to_write);
+
+                // write sector from SDCACHE0
+                write_sector(sector_addr);
+
+                // increment pointers and write positions
+                extramptr += bytes_to_write;
+                _fptr_pos += bytes_to_write;
+            }
+
+            // check if all data has been written, if so, stop function
+            if(finalpos == _fptr_pos) {
+                return;
+            }
+
+            // increment blockpos
+            blockpos += _bytes_per_sector;
+        }
+        ctr++;
+    }
+}

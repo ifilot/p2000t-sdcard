@@ -171,4 +171,12 @@ inline void set_current_folder(uint32_t folder_addr) {
     _current_folder_cluster = folder_addr;
 }
 
+/**
+ * @brief Write data to file pointer from external RAM
+ * 
+ * @param extramptr external RAM address
+ * @param nrbytes   number of bytes to write
+ */
+void write_to_file(uint16_t extramptr, uint16_t nrbytes);
+
 #endif // _FAT32_H
