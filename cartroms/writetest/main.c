@@ -59,15 +59,25 @@ void main(void) {
         read_folder(-1, 0);
 
         // proceed to create new file
-        uint8_t res = create_new_file("BEVER002TXT");
+        uint8_t res = create_new_file("BEVER003TXT");
         sprintf(termbuffer, "File creation result: %02X", res);
         terminal_printtermbuffer();
 
-        read_folder(-1, 0);
-
         set_current_folder(folder_addr);
-        uint32_t file_addr = find_in_folder("BEVER001TXT", F_FIND_FOLDER_NAME);
+        uint32_t file_addr = find_in_folder("BEVER003TXT", F_FIND_FILE_NAME);
+
         set_file_pointer(folder_addr, file_addr);
+
+        // allocate some writeable data
+        for(uint16_t i=0; i<256; i++) {
+            ram_write_uint8_t(SDCACHE1+i, i);
+        }
+
+        terminal_hexdump(SDCACHE1, 4, DUMP_EXTRAM);
+
+        for(uint8_t j=0; j<128; j++) {
+            write_to_file(SDCACHE1, 256);
+        }
 
     } else {
         print_error("No folder DUMPS found in root dir.");

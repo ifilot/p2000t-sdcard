@@ -55,6 +55,7 @@ extern uint32_t _cluster_begin_lba;
 extern uint32_t _lba_addr_root_dir;
 extern uint32_t _linkedlist[F_LL_SIZE];
 extern uint32_t _current_folder_cluster;
+extern uint32_t _fptr_cluster;
 
 // global variables for currently active file or folder
 extern uint32_t _filesize_current_file;
@@ -178,5 +179,18 @@ inline void set_current_folder(uint32_t folder_addr) {
  * @param nrbytes   number of bytes to write
  */
 void write_to_file(uint16_t extramptr, uint16_t nrbytes);
+
+/**
+ * @brief Allocate for file pointer additional clusters
+ */
+void allocate_clusters(uint8_t nr_of_clusters);
+
+/**
+ * @brief Update cluster pointer
+ * 
+ * @param src // source cluster
+ * @param des // destination cluster
+ */
+void update_pointer_next_cluster(uint32_t src, uint32_t des);
 
 #endif // _FAT32_H

@@ -132,11 +132,10 @@ _ram_read_uint32_t:
 _ram_write_uint8_t:
     pop de                      ; return address
     pop hl                      ; ramptr
-    dec sp                      ; decrement sp for 1-byte argument
-    pop bc                      ; byte to write (stored in b)
-    push de                     ; push return address back onto stack
     call _set_ram_address
-    ld a,b
+    dec sp                      ; decrement sp for 1-byte argument
+    pop af                      ; byte to write (stored in b)
+    push de                     ; push return address back onto stack
     out (RAM_IO), a
     ret
 

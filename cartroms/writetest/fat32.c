@@ -37,13 +37,17 @@ uint32_t _current_folder_cluster = 0;
 char _basename[9];
 char _ext[4];
 uint8_t _current_attrib = 0;
+uint32_t _last_sector_cache = 0;
+uint8_t _last_entry_id_cache = 0;
 
 // file pointer variables
-uint32_t _fptr_cluster = 0;         // first cluster of a file
-uint32_t _fptr_filesize = 0;        // stored size of file
-uint32_t _fptr_size_allocated = 0;  // storage space currently allocated
-uint32_t _fptr_pos = 0;             // read position
-uint32_t _fptr_folder_addr = 0;     // cluster address of the folder
+uint32_t _fptr_cluster = 0;             // first cluster of a file
+uint32_t _fptr_filesize = 0;            // stored size of file
+uint32_t _fptr_size_allocated = 0;      // storage space currently allocated
+uint32_t _fptr_pos = 0;                 // read position
+uint32_t _fptr_folder_addr = 0;         // cluster address of the folder
+uint32_t _fptr_entry_sector_addr = 0;   // sector address of the file entry
+uint8_t  _fptr_entry_id = 0;            // entry index
 
 /**
  * @brief Read the Master Boot Record
@@ -362,6 +366,8 @@ uint32_t find_in_folder(const char* search, uint8_t which) {
                         if(!(c & (1 << 4))) {
                             if(grab_cluster_address_from_fileblock(loc) == _fptr_cluster) {
                                 store_file_metadata(j);
+                                _last_sector_cache = caddr;
+                                _last_entry_id_cache = j;
                                 return _fptr_cluster;
                             }
                         }
@@ -396,7 +402,6 @@ void build_linked_list(uint32_t nextcluster) {
     while(nextcluster < 0x0FFFFFF8 && nextcluster != 0 && ctr < F_LL_SIZE) {
         _linkedlist[ctr] = nextcluster;
         read_sector(_fat_begin_lba + (nextcluster >> 7));
-        uint8_t item = nextcluster & 0b01111111;
         nextcluster = ram_read_uint32_t((nextcluster & 0b01111111) * 4);
         ctr++;
     }
@@ -535,14 +540,9 @@ uint32_t allocate_free_cluster(void) {
         for(uint8_t i=0; i<128; i++) {
             uint32_t cluster = ram_read_uint32_t(ramptr);
             if(cluster == 0) {
-                sprintf(termbuffer, "Found free cluster: %08lX", (ctr << 7) | i);
-                terminal_printtermbuffer();
                 ram_write_uint32_t(ramptr, 0x0FFFFFFF);
-                print("Writing to primary FAT");
                 write_sector(addr);                         // write to primary FAT
-                print("Writing to secondary FAT");
                 write_sector(addr + _sectors_per_fat);      // write to secondary FAT
-                print("Returning cluster address");
                 return (ctr << 7) | i;
             }
             ramptr += 4;
@@ -572,22 +572,32 @@ uint32_t grab_cluster_address_from_fileblock(uint16_t loc) {
  */
 void set_file_pointer(uint32_t folder_addr, uint32_t file_addr) {
     // set cluster addresses of files
-    uint32_t _fptr_folder_addr = folder_addr;
-    uint32_t _fptr_cluster = file_addr;
+    _fptr_folder_addr = folder_addr;
+    _fptr_cluster = file_addr;
     
     // grab total file size
     set_current_folder(folder_addr);
-    find_in_folder("", F_FIND_FILE_ADDR);
-    _fptr_filesize = _filesize_current_file;
+    find_in_folder("", F_FIND_FILE_ADDR);           // stores metadata
+    _fptr_filesize = _filesize_current_file;        // store file size
+    _fptr_entry_sector_addr = _last_sector_cache;   // store entry sector
+    _fptr_entry_id = _last_entry_id_cache;          // store entry id
 
     // determine allocated file size
     build_linked_list(file_addr);
+
+    sprintf(termbuffer, "Linked list[0]: %08lX", _linkedlist[0]);
+    terminal_printtermbuffer();
+    sprintf(termbuffer, "Linked list[1]: %08lX", _linkedlist[1]);
+    terminal_printtermbuffer();
+
     uint8_t ctr = 0;
+    _fptr_size_allocated = 0;
     while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE) {
+        _fptr_size_allocated += _sectors_per_cluster * _bytes_per_sector;
         ctr++;
     }
-    ctr++;
-    _fptr_size_allocated = ctr * _sectors_per_cluster * _bytes_per_sector;
+    sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated);
+    terminal_printtermbuffer();
 
     // reset pointer positions
     _fptr_pos = 0;
@@ -611,10 +621,29 @@ void set_file_pointer(uint32_t folder_addr, uint32_t file_addr) {
  * @param nrbytes   number of bytes to write
  */
 void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
+    if(_fptr_cluster == 0) {
+        print_error("No file pointer is set");
+    }
+
+    // calculate final position after writing
     uint32_t finalpos = _fptr_pos + nrbytes;
 
+    sprintf(termbuffer, "Final position: %08lX", finalpos);
+    terminal_printtermbuffer();
+
+    sprintf(termbuffer, "Allocated size: %08lX", _fptr_size_allocated);
+    terminal_printtermbuffer();
+
+    // check if allocatable size needs to be expanded and do so if necessary
     if(finalpos > _fptr_size_allocated) {
-        // allocate more clusters
+        print("Allocating more clusters");
+        // uint32_t bytes_per_cluster = _bytes_per_sector * _sectors_per_cluster;
+        // uint32_t required_size = finalpos - _fptr_size_allocated;
+        // uint8_t newclusters = required_size / bytes_per_cluster;
+        // if(newclusters == 0) {
+        //     newclusters++;
+        // }
+        // allocate_clusters(newclusters);
     }
 
     // build the linked list for the file
@@ -624,7 +653,6 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
     uint32_t blockpos = 0;
     uint32_t nextblockpos = 0;
     uint16_t bytes_to_write = 0;
-    uint32_t sector_addr = 0;
 
     // loop over the clusters
     uint8_t ctr = 0;    // cluster counter
@@ -634,6 +662,9 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
             // set position of next block
             nextblockpos = blockpos + _bytes_per_sector;
+
+            sprintf(termbuffer, "Sector: %02X", i);
+            terminal_printtermbuffer();
 
             // check if the write position is in this current block
             if(_fptr_pos >= blockpos && _fptr_pos < nextblockpos) {
@@ -645,13 +676,25 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
                 }
 
                 // determine sector address
-                sector_addr = calculate_sector_address(_linkedlist[ctr], i);
+                uint32_t sector_addr = calculate_sector_address(_linkedlist[ctr], i);
 
                 // read data from sector in SDCACHE0
                 read_sector(sector_addr);
 
+                terminal_hexdump(SDCACHE0, 2, DUMP_EXTRAM);
+
+                sprintf(termbuffer, "Writing bytes: %04X", bytes_to_write);
+                terminal_printtermbuffer();
+
+                sprintf(termbuffer, "Transfer from: %04X", extramptr);
+                terminal_printtermbuffer();
+                sprintf(termbuffer, "Transfer to: %04X", SDCACHE0 + (_fptr_pos - blockpos));
+                terminal_printtermbuffer();
+
                 // copy new data into sector
                 ram_transfer(extramptr, SDCACHE0 + (_fptr_pos - blockpos), bytes_to_write);
+
+                terminal_hexdump(SDCACHE0, 2, DUMP_EXTRAM);
 
                 // write sector from SDCACHE0
                 write_sector(sector_addr);
@@ -663,6 +706,16 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
 
             // check if all data has been written, if so, stop function
             if(finalpos == _fptr_pos) {
+
+                print("Data is written");
+
+                // store updated file size if the file has grown in size
+                if(finalpos > _fptr_filesize) {
+                    read_sector(_fptr_entry_sector_addr);
+                    ram_write_uint32_t(SDCACHE0 + _fptr_entry_id * 32 + 28, finalpos);
+                    write_sector(_fptr_entry_sector_addr);
+                }
+
                 return;
             }
 
@@ -671,4 +724,33 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
         }
         ctr++;
     }
+}
+
+/**
+ * @brief Allocate for file pointer additional clusters
+ */
+void allocate_clusters(uint8_t nr_of_clusters) {
+    // build the linked list for the file
+    build_linked_list(_fptr_cluster);
+    uint8_t ctr = 0;    // cluster counter
+    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE) {ctr++;}
+    for(uint8_t i=0; i<nr_of_clusters; i++) {
+        _linkedlist[ctr] = allocate_free_cluster();
+        update_pointer_next_cluster(_linkedlist[ctr-1], _linkedlist[ctr]);
+        ctr++;
+    }
+}
+
+/**
+ * @brief Update cluster pointer
+ * 
+ * @param src // source cluster
+ * @param des // destination cluster
+ */
+void update_pointer_next_cluster(uint32_t src, uint32_t des) {
+    uint32_t addr = _fat_begin_lba + (src >> 7);
+    read_sector(addr);
+    ram_write_uint32_t((src & 0b01111111) * 4, des);
+    write_sector(addr);
+    write_sector(addr + _sectors_per_fat);
 }
