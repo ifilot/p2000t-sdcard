@@ -18,103 +18,18 @@
  *                                                                        *
  **************************************************************************/
 
-#include <string.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <z80.h>
-
-#include "constants.h"
-#include "ascii.h"
-#include "config.h"
-#include "ports.h"
-#include "fat32.h"
-#include "ram.h"
 #include "sdcard.h"
-#include "terminal_ext.h"
 
-// set printf io
-#pragma printf "%i %X %lX %c %s %lu %u"
-
-// definitions
-void init(void);
-void show_sdcard_data(void);
-
-void main(void) {
-    // initialize environment
-    init();
-
-    // output SD card information to the user
-    show_sdcard_data();
-
-    // read contents root folder
-    read_folder(-1, 0);
-
-    // find dumps folder
-    uint32_t folder_addr = find_in_folder("DUMPS      ", F_FIND_FOLDER_NAME);
-
-    // check if folder is found
-    if(folder_addr != 0) {
-        // output folder contents
-        set_current_folder(folder_addr);
-        read_folder(-1, 0);
-
-        // proceed to create new file
-        uint8_t res = create_new_file("COPYTES2TXT");
-        sprintf(termbuffer, "File creation result: %02X", res);
-        terminal_printtermbuffer();
-
-        set_current_folder(folder_addr);
-        uint32_t file_addr = find_in_folder("TEST    TXT", F_FIND_FILE_NAME);
-        read_sector(calculate_sector_address(file_addr, 0));
-        ram_transfer(SDCACHE0, SDCACHE1, 512);
-
-        file_addr = find_in_folder("COPYTES2TXT", F_FIND_FILE_NAME);
-        // set_file_pointer(folder_addr, file_addr);
-
-        // for(uint8_t i=0; i<130; i++) {
-        //     write_to_file(SDCACHE1, 512);
-        // }
-
-        build_linked_list(file_addr);
-        for(uint8_t i=0; i<F_LL_SIZE; i++) {
-            sprintf(termbuffer, "%02X %08lX", i, _linkedlist[i]);
-            terminal_printtermbuffer();
-        }
-
-        print("End of program");
-
-    } else {
-        print_error("No folder DUMPS found in root dir.");
-    }
-
-    for(;;){}
-}
-
-void init(void) {
-    // disable SD-card
-    sdcs_set();
-
-    // set the CACHE bank
-    set_ram_bank(RAM_BANK_CACHE);
-
-    clear_screen();
-    terminal_init(3, 20);
-
-    const uint8_t nrkb = memory[0x605C] <= 2 ? memory[0x605C] * 16 : 40;
-
-    sprintf(&vidmem[0x50], "%c%cSDCARD WRITETEST", TEXT_DOUBLE, COL_CYAN);
-    sprintf(&vidmem[0x50*22], "Version: %s. Memory model: %i kb.", __VERSION__, nrkb);
-    sprintf(&vidmem[0x50*23], "Compiled at: %s / %s", __DATE__, __TIME__);
-
-    // turn LEDs off
-    z80_outp(PORT_LED_IO, 0x00);
-}
+// shared buffer object to store the data of a single sector on the SD card
+uint8_t _resp8[5];
+uint8_t _resp58[5];
+uint8_t _flag_sdcard_mounted = 0;
 
 /**
  * @brief Output information of the SD-CARD to the user
  * 
  */
-void show_sdcard_data(void) {
+uint8_t init_sdcard(void) {
     // mount sd card
     print("Initializing SD card..");
     
@@ -132,8 +47,6 @@ void show_sdcard_data(void) {
     open_command();
     c = cmd0();
     close_command();
-    sprintf(termbuffer, "Response CMD0: %02X", c);
-    terminal_printtermbuffer();
 
     // CMD8: Sends interface condition    
     open_command();
@@ -146,15 +59,29 @@ void show_sdcard_data(void) {
     sprintf(termbuffer, "CMD8: %02X %02X %02X %02X %02X", _resp8[0], _resp8[1], _resp8[2], _resp8[3], _resp8[4]);
     terminal_printtermbuffer();
 
+    if(_resp8[0] >= 0x02) {
+        return -1;
+    }
+
     // keep on looping until zero result is found
     c = 0xFF;
-    while(c != 0) {
+    uint16_t ctr = 0;
+    while(c != 0 & ctr < 1000) {
         open_command();
         cmd55();
         close_command();
         open_command();
         c = acmd41();   // Send host capacity support information
         close_command();
+        ctr++;
+    }
+
+    if(ctr == 1000) {
+        print_error("SD card time-out");
+        return -1;
+    } else {
+        sprintf(termbuffer, "ACMD41 attempts: %i", ctr);
+        terminal_printtermbuffer();
     }
 
     // CMD53: Read OCR register
@@ -170,9 +97,5 @@ void show_sdcard_data(void) {
     // the first block from the SD card and print it to the screen
     print("SD Card initialized");
 
-    uint32_t lba0 = read_mbr();
-    read_partition(lba0);
-
-    // sd card successfully mounted
-    print("Partition 1 mounted");
+    return 0;
 }
