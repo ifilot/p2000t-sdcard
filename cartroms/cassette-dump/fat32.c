@@ -59,7 +59,7 @@ uint32_t read_mbr(void) {
     read_sector(0x00000000);
     
     // grab the start address of the first partition
-    return ram_read_uint32_t(SDCACHE0 + 446 + 8);
+    return ram_read_uint32_t(SDCACHE0 + 0x1C6);
 }
 
 /**
@@ -136,7 +136,7 @@ void read_partition(uint32_t lba0) {
 
     // consolidate variables
     _fat_begin_lba = lba0 + _reserved_sectors;
-    _shadow_fat_begin_lba = _fat_begin_lba + _sectors_per_fat;
+    _shadow_fat_begin_lba = _fat_begin_lba + _sectors_per_fat + 1;
     _sector_begin_lba = _fat_begin_lba + (_number_of_fats * _sectors_per_fat);
     _lba_addr_root_dir = calculate_sector_address(_root_dir_first_cluster, 0);
 
@@ -585,10 +585,10 @@ void set_file_pointer(uint32_t folder_addr, uint32_t file_addr) {
     // determine allocated file size
     build_linked_list(file_addr);
 
-    sprintf(termbuffer, "Linked list[0]: %08lX", _linkedlist[0]);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Linked list[1]: %08lX", _linkedlist[1]);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Linked list[0]: %08lX", _linkedlist[0]);
+    // terminal_printtermbuffer();
+    // sprintf(termbuffer, "Linked list[1]: %08lX", _linkedlist[1]);
+    // terminal_printtermbuffer();
 
     uint8_t ctr = 0;
     _fptr_size_allocated = 0;
@@ -596,20 +596,20 @@ void set_file_pointer(uint32_t folder_addr, uint32_t file_addr) {
         _fptr_size_allocated += _sectors_per_cluster * _bytes_per_sector;
         ctr++;
     }
-    sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated);
+    // terminal_printtermbuffer();
 
     // reset pointer positions
     _fptr_pos = 0;
 
-    sprintf(termbuffer, "File size: %08lX", _fptr_filesize);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated >> 10);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Folder cluster: %08lX", _fptr_folder_addr);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "File cluster: %08lX", _fptr_cluster);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "File size: %08lX", _fptr_filesize);
+    // terminal_printtermbuffer();
+    // sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated >> 10);
+    // terminal_printtermbuffer();
+    // sprintf(termbuffer, "Folder cluster: %08lX", _fptr_folder_addr);
+    // terminal_printtermbuffer();
+    // sprintf(termbuffer, "File cluster: %08lX", _fptr_cluster);
+    // terminal_printtermbuffer();
 }
 
 /**
@@ -628,15 +628,15 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
     // calculate final position after writing
     uint32_t finalpos = _fptr_pos + nrbytes;
 
-    sprintf(termbuffer, "Final position: %08lX", finalpos);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Final position: %08lX", finalpos);
+    // terminal_printtermbuffer();
 
-    sprintf(termbuffer, "Allocated size: %08lX", _fptr_size_allocated);
-    terminal_printtermbuffer();
+    // sprintf(termbuffer, "Allocated size: %08lX", _fptr_size_allocated);
+    // terminal_printtermbuffer();
 
     // check if allocatable size needs to be expanded and do so if necessary
     if(finalpos > _fptr_size_allocated) {
-        print("Allocating more clusters");
+        // print("Allocating more clusters");
         uint32_t bytes_per_cluster = _bytes_per_sector * _sectors_per_cluster;
         uint32_t required_size = finalpos - _fptr_size_allocated;
         uint8_t newclusters = required_size / bytes_per_cluster;
@@ -646,8 +646,8 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
         }
         allocate_clusters(newclusters);
 
-        print_recall("Press key to continue");
-        wait_for_key();
+        // print_recall("Press key to continue");
+        // wait_for_key();
     }
 
     // build the linked list for the file
@@ -667,8 +667,8 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
             // set position of next block
             nextblockpos = blockpos + _bytes_per_sector;
 
-            sprintf(termbuffer, "Sector: %02X", i);
-            terminal_printtermbuffer();
+            // sprintf(termbuffer, "Sector: %02X", i);
+            // terminal_printtermbuffer();
 
             // check if the write position is in this current block
             if(_fptr_pos >= blockpos && _fptr_pos < nextblockpos) {
@@ -687,7 +687,13 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
 
                 //terminal_hexdump(SDCACHE0, 2, DUMP_EXTRAM);
 
-                // sprintf(termbuffer, "Writing bytes: %04X", bytes_to_write);
+                // sprintf(termbuffer, "Writing to sector address: %08X", sector_addr);
+                // terminal_printtermbuffer();
+
+                // sprintf(termbuffer, "Writing to sector: %02X", i);
+                // terminal_printtermbuffer();
+
+                // sprintf(termbuffer, "Writing to cluster: %08X", _linkedlist[ctr]);
                 // terminal_printtermbuffer();
 
                 // sprintf(termbuffer, "Transfer from: %04X", extramptr);
@@ -706,12 +712,15 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
                 // increment pointers and write positions
                 extramptr += bytes_to_write;
                 _fptr_pos += bytes_to_write;
+
+                // print_recall("Press key to continue");
+                // wait_for_key();
             }
 
             // check if all data has been written, if so, stop function
             if(finalpos == _fptr_pos) {
 
-                print("Data is written");
+                // print("Data is written");
 
                 // store updated file size if the file has grown in size
                 if(finalpos > _fptr_filesize) {

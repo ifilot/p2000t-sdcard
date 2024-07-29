@@ -38,7 +38,8 @@
 
 // definitions
 void init(void);
-void show_sdcard_data(void);
+void copy_current_tapeblock(void);
+void parse_filename(char* filename);
 
 void main(void) {
     // initialize environment
@@ -53,7 +54,7 @@ void main(void) {
     // check if folder is found
     if(folder_addr != 0) {
         print("Accessing DUMPS folder.");
-
+        set_current_folder(folder_addr);
     } else {
         print_error("No folder DUMPS found in root dir.");
         for(;;){}
@@ -82,6 +83,7 @@ void main(void) {
             // copied to internal memory
             print_recall("Reading next program...");
             tape_read_block();
+
             if(memory[CASSTAT] != 0) {
                 sprintf(termbuffer, "%cStop reading tape, exit code: %c", COL_RED, memory[CASSTAT]);
                 terminal_printtermbuffer();
@@ -111,6 +113,23 @@ void main(void) {
                 // grab total blocks and start copying first block
                 uint8_t blockcounter = 0;
 
+                // create new file
+                char filename[12] = "________CAS";  // has terminating char '\0'
+                memcpy(filename, description, 8);
+                parse_filename(filename);
+                if(create_new_file(filename) == F_SUCCESS) {
+                    uint32_t file_addr = find_in_folder(filename, F_FIND_FILE_NAME);
+                    if(file_addr != 0) {
+                        set_file_pointer(folder_addr, file_addr);
+                    } else {
+                        print_error("Could not create file pointer");
+                    }
+                } else {
+                    print_error("Unable to create file.");
+                    for(;;){}
+                }
+                copy_current_tapeblock();
+
                 // consume all blocks
                 while(memory[BLOCKCTR] > 1) {
                     blockcounter++;
@@ -120,8 +139,10 @@ void main(void) {
                     if(memory[CASSTAT] != 0) {
                         sprintf(termbuffer, "Stop reading tape, exit code: %c", memory[CASSTAT]);
                         terminal_printtermbuffer();
-                        for(;;){}
+                        
+                        print_error("Reading the tape failed.");
                     }
+                    copy_current_tapeblock();
                 }
                 sprintf(termbuffer, "%cCopied: %s to SD-CARD", COL_GREEN, description);
                 terminal_printtermbuffer();
@@ -137,7 +158,8 @@ void main(void) {
             }
         }
         print("All done reading this tape.");
-        print("Swap tape to continue copying.");
+        print("Swap tape or swap side to continue");
+        print("copying from tape to SD-card.");
         print("");
     }
 
@@ -176,4 +198,50 @@ void init(void) {
 
     // sd card successfully mounted
     print("Partition 1 mounted");
+}
+
+/**
+ * @brief Copy the current tape block in memory to the SD-card
+ * 
+ */
+void copy_current_tapeblock(void) {
+    ram_set(SDCACHE1, 0x00, 0x100);                         // wipe first 0x100 bytes
+    copy_to_ram(&memory[0x6030], SDCACHE1 + 0x30, 0x20);    // set metadata
+    copy_to_ram(&memory[BUFFER], SDCACHE1 + 0x100, 0x400);  // set data
+    write_to_file(SDCACHE1, 0x500);
+}
+
+/**
+ * @brief Convert any invalid characters. FAT32 8.3 filenames only support
+ *        uppercase characters and certain special characters. This function
+ *        transforms any lowercase to uppercase characters and transforms any
+ *        invalid special characters to 'X'.
+ * 
+ * @param filename filename to convert (only convert first 8 characters)
+ */
+void parse_filename(char* filename) {
+    for(uint8_t j=0; j<8; j++) {
+        if(filename[j] >= 'a' && filename[j] <= 'z') {
+            filename[j] -= 0x20;
+        }
+        if(filename[j] >= 'A' && filename[j] <= 'Z') {
+            continue;
+        }
+        if(filename[j] >= '0' && filename[j] <= '9') {
+            continue;
+        }
+        if(filename[j] >= '#' && filename[j] <= ')') {
+            continue;
+        }
+        if(filename[j] >= '^' && filename[j] <= '`') {
+            continue;
+        }
+        if(filename[j] == '!' || filename[j] == '-' || filename[j] == '@') {
+            continue;
+        }
+        if(filename[j] == '{' || filename[j] == '}' || filename[j] == '~' || filename[j] == ' ') {
+            continue;
+        }
+        filename[j] = 'X';
+    }
 }

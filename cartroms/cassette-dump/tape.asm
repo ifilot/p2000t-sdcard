@@ -12,6 +12,7 @@ SECTION code_user
 
 PUBLIC _tape_rewind
 PUBLIC _tape_read_block
+PUBLIC _tape_skip_forward
 
 ; constants for cassette instructions
 CAS_INIT:   equ $00
@@ -41,17 +42,19 @@ BUFFER:     equ $6100   ; position to store tape data
 ; Rewind the cassette
 ;-------------------------------------------------------------------------------
 _tape_rewind:
+    push ix
     ld a,CAS_INIT
     call TAPE
     ld a,CAS_REWIND
     call TAPE
+    pop ix
     ret
 
 ;-------------------------------------------------------------------------------
 ; Read a single block from the tape to the buffer area
 ;-------------------------------------------------------------------------------
 _tape_read_block:
-    push ix             ; conserve iy because it is used as frame pointer
+    push ix             ; conserve ix because it is used as frame pointer
     ld a,(CASSTAT)      ; load tape status
     cp 'M'              ; check for M
     jp z,tprdexit
@@ -60,10 +63,22 @@ _tape_read_block:
     ld hl,$0400
     ld ($6032),hl
     ld ($6034),hl
-    ld a,CAS_INIT
-    call TAPE
+    ;ld a,CAS_INIT
+    ;call TAPE
     ld a,CAS_READ
     call TAPE
 tprdexit:
-    pop ix              ; retrieve iy
+    pop ix              ; retrieve ix
+    ret
+
+;-------------------------------------------------------------------------------
+; Read a single block from the tape to the buffer area
+;-------------------------------------------------------------------------------
+_tape_skip_forward:
+    push ix             ; conserve ix because it is used as frame pointer
+    ;ld a,CAS_INIT
+    ;call TAPE
+    ld a,CAS_SKIPF
+    call TAPE
+    pop ix              ; retrieve ix
     ret
