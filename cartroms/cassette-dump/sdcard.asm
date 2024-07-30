@@ -212,14 +212,15 @@ _cmd55:
 ;-------------------------------------------------------------------------------
 ; CMD58: Read OCR register
 ;
+; input: hl - pointer to response array
 ; garbles: a,b,hl
 ; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd58:
-    ex de,hl
+    ex de,hl                    ; store pointer in de
     ld hl,cmd58str              ; load command list
     call sendcommand            ; garbles a,b,hl
-    call receiveR3              ; garbles a,b,de
+    call receiveR3              ; garbles a,b,de; de is pointer address for R3
     ret
 
 ;-------------------------------------------------------------------------------

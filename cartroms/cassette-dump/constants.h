@@ -33,6 +33,8 @@
 
 #define INPUTLENGTH 20
 
-#define ROM_BANK_DEFAULT 0
+#define ROM_BANK_DEFAULT    0
+#define YES                 0x00
+#define NO                  0x01
 
 #endif

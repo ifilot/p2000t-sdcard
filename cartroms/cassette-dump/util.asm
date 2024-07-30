@@ -26,6 +26,7 @@ PUBLIC _read_uint32_t
 PUBLIC _get_stack_location
 PUBLIC _call_program
 PUBLIC _hexcode_to_uint16t
+PUBLIC _get_memory_location
 
 ;-------------------------------------------------------------------------------
 ; void replace_bytes(uint8_t* str, uint8_t org, uint8_t rep, uint16_t nrbytes) __z88dk_callee;
@@ -170,4 +171,13 @@ hex_end:
     ret
 hex_invalid:
     ld de,0
+    ret
+
+;-------------------------------------------------------------------------------
+; Get memory location
+;
+; input: hl - pointer to memory location
+; return hl - uint16_t
+;-------------------------------------------------------------------------------
+_get_memory_location:
     ret

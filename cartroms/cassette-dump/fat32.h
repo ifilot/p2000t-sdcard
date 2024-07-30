@@ -193,4 +193,23 @@ void allocate_clusters(uint8_t nr_of_clusters);
  */
 void update_pointer_next_cluster(uint32_t src, uint32_t des);
 
+/**
+ * @brief Convert any invalid characters. FAT32 8.3 filenames only support
+ *        uppercase characters and certain special characters. This function
+ *        transforms any lowercase to uppercase characters and transforms any
+ *        invalid special characters to 'X'.
+ * 
+ * @param filename filename to convert (only convert first 8 characters)
+ */
+void parse_fat32_filename(char* filename);
+
+/**
+ * @brief Rename a FAT32 filename by grabbing the last digit, checking
+ *        if it is a digit. If so, increment it by one, if not, replace
+ *        it by a zero.
+ * 
+ * @param filename filename to convert
+ */
+void rename_fat32_filename(char* filename);
+
 #endif // _FAT32_H

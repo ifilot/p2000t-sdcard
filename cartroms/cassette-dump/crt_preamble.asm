@@ -18,8 +18,13 @@
 ;                                                                       
 ;-------------------------------------------------------------------------------
 
-; signature, byte count, checksum
-DB 0x5E,0x00,0x00,0x00,0x00
+; signature, byte count, CRC16 checksum
+;
+; * signature needs to be 0x50 to indicate that this is a runnable PRG file
+; * byte count corresponds to the number of bytes of the program
+; * checksum is the CRC-16 checksum
+; * the byte count and CRC16 checksum need to be set later
+DB 0x50,0x00,0x00,0x00,0x00
 
 ; name of the cartridge (11 bytes)
 ;DB 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00

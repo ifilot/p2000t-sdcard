@@ -101,25 +101,6 @@ void read_partition(uint32_t lba0) {
     // partition signature, should be 0x55AA
     uint16_t signature = ram_read_uint16_t(SDCACHE0 + 0x1FE);
 
-    // print data
-    // sprintf(termbuffer, "LBA partition 1:%c%08lX", COL_GREEN, lba0);
-    // terminal_printtermbuffer();
-
-    // sprintf(termbuffer, "Bytes per sector:%c%i", COL_GREEN, _bytes_per_sector);
-    // terminal_printtermbuffer();
-
-    sprintf(termbuffer, "Sectors per cluster:%c%i", COL_GREEN, _sectors_per_cluster);
-    terminal_printtermbuffer();
-
-    // sprintf(termbuffer, "Reserved sectors:%c%i", COL_GREEN, _reserved_sectors);
-    // terminal_printtermbuffer();
-
-    // sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
-    // terminal_printtermbuffer();
-
-    // sprintf(termbuffer, "Sectors per FAT:%c%lu", COL_GREEN, _sectors_per_fat);
-    // terminal_printtermbuffer();
-
     // calculate the total capacity on the partition
     // each FAT holds a number of sectors
     // each sector can refer to 128 clusters (128 x 32 = 512 bytes)
@@ -128,28 +109,11 @@ void read_partition(uint32_t lba0) {
     sprintf(termbuffer, "Partition size:%c%lu MiB", COL_GREEN, (_sectors_per_fat * _sectors_per_cluster * _bytes_per_sector) >> 13 );
     terminal_printtermbuffer();
 
-    // sprintf(termbuffer, "Root first cluster:%c%08lX", COL_GREEN, _root_dir_first_cluster);
-    // terminal_printtermbuffer();
-
-    // sprintf(termbuffer, "Signature:%c%04X", COL_GREEN, signature);
-    // terminal_printtermbuffer();
-
     // consolidate variables
     _fat_begin_lba = lba0 + _reserved_sectors;
     _shadow_fat_begin_lba = _fat_begin_lba + _sectors_per_fat + 1;
     _sector_begin_lba = _fat_begin_lba + (_number_of_fats * _sectors_per_fat);
     _lba_addr_root_dir = calculate_sector_address(_root_dir_first_cluster, 0);
-
-    // show prominent sector locations
-    sprintf(termbuffer, "FAT sector:%c%08lX", COL_GREEN, _fat_begin_lba);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Shadow FAT sector:%c%08lX", COL_GREEN, _shadow_fat_begin_lba);
-    terminal_printtermbuffer();
-    // sprintf(termbuffer, "First cluster sector:%c%08lX", COL_GREEN, calculate_sector_address(0, 0));
-    // terminal_printtermbuffer();
-
-    // sprintf(termbuffer, "Number of FATS:%c%i", COL_GREEN, _number_of_fats);
-    // terminal_printtermbuffer();
 
     // read first sector of first partition to establish volume name
     read_sector(_lba_addr_root_dir);
@@ -585,31 +549,15 @@ void set_file_pointer(uint32_t folder_addr, uint32_t file_addr) {
     // determine allocated file size
     build_linked_list(file_addr);
 
-    // sprintf(termbuffer, "Linked list[0]: %08lX", _linkedlist[0]);
-    // terminal_printtermbuffer();
-    // sprintf(termbuffer, "Linked list[1]: %08lX", _linkedlist[1]);
-    // terminal_printtermbuffer();
-
     uint8_t ctr = 0;
     _fptr_size_allocated = 0;
     while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE) {
         _fptr_size_allocated += _sectors_per_cluster * _bytes_per_sector;
         ctr++;
     }
-    // sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated);
-    // terminal_printtermbuffer();
 
     // reset pointer positions
     _fptr_pos = 0;
-
-    // sprintf(termbuffer, "File size: %08lX", _fptr_filesize);
-    // terminal_printtermbuffer();
-    // sprintf(termbuffer, "Allocated size: %08lX KiB", _fptr_size_allocated >> 10);
-    // terminal_printtermbuffer();
-    // sprintf(termbuffer, "Folder cluster: %08lX", _fptr_folder_addr);
-    // terminal_printtermbuffer();
-    // sprintf(termbuffer, "File cluster: %08lX", _fptr_cluster);
-    // terminal_printtermbuffer();
 }
 
 /**
@@ -628,12 +576,6 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
     // calculate final position after writing
     uint32_t finalpos = _fptr_pos + nrbytes;
 
-    // sprintf(termbuffer, "Final position: %08lX", finalpos);
-    // terminal_printtermbuffer();
-
-    // sprintf(termbuffer, "Allocated size: %08lX", _fptr_size_allocated);
-    // terminal_printtermbuffer();
-
     // check if allocatable size needs to be expanded and do so if necessary
     if(finalpos > _fptr_size_allocated) {
         // print("Allocating more clusters");
@@ -645,9 +587,6 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
             newclusters++;
         }
         allocate_clusters(newclusters);
-
-        // print_recall("Press key to continue");
-        // wait_for_key();
     }
 
     // build the linked list for the file
@@ -667,9 +606,6 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
             // set position of next block
             nextblockpos = blockpos + _bytes_per_sector;
 
-            // sprintf(termbuffer, "Sector: %02X", i);
-            // terminal_printtermbuffer();
-
             // check if the write position is in this current block
             if(_fptr_pos >= blockpos && _fptr_pos < nextblockpos) {
                 // determine how many bytes need to be written in this block
@@ -685,26 +621,8 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
                 // read data from sector in SDCACHE0
                 read_sector(sector_addr);
 
-                //terminal_hexdump(SDCACHE0, 2, DUMP_EXTRAM);
-
-                // sprintf(termbuffer, "Writing to sector address: %08X", sector_addr);
-                // terminal_printtermbuffer();
-
-                // sprintf(termbuffer, "Writing to sector: %02X", i);
-                // terminal_printtermbuffer();
-
-                // sprintf(termbuffer, "Writing to cluster: %08X", _linkedlist[ctr]);
-                // terminal_printtermbuffer();
-
-                // sprintf(termbuffer, "Transfer from: %04X", extramptr);
-                // terminal_printtermbuffer();
-                // sprintf(termbuffer, "Transfer to: %04X", SDCACHE0 + (_fptr_pos - blockpos));
-                // terminal_printtermbuffer();
-
                 // copy new data into sector
                 ram_transfer(extramptr, SDCACHE0 + (_fptr_pos - blockpos), bytes_to_write);
-
-                //terminal_hexdump(SDCACHE0, 2, DUMP_EXTRAM);
 
                 // write sector from SDCACHE0
                 write_sector(sector_addr);
@@ -712,9 +630,6 @@ void write_to_file(uint16_t extramptr, uint16_t nrbytes) {
                 // increment pointers and write positions
                 extramptr += bytes_to_write;
                 _fptr_pos += bytes_to_write;
-
-                // print_recall("Press key to continue");
-                // wait_for_key();
             }
 
             // check if all data has been written, if so, stop function
@@ -766,4 +681,58 @@ void update_pointer_next_cluster(uint32_t src, uint32_t des) {
     ram_write_uint32_t((src & 0b01111111) * 4, des);
     write_sector(addr);
     write_sector(addr + _sectors_per_fat);
+}
+
+/**
+ * @brief Convert any invalid characters. FAT32 8.3 filenames only support
+ *        uppercase characters and certain special characters. This function
+ *        transforms any lowercase to uppercase characters and transforms any
+ *        invalid special characters to 'X'.
+ * 
+ * @param filename filename to convert (only convert first 8 characters)
+ */
+void parse_fat32_filename(char* filename) {
+    for(uint8_t j=0; j<8; j++) {
+        if(filename[j] >= 'a' && filename[j] <= 'z') {
+            filename[j] -= 0x20;
+        }
+        if(filename[j] >= 'A' && filename[j] <= 'Z') {
+            continue;
+        }
+        if(filename[j] >= '0' && filename[j] <= '9') {
+            continue;
+        }
+        if(filename[j] >= '#' && filename[j] <= ')') {
+            continue;
+        }
+        if(filename[j] >= '^' && filename[j] <= '`') {
+            continue;
+        }
+        if(filename[j] == '!' || filename[j] == '-' || filename[j] == '@') {
+            continue;
+        }
+        if(filename[j] == '{' || filename[j] == '}' || filename[j] == '~' || filename[j] == ' ') {
+            continue;
+        }
+        filename[j] = 'X';
+    }
+}
+
+/**
+ * @brief Rename a FAT32 filename by grabbing the last digit, checking
+ *        if it is a digit. If so, increment it by one, if not, replace
+ *        it by a zero.
+ * 
+ * @param filename filename to convert
+ */
+void rename_fat32_filename(char* filename) {
+    if(!(filename[7] >= '0' && filename[7] <= '9')) {
+        filename[7] = '0';
+    } else {
+        if(filename[7] == '9') {
+            filename[7] = '0';
+        } else {
+            filename[7] += 1;
+        }
+    }
 }

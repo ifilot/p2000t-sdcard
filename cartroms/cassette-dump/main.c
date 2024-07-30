@@ -39,14 +39,18 @@
 // definitions
 void init(void);
 void copy_current_tapeblock(void);
-void parse_filename(char* filename);
 
-void main(void) {
+// pre-allocate a big read buffer
+static uint8_t cassette_buffer[0x400];
+static char filename[11];
+
+int main(void) {
     // initialize environment
     init();
 
-    // read contents root folder
-    read_folder(-1, 0);
+    // print buffer location
+    sprintf(termbuffer, "Cassette buffer: 0x%04X", get_memory_location(cassette_buffer));
+    terminal_printtermbuffer();
 
     // find dumps folder
     uint32_t folder_addr = find_in_folder("DUMPS      ", F_FIND_FOLDER_NAME);
@@ -61,10 +65,8 @@ void main(void) {
     }
 
     // create placeholders to store tape data
-    char description[17];
-    description[16] = '\0';
-    char ext[4];
-    ext[3] = '\0';
+    char description[16];
+    char ext[3];
 
     for(;;) {
         // whether to proceed to next cassette
@@ -82,7 +84,8 @@ void main(void) {
             // read the first block from the tape; the data from the tape is now
             // copied to internal memory
             print_recall("Reading next program...");
-            tape_read_block();
+            tape_read_block(cassette_buffer);
+            // terminal_hexdump(get_memory_location(cassette_buffer), 4, DUMP_INTRAM);
 
             if(memory[CASSTAT] != 0) {
                 sprintf(termbuffer, "%cStop reading tape, exit code: %c", COL_RED, memory[CASSTAT]);
@@ -101,57 +104,78 @@ void main(void) {
             // asked whether they want to store the program from tape on the ROM
             // chip or whether they want to continue searching for the next program
             // on the tape
-            sprintf(termbuffer, "Found: %c%s %s%c%i%c%i", COL_YELLOW, description, 
+            sprintf(termbuffer, "Found: %c%.16s %.3s%c%i%c%i", COL_YELLOW, description, 
                     ext,COL_CYAN,totalblocks,COL_MAGENTA,length);
             terminal_printtermbuffer();
-            print_recall("Copy program to ROM? (Y/N)");
+            print_recall("Copy program to sd-card? (Y/N)");
 
             // check if user presses YES key
             uint8_t store_continue = wait_for_key_fixed(33);
+            uint8_t continue_copying = YES;
 
             if(store_continue == 1) {
                 // grab total blocks and start copying first block
                 uint8_t blockcounter = 0;
 
                 // create new file
-                char filename[12] = "________CAS";  // has terminating char '\0'
                 memcpy(filename, description, 8);
-                parse_filename(filename);
-                if(create_new_file(filename) == F_SUCCESS) {
-                    uint32_t file_addr = find_in_folder(filename, F_FIND_FILE_NAME);
-                    if(file_addr != 0) {
-                        set_file_pointer(folder_addr, file_addr);
-                    } else {
-                        print_error("Could not create file pointer");
-                    }
-                } else {
-                    print_error("Unable to create file.");
-                    for(;;){}
+                memcpy(&filename[8], "CAS", 3);
+                parse_fat32_filename(filename);
+                uint8_t res = create_new_file(filename);
+                switch(res) {
+                    case F_ERROR_FILE_EXISTS:
+                        while(res == F_ERROR_FILE_EXISTS) {
+                            print("File exists, auto-renaming...");
+                            rename_fat32_filename(filename);
+                            sprintf(termbuffer, "Trying:%c%.8s.%.3s", COL_YELLOW, filename, &filename[8]);
+                            terminal_printtermbuffer();
+                            res = create_new_file(filename);
+                        }
+                        // fall through
+                    case F_SUCCESS:
+                        uint32_t file_addr = find_in_folder(filename, F_FIND_FILE_NAME);
+                        if(file_addr != 0) {
+                            set_file_pointer(folder_addr, file_addr);
+                            copy_current_tapeblock();
+                        } else {
+                            print_error("Could not create file pointer");
+                            print_error("Fatal exception, terminating.");
+                            return -1;
+                        }
+                    break;
+                    case F_ERROR_CARD_FULL:
+                        print_error("SD-card is full.");
+                        print("Please replace SD-card and restart");
+                        print_error("Terminating.");
+                        return -1;
+                    break;
+                    default:
+                        print_error("Fatal error encountered, terminating.");
+                        return -1;
+                    break;
                 }
-                copy_current_tapeblock();
 
                 // consume all blocks
                 while(memory[BLOCKCTR] > 1) {
                     blockcounter++;
                     sprintf(termbuffer, "Remaining blocks: %i...", memory[BLOCKCTR]-1);
                     terminal_redoline();
-                    tape_read_block();
+                    tape_read_block(cassette_buffer);
                     if(memory[CASSTAT] != 0) {
                         sprintf(termbuffer, "Stop reading tape, exit code: %c", memory[CASSTAT]);
                         terminal_printtermbuffer();
-                        
-                        print_error("Reading the tape failed.");
+                        break;
                     }
                     copy_current_tapeblock();
                 }
-                sprintf(termbuffer, "%cCopied: %s to SD-CARD", COL_GREEN, description);
+                sprintf(termbuffer, "%c%s >%c%.8s.%.3s", COL_GREEN, description, COL_YELLOW, filename, &filename[8]);
                 terminal_printtermbuffer();
             } else {
                 // skip all blocks
                 while(memory[BLOCKCTR] > 1) {
                     sprintf(termbuffer, "Skipping blocks: %i...", memory[BLOCKCTR]-1);
                     terminal_redoline();
-                    tape_read_block();
+                    tape_read_block(cassette_buffer);
                 }
                 sprintf(termbuffer, "%cSkipping: %s", COL_RED, description);
                 terminal_printtermbuffer();
@@ -163,7 +187,7 @@ void main(void) {
         print("");
     }
 
-    print("End of program.");
+    return 0;
 }
 
 void init(void) {
@@ -207,41 +231,6 @@ void init(void) {
 void copy_current_tapeblock(void) {
     ram_set(SDCACHE1, 0x00, 0x100);                         // wipe first 0x100 bytes
     copy_to_ram(&memory[0x6030], SDCACHE1 + 0x30, 0x20);    // set metadata
-    copy_to_ram(&memory[BUFFER], SDCACHE1 + 0x100, 0x400);  // set data
+    copy_to_ram(cassette_buffer, SDCACHE1 + 0x100, 0x400);  // set data
     write_to_file(SDCACHE1, 0x500);
-}
-
-/**
- * @brief Convert any invalid characters. FAT32 8.3 filenames only support
- *        uppercase characters and certain special characters. This function
- *        transforms any lowercase to uppercase characters and transforms any
- *        invalid special characters to 'X'.
- * 
- * @param filename filename to convert (only convert first 8 characters)
- */
-void parse_filename(char* filename) {
-    for(uint8_t j=0; j<8; j++) {
-        if(filename[j] >= 'a' && filename[j] <= 'z') {
-            filename[j] -= 0x20;
-        }
-        if(filename[j] >= 'A' && filename[j] <= 'Z') {
-            continue;
-        }
-        if(filename[j] >= '0' && filename[j] <= '9') {
-            continue;
-        }
-        if(filename[j] >= '#' && filename[j] <= ')') {
-            continue;
-        }
-        if(filename[j] >= '^' && filename[j] <= '`') {
-            continue;
-        }
-        if(filename[j] == '!' || filename[j] == '-' || filename[j] == '@') {
-            continue;
-        }
-        if(filename[j] == '{' || filename[j] == '}' || filename[j] == '~' || filename[j] == ' ') {
-            continue;
-        }
-        filename[j] = 'X';
-    }
 }

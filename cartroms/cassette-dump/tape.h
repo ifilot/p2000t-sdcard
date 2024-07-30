@@ -13,10 +13,25 @@
 #define BLOCKCTR   0x604F
 #define MEMSIZE    0x605C
 #define TAPE       0x0018
-#define BUFFER     0x6100
+//#define BUFFER     0x6100
 
+/**
+ * @brief Rewind the tape drive
+ * 
+ */
 void tape_rewind(void);
-void tape_read_block(void);
+
+/**
+ * @brief Read a single block from the tape
+ * 
+ * @param location storage location
+ */
+void tape_read_block(uint8_t *location) __z88dk_fastcall;
+
+/**
+ * @brief Skip the tape one block forward
+ * 
+ */
 void tape_skip_forward(void);
 
 #endif // _TAPE_H

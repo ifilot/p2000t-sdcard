@@ -26,8 +26,8 @@
 ; * the byte count and CRC16 checksum need to be set later
 DB 0x50,0x00,0x00,0x00,0x00
 
-; name of the program (8+3 bytes)
-DB 'H','E','L','L','O','W','O','R','P','R','G'
+; name of the cartridge (11 bytes)
+;DB 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+DB 'C' ,'A' ,'S' ,'S' ,'E' ,'T' ,'T', 'E', 'D', 'M', 'P'
 
-; first address to call is thus $A210
 jp __Start

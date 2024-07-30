@@ -36,7 +36,7 @@ FILETYPE:   equ $6041
 BLOCKCTR:   equ $604F
 MEMSIZE:    equ $605C
 TAPE:       equ $0018   ; address of the "tape" function
-BUFFER:     equ $6100   ; position to store tape data
+;BUFFER:     equ $6100   ; position to store tape data
 
 ;-------------------------------------------------------------------------------
 ; Rewind the cassette
@@ -52,19 +52,18 @@ _tape_rewind:
 
 ;-------------------------------------------------------------------------------
 ; Read a single block from the tape to the buffer area
+;
+; INPUT: HL - buffer location
 ;-------------------------------------------------------------------------------
 _tape_read_block:
     push ix             ; conserve ix because it is used as frame pointer
     ld a,(CASSTAT)      ; load tape status
     cp 'M'              ; check for M
     jp z,tprdexit
-    ld hl,BUFFER
-    ld ($6030),hl
+    ld ($6030),hl       ; store buffer location
     ld hl,$0400
-    ld ($6032),hl
+    ld ($6032),hl       ; store amount of bytes to read
     ld ($6034),hl
-    ;ld a,CAS_INIT
-    ;call TAPE
     ld a,CAS_READ
     call TAPE
 tprdexit:
