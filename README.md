@@ -43,6 +43,7 @@ from said SD card and load them into memory.
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 * [MULTIROM-4x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x40.BIN) (W27C512 / 64 KiB)
 * [MULTIROM-32x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x40.BIN) (SST39SF040 / 512 KiB)
+* [CASDUMP.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP.BIN) (only works for 0x40 version)
 
 ### 0x60 version
 
@@ -115,6 +116,18 @@ cd src
 * [Modified BASIC ROM source files](basicmod/)
 * [Launcher and Flasher programs](src/)
 * [Custom programs](programs/)
+
+## PCB assembly service
+
+The folder [pcb/port2-sdcard-interface](pcb/port2-sdcard-interface) contains
+`port2-sdcard-interface_bom_bot.csv` and `port2-sdcard-interface-bottom-pos.csv`
+which can be used for the JLCPCB assembly service. An example of the part
+placement can be found in the image below. At the time of writing, two
+components were unavailable, being the memory chip `62128` and a 0 ohm resistor,
+which is the reason that these two parts are missing. Note that all through-hole
+parts, e.g. LEDs, oscillator and PLCC32 socket, have to be hand-soldered in.
+
+![img PCB assembly](img/sdcard-pcb-part-placement.png)
 
 ## License
 
