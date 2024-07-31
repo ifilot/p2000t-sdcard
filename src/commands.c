@@ -66,7 +66,7 @@ void (*__operations[])(void) = {
 void command_ls(void) {
     if(check_mounted() == 1) { return; }
 
-    read_folder(_current_folder_cluster, -1, 0);
+    read_folder(-1, 0);
 }
 
 /**
@@ -76,18 +76,20 @@ void command_ls(void) {
 void command_lscas(void) {
     if(check_mounted() == 1) { return; }
 
-    read_folder(_current_folder_cluster, -1, 1);
+    read_folder(-1, 1);
 }
 
 /**
  * @brief change directory to folder indicated by id
  */
 void command_cd(void) {
+    static const char err[] = "Invalid entry or not a directory";
     if(check_mounted() == 1) { return; }
 
     int id = atoi(&__lastinput[2]);
+    _current_attrib = 0x00;
 
-    uint32_t clus = read_folder(_current_folder_cluster, id, 0);
+    uint32_t clus = read_folder(id, 0);
     if(clus != _root_dir_first_cluster) {
         if(_current_attrib & (1 << 4)) {
             if(clus == 0) { // if zero, this is the root directory
@@ -95,9 +97,11 @@ void command_cd(void) {
             } else {
                 _current_folder_cluster = clus;
             }
+        } else {
+            print_error(err);
         }
     } else {
-        print_error("Invalid entry or not a directory");
+        print_error(err);
     }
 }
 
@@ -117,7 +121,7 @@ void command_fileinfo(void) {
     sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
     terminal_printtermbuffer();
     print("Clusters:");
-    for(uint8_t i=0; i<LINKEDLIST_SIZE; i++) {
+    for(uint8_t i=0; i<F_LL_SIZE; i++) {
         uint32_t cluster_id = _linkedlist[i];
 
         if(cluster_id == 0 || cluster_id == 0xFFFFFFFF) {
@@ -237,7 +241,7 @@ void command_hexdump(void) {
     }
 
     // read the first sector of the file
-    read_sector(get_sector_addr(_linkedlist[0], 0));
+    read_sector(calculate_sector_address(_linkedlist[0], 0));
 
     sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
     terminal_printtermbuffer();
@@ -390,7 +394,7 @@ uint8_t read_file_metadata(int16_t file_id) {
         return 1;
     }
 
-    uint32_t cluster = read_folder(_current_folder_cluster, file_id, 0);
+    uint32_t cluster = read_folder(file_id, 0);
     if(cluster == _root_dir_first_cluster) {
         print_error("Could not find file");
         return 1;

@@ -708,6 +708,49 @@ jobs:
 
 #-------------------------------------------------------------------------------
 
+  build-prg-casdump:
+    runs-on: ubuntu-latest
+    container: 
+      image: z88dk/z88dk
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build CRC16 PRG
+      run: |
+        cd programs/casdump
+        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
+        make cassettedump-prg
+        ls -alh
+    - name: Upload CASDUMP.BIN
+      uses: actions/upload-artifact@v4
+      with:
+        name: CASDUMP-UNSIGNED.PRG
+        path: programs/casdump/CASDUMP.PRG
+
+  sign-prg-casdump:
+    runs-on: ubuntu-latest
+    needs: [build-prg-casdump]
+    permissions: write-all
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: sudo apt install -y python3
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: CASDUMP-UNSIGNED.PRG
+        path: ./
+    - name: Sign binary
+      run: |
+        python3 scripts/signprg.py CASDUMP.PRG
+    - name: Upload CASDUMP.PRG
+      uses: actions/upload-artifact@v4
+      with:
+        name: CASDUMP.PRG
+        path: CASDUMP.PRG
+
+#-------------------------------------------------------------------------------
+
   packaging-programs:
     runs-on: ubuntu-latest
     needs: [sign-prg-helloworld, sign-prg-moncrc16]
@@ -752,4 +795,26 @@ jobs:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: PROGRAMS.zip
         asset_name: PROGRAMS.zip
+        asset_content_type: application/octet-stream
+  
+  deploy-casdump:
+    runs-on: ubuntu-latest
+    needs: [sign-prg-casdump, create-release]
+    permissions: write-all
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download CASDUMP.PRG
+      uses: actions/download-artifact@v4
+      with:
+        name: CASDUMP.PRG
+        path: ./
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: CASDUMP.PRG
+        asset_name: CASDUMP.PRG
         asset_content_type: application/octet-stream

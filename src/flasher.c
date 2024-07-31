@@ -50,7 +50,7 @@ int main(void) {
 
     // mount sd card
     print_recall("Initializing SD card..");
-    if(init_sdcard(_resp8, _resp58) != 0) {
+    if(init_sdcard() != 0) {
         print_error("Cannot connect to SD-CARD.");
         for(;;){}
     }
@@ -61,11 +61,13 @@ int main(void) {
 
     print_recall("Mounting partition 1..");
     uint32_t lba0 = read_mbr();
-    read_partition(lba0);
-
-    // sd card successfully mounted
-    print("Partition 1 mounted");
-    print("");
+    if(lba0 == 0) {
+        print_error("Cannot connect to SD-CARD.");
+        for(;;){}
+    } else {
+        read_partition(lba0);
+        print("Partition 1 mounted");
+    }
 
     // read the root directory
     uint32_t faddr = find_file(_root_dir_first_cluster, LAUNCHERNAME, LAUNCHEREXT);
@@ -153,7 +155,7 @@ uint8_t store_file_rom(uint32_t faddr, uint16_t rom_addr, uint8_t verbose) {
     uint8_t scctr = 0;  // counter for sectors
     while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && scctr < total_sectors) {
 
-        const uint32_t caddr = get_sector_addr(_linkedlist[ctr], 0);
+        const uint32_t caddr = calculate_sector_address(_linkedlist[ctr], 0);
 
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
             // directly transfer data to ROM chip

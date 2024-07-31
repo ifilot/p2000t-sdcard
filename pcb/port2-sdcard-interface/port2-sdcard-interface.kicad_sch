@@ -18691,7 +18691,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 111.125 213.36 0)
 			(effects
 				(font
@@ -18966,7 +18966,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 281.305 78.74 0)
 			(effects
 				(font
@@ -19078,7 +19078,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 48.895 213.36 0)
 			(effects
 				(font
@@ -19420,7 +19420,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 137.795 149.86 0)
 			(effects
 				(font
@@ -19598,7 +19598,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 35.56 213.36 0)
 			(effects
 				(font
@@ -19674,7 +19674,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 41.275 53.34 0)
 			(effects
 				(font
@@ -19788,15 +19788,6 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" ""
-			(at 238.76 155.448 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "bbe06164-210f-423e-ab84-6a48b25ba687")
 		)
@@ -19856,6 +19847,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 181.61 274.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC Part #" "C407459"
 			(at 181.61 274.32 0)
 			(effects
 				(font
@@ -19989,15 +19989,6 @@
 			)
 		)
 		(property "Description" ""
-			(at 336.55 69.215 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC Part" ""
 			(at 336.55 69.215 0)
 			(effects
 				(font
@@ -20163,7 +20154,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 83.185 213.36 0)
 			(effects
 				(font
@@ -20372,7 +20363,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C131486"
+		(property "LCSC Part #" "C131486"
 			(at 309.245 201.93 0)
 			(effects
 				(font
@@ -20571,7 +20562,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5123594"
+		(property "LCSC Part #" "C5123594"
 			(at 328.93 137.795 0)
 			(effects
 				(font
@@ -20648,7 +20639,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5597"
+		(property "LCSC Part #" "C5597"
 			(at 301.625 149.225 0)
 			(effects
 				(font
@@ -20833,7 +20824,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 21.59 213.36 0)
 			(effects
 				(font
@@ -20910,7 +20901,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 119.38 118.745 0)
 			(effects
 				(font
@@ -21022,7 +21013,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5588"
+		(property "LCSC Part #" "C5588"
 			(at 288.925 212.09 0)
 			(effects
 				(font
@@ -21137,7 +21128,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C338758"
+		(property "LCSC Part #" "C338758"
 			(at 77.47 46.355 0)
 			(effects
 				(font
@@ -21255,7 +21246,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5588"
+		(property "LCSC Part #" "C5588"
 			(at 235.585 211.455 0)
 			(effects
 				(font
@@ -21501,7 +21492,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 219.075 131.445 0)
 			(effects
 				(font
@@ -21607,15 +21598,6 @@
 			)
 		)
 		(property "Description" ""
-			(at 364.49 240.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC Part" ""
 			(at 364.49 240.03 0)
 			(effects
 				(font
@@ -21778,7 +21760,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5588"
+		(property "LCSC Part #" "C5588"
 			(at 370.84 205.105 0)
 			(effects
 				(font
@@ -21893,7 +21875,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5602"
+		(property "LCSC Part #" "C5602"
 			(at 80.01 139.7 0)
 			(effects
 				(font
@@ -22012,7 +21994,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 53.34 149.86 0)
 			(effects
 				(font
@@ -22125,6 +22107,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC Part #" "C381082"
+			(at 271.78 256.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "9"
 			(uuid "9bf91bb3-294b-48e8-992c-192a77f62d6a")
 		)
@@ -22217,7 +22208,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C27597"
+		(property "LCSC Part #" "C27597"
 			(at 32.131 274.701 0)
 			(effects
 				(font
@@ -22332,7 +22323,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5947"
+		(property "LCSC Part #" "C5947"
 			(at 222.885 93.345 0)
 			(effects
 				(font
@@ -22517,7 +22508,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5159708"
+		(property "LCSC Part #" "C5159708"
 			(at 294.64 41.275 0)
 			(effects
 				(font
@@ -22593,7 +22584,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 76.2 213.36 0)
 			(effects
 				(font
@@ -22669,7 +22660,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C429158"
+		(property "LCSC Part #" "C429158"
 			(at 231.14 155.448 0)
 			(effects
 				(font
@@ -22813,7 +22804,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 135.255 240.665 0)
 			(effects
 				(font
@@ -22926,7 +22917,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 32.385 257.175 0)
 			(effects
 				(font
@@ -23171,7 +23162,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 28.575 213.36 0)
 			(effects
 				(font
@@ -23247,7 +23238,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 146.05 213.36 0)
 			(effects
 				(font
@@ -23324,7 +23315,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 122.555 56.515 0)
 			(effects
 				(font
@@ -23503,7 +23494,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 139.065 213.36 0)
 			(effects
 				(font
@@ -23579,7 +23570,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 62.865 213.36 0)
 			(effects
 				(font
@@ -23788,7 +23779,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 99.695 240.665 0)
 			(effects
 				(font
@@ -23901,7 +23892,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 99.695 257.175 0)
 			(effects
 				(font
@@ -24084,15 +24075,6 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" ""
-			(at 234.315 131.445 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "55dcd15d-328c-48bf-aa20-e862dd7366e9")
 		)
@@ -24160,7 +24142,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 97.155 213.36 0)
 			(effects
 				(font
@@ -24236,6 +24218,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC Part #" "C407459"
+			(at 213.36 256.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "823413ce-81a6-4b72-bba2-3481bf603a6f")
 		)
@@ -24296,6 +24287,15 @@
 			)
 		)
 		(property "Description" "Quad buffer 3-State outputs"
+			(at 193.04 274.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC Part #" "C7494906"
 			(at 193.04 274.32 0)
 			(effects
 				(font
@@ -24872,6 +24872,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC Part #" "C407459"
+			(at 213.36 274.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "fb7b2e04-3fe4-4172-b6e5-4b9402269b9d")
 		)
@@ -25074,7 +25083,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C27597"
+		(property "LCSC Part #" "C27597"
 			(at 381 192.405 0)
 			(effects
 				(font
@@ -25387,7 +25396,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5597"
+		(property "LCSC Part #" "C5597"
 			(at 66.04 257.81 0)
 			(effects
 				(font
@@ -25708,7 +25717,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C27597"
+		(property "LCSC Part #" "C27597"
 			(at 192.405 143.383 0)
 			(effects
 				(font
@@ -25953,7 +25962,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 150.495 118.745 0)
 			(effects
 				(font
@@ -26131,7 +26140,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 55.88 213.36 0)
 			(effects
 				(font
@@ -26409,7 +26418,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 150.495 132.08 0)
 			(effects
 				(font
@@ -26522,7 +26531,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 150.495 104.14 0)
 			(effects
 				(font
@@ -26772,15 +26781,6 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" ""
-			(at 234.95 144.78 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "7ff9d476-0792-43de-ae15-cbb6333fb2f6")
 		)
@@ -26848,7 +26848,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 125.095 213.36 0)
 			(effects
 				(font
@@ -27259,7 +27259,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5159708"
+		(property "LCSC Part #" "C5159708"
 			(at 287.655 133.985 0)
 			(effects
 				(font
@@ -27468,7 +27468,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C131486"
+		(property "LCSC Part #" "C131486"
 			(at 255.905 201.295 0)
 			(effects
 				(font
@@ -27664,7 +27664,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 104.14 213.36 0)
 			(effects
 				(font
@@ -27873,7 +27873,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 281.305 43.815 0)
 			(effects
 				(font
@@ -28051,7 +28051,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C429158"
+		(property "LCSC Part #" "C429158"
 			(at 241.935 131.445 0)
 			(effects
 				(font
@@ -28128,7 +28128,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5588"
+		(property "LCSC Part #" "C5588"
 			(at 66.04 241.3 0)
 			(effects
 				(font
@@ -28243,7 +28243,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5953"
+		(property "LCSC Part #" "C5953"
 			(at 38.1 106.68 0)
 			(effects
 				(font
@@ -28364,7 +28364,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C27597"
+		(property "LCSC Part #" "C27597"
 			(at 192.659 161.544 0)
 			(effects
 				(font
@@ -28534,6 +28534,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 181.61 256.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC Part #" "C407459"
 			(at 181.61 256.54 0)
 			(effects
 				(font
@@ -28742,7 +28751,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C27597"
+		(property "LCSC Part #" "C27597"
 			(at 32.385 240.665 0)
 			(effects
 				(font
@@ -28854,7 +28863,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C525286"
+		(property "LCSC Part #" "C525286"
 			(at 278.765 145.415 0)
 			(effects
 				(font
@@ -29132,6 +29141,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC Part #" "C309030"
+			(at 201.93 237.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "551da351-ddab-487d-8316-70c407d99686")
 		)
@@ -29333,7 +29351,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5597"
+		(property "LCSC Part #" "C5597"
 			(at 347.345 149.225 0)
 			(effects
 				(font
@@ -29584,7 +29602,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 135.255 257.175 0)
 			(effects
 				(font
@@ -29764,6 +29782,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC Part #" "C7494906"
+			(at 224.79 256.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "3"
 			(uuid "2d31a0e1-7a39-4f1e-bef0-500fe68a7af2")
 		)
@@ -29933,7 +29960,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 69.215 213.36 0)
 			(effects
 				(font
@@ -30069,6 +30096,15 @@
 			)
 		)
 		(property "Description" "Quad buffer 3-State outputs"
+			(at 66.04 274.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC Part #" "C7494906"
 			(at 66.04 274.32 0)
 			(effects
 				(font
@@ -30314,6 +30350,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC Part #" "C7494906"
+			(at 193.04 256.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "3"
 			(uuid "2d31a0e1-7a39-4f1e-bef0-500fe68a7af4")
 		)
@@ -30418,7 +30463,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 281.305 31.115 0)
 			(effects
 				(font
@@ -30531,7 +30576,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 219.075 144.78 0)
 			(effects
 				(font
@@ -30644,7 +30689,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 119.38 132.08 0)
 			(effects
 				(font
@@ -30756,7 +30801,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" ""
+		(property "LCSC Part #" "C431818"
 			(at 242.57 144.78 0)
 			(effects
 				(font
@@ -31100,7 +31145,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C27597"
+		(property "LCSC Part #" "C27597"
 			(at 347.345 192.405 0)
 			(effects
 				(font
@@ -31214,7 +31259,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C2840304"
+		(property "LCSC Part #" "C2840304"
 			(at 381 59.055 0)
 			(effects
 				(font
@@ -31447,7 +31492,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 119.38 90.805 0)
 			(effects
 				(font
@@ -31825,15 +31870,6 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" ""
-			(at 238.887 164.973 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "e849218b-fdcc-417f-ac24-00d3c0a7db69")
 		)
@@ -31968,7 +32004,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 41.275 40.64 0)
 			(effects
 				(font
@@ -32081,7 +32117,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 121.92 40.005 0)
 			(effects
 				(font
@@ -32196,15 +32232,6 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" ""
-			(at 156.845 46.99 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "1"
 			(uuid "89f9392b-2945-4f68-a5e1-4ec759a9a884")
 		)
@@ -32271,6 +32298,15 @@
 			)
 		)
 		(property "Description" "1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223"
+			(at 191.77 233.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC Part #" "C5346136"
 			(at 191.77 233.68 0)
 			(effects
 				(font
@@ -32349,7 +32385,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C429158"
+		(property "LCSC Part #" "C429158"
 			(at 231.267 164.973 0)
 			(effects
 				(font
@@ -32425,7 +32461,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C525286"
+		(property "LCSC Part #" "C525286"
 			(at 327.025 145.415 0)
 			(effects
 				(font
@@ -32568,7 +32604,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 153.035 213.36 0)
 			(effects
 				(font
@@ -32776,7 +32812,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 281.305 91.44 0)
 			(effects
 				(font
@@ -33089,7 +33125,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5602"
+		(property "LCSC Part #" "C5602"
 			(at 80.01 98.425 0)
 			(effects
 				(font
@@ -33207,7 +33243,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 118.11 213.36 0)
 			(effects
 				(font
@@ -33419,7 +33455,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5588"
+		(property "LCSC Part #" "C5588"
 			(at 337.185 205.74 0)
 			(effects
 				(font
@@ -33531,7 +33567,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C699445"
+		(property "LCSC Part #" "C699445"
 			(at 156.21 149.86 0)
 			(effects
 				(font
@@ -33644,6 +33680,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC Part #" "C7494906"
+			(at 224.79 274.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "3"
 			(uuid "2d31a0e1-7a39-4f1e-bef0-500fe68a7af5")
 		)
@@ -33747,7 +33792,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 90.17 213.36 0)
 			(effects
 				(font
@@ -33825,7 +33870,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5613"
+		(property "LCSC Part #" "C5613"
 			(at 217.805 45.72 0)
 			(effects
 				(font
@@ -33943,7 +33988,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 132.08 213.36 0)
 			(effects
 				(font
@@ -34085,7 +34130,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 42.545 213.36 0)
 			(effects
 				(font
@@ -34228,7 +34273,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C5632"
+		(property "LCSC Part #" "C5632"
 			(at 150.495 90.805 0)
 			(effects
 				(font

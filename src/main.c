@@ -106,25 +106,23 @@ void init(void) {
     z80_outp(PORT_LED_IO, 0x00);
 
     // mount sd card
-    print_recall("Initializing SD card..");
-    if(init_sdcard(_resp8, _resp58) != 0) {
+    if(init_sdcard() != 0) {
         print_error("Cannot connect to SD-CARD.");
         for(;;){}
     }
 
-    // inform user that the SD card is initialized and that we are ready to read
-    // the first block from the SD card and print it to the screen
-    print("SD Card initialized");
-
     print_recall("Mounting partition 1..");
     uint32_t lba0 = read_mbr();
-    read_partition(lba0);
+    if(lba0 == 0) {
+        print_error("Cannot connect to SD-CARD.");
+        for(;;){}
+    } else {
+        read_partition(lba0);
+        print("Partition 1 mounted");
+        print("System ready.");
 
-    // sd card successfully mounted
-    print("Partition 1 mounted");
-    print("System ready.");
-
-    // insert cursor
-    sprintf(termbuffer, "%c>%c", COL_CYAN, COL_WHITE);
-    terminal_redoline();
+        // insert cursor
+        sprintf(termbuffer, "%c>%c", COL_CYAN, COL_WHITE);
+        terminal_redoline();
+    }
 }

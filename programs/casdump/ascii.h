@@ -18,48 +18,14 @@
  *                                                                        *
  **************************************************************************/
 
-#include "copy.h"
-#include "terminal.h"
-
-/**
- * @brief Copy 0x4000 bytes from external RAM to external ROM
- * 
- * @param ram_src starting position in RAM
- * @param nbytes  number of bytes to copy
- * @param verbose whether to show verbose output
- */
-void copy_ram_rom(uint16_t ram_src, uint16_t nbytes, uint8_t verbose) {
-
-    // wipe 16kb on rom
-    for(uint8_t i=0; i<4; i++) {
-        sst39sf_wipe_sector(0x1000 * i);
-    }
-
-    uint8_t nsectors = nbytes / 256;
-    uint8_t remaining = nbytes % 256;
-    uint16_t rom_addr = 0;
-
-    for(uint8_t i=0; i<nsectors; i++) {
-        uint8_t j = 0;
-
-        do {
-            sst39sf_write_byte(rom_addr++, ram_read_uint8_t(ram_src++));
-        } while (j++ != 255);
-
-        if(verbose == 1) {
-            sprintf(termbuffer, "Copying sector %i / %i to ROM", 
-                    i+1, nsectors+1);
-            terminal_redoline();
-        }
-    }
-
-    for(uint8_t j=0; j<remaining; j++) {
-        sst39sf_write_byte(rom_addr++, ram_read_uint8_t(ram_src++));
-    }
-
-    if(verbose == 1) {
-        sprintf(termbuffer, "Done copying sector %i / %i to ROM", 
-                    nsectors+1, nsectors+1);
-        terminal_printtermbuffer();
-    }
-}
+uint8_t __ascii[] = {
+    0x10,0x36,0x11,0x71,0x33,0x35,0x37,0x34,
+    0x09,0x68,0x7A,0x73,0x64,0x67,0x6A,0x66,
+    0x2E,0x20,0x30,0x30,0x23,0x12,0x2C,0x13,
+    0x00,0x6E,0x3C,0x78,0x63,0x62,0x6D,0x76,
+    0x1B,0x79,0x61,0x77,0x65,0x74,0x75,0x72,
+    0x0F,0x39,0x2B,0x2D,0x08,0x30,0x31,0x2D,
+    0x39,0x6F,0x38,0x37,0x0D,0x70,0x38,0x40,
+    0x33,0x2E,0x32,0x31,0x5D,0x2F,0x6B,0x32,
+    0x36,0x6C,0x35,0x34,0x7B,0x3B,0x69,0x3A,
+};

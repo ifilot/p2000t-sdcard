@@ -18,9 +18,25 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _CRC16_H
-#define _CRC16_H
+#ifndef _TERMINAL_EXT_H
+#define _TERMINAL_EXT_H
 
-uint16_t crc16(uint16_t addr, uint16_t nrbytes) __z88dk_callee;
+#include <stdio.h>
+#include <string.h>
+#include "ram.h"
+#include "terminal.h"
 
-#endif // _CRC16_H
+#define DUMP_INTRAM 0
+#define DUMP_EXTRAM 1
+#define DUMP_EXTROM 2
+
+/**
+ * @brief Perform hexdump from part of external RAM
+ * 
+ * @param addr external RAM address
+ */
+void terminal_hexdump(uint16_t addr, uint8_t nrlines, uint8_t mode);
+
+uint8_t bytegrab(uint16_t addr, uint8_t mode);
+
+#endif

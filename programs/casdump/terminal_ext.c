@@ -18,21 +18,50 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _CONSTANTS_H
-#define _CONSTANTS_H
+#include "terminal_ext.h"
 
-#define COL_NONE    0x00
-#define COL_RED     0x01
-#define COL_GREEN   0x02
-#define COL_YELLOW  0x03
-#define COL_BLUE    0x04
-#define COL_MAGENTA 0x05
-#define COL_CYAN    0x06
-#define COL_WHITE   0x07
-#define TEXT_DOUBLE 0x0D
+/**
+ * @brief Perform hexdump from part of external RAM
+ * 
+ * @param addr external RAM address
+ */
+void terminal_hexdump(uint16_t addr, uint8_t nrlines, uint8_t mode) {
 
-#define INPUTLENGTH 20
+    for(uint16_t j=0; j<nrlines; j++) {  // loop over lines
 
-#define ROM_BANK_DEFAULT 0
+        // show address
+        sprintf(termbuffer, "%c%04X", COL_YELLOW, addr);
 
-#endif
+        // show bytes
+        for(uint8_t i=0; i<8; i++) {    // loop over bytes
+            uint8_t val = bytegrab(addr, mode);
+            sprintf(&termbuffer[5+i*3], "%c%02X", COL_WHITE, val);
+
+            // show ASCII value
+            if(val >= 32 && val <= 127) {
+                termbuffer[6+8*3+i] = val;
+            } else {
+                termbuffer[6+8*3+i] = '.';
+            }
+
+            addr++;
+        }
+
+        termbuffer[5+8*3] = COL_CYAN;
+        terminal_printtermbuffer();
+    }
+}
+
+uint8_t bytegrab(uint16_t addr, uint8_t mode) {
+    switch(mode) {
+        case DUMP_INTRAM:
+            return memory[addr];
+        break;
+        case DUMP_EXTRAM:
+            return ram_read_uint8_t(addr);
+        break;
+        default:
+            return 0x00;
+        break;
+    }
+}

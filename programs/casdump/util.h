@@ -18,10 +18,12 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _UTIL_H
-#define _UTIL_H
+#ifndef _UINT_UTIL_H
+#define _UINT_UTIL_H
 
-#include "terminal.h"
+#include <stdint.h>
+#include <string.h>
+#include "memory.h"
 
 /**
  * @brief Replace all bytes in a string
@@ -89,4 +91,12 @@ void call_program(uint16_t ramptr) __z88dk_callee;
  */
 uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
 
-#endif //_UTIL_H
+/**
+ * @brief Get the memory location of a variable
+ * 
+ * @param addr 
+ * @return uint16_t 
+ */
+uint16_t get_memory_location(uint8_t *addr) __z88dk_callee;
+
+#endif //_UINT_UTIL_H
