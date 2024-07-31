@@ -57,9 +57,12 @@ uint8_t  _fptr_entry_id = 0;            // entry index
 uint32_t read_mbr(void) {
     // read the first sector of the SD card
     read_sector(0x00000000);
-    
-    // grab the start address of the first partition
-    return ram_read_uint32_t(SDCACHE0 + 0x1C6);
+
+    if(ram_read_uint16_t(SDCACHE0 + 510) != 0xAA55) {
+        return 0;
+    } else {
+        return ram_read_uint32_t(SDCACHE0 + 0x1C6);
+    }
 }
 
 /**

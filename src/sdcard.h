@@ -47,7 +47,7 @@ extern uint8_t _flag_sdcard_mounted;
  * 
  * Returns 0 on success and 1 on error
  */
-uint8_t init_sdcard(uint8_t *resp8, uint8_t *resp58) __z88dk_callee;
+uint8_t init_sdcard(void);
 
 /******************************************************************************
  * RECEIVE OPERATIONS
@@ -75,19 +75,29 @@ void open_command(void) __z88dk_callee;
 void close_command(void) __z88dk_callee;
 
 /**
+ * Send pulses to SD card to trigger a reset state
+ */
+void sdpulse(void) __z88dk_callee;
+
+/**
  * CMD0: Reset the SD Memory Card
  */
-void cmd0(void) __z88dk_callee;
+uint8_t cmd0(void) __z88dk_callee;
 
 /**
  * CMD8: Sends interface condition
  */
-void cmd8(uint8_t *resp) __z88dk_callee;
+void cmd8(uint8_t *resp) __z88dk_fastcall;
 
 /**
  * CMD17: Read block
  */
-void cmd17(uint32_t addr) __z88dk_callee;
+uint8_t cmd17(uint32_t addr) __z88dk_fastcall;
+
+/**
+ * CMD24: Write block
+ */
+uint8_t cmd24(uint32_t addr) __z88dk_fastcall;
 
 /**
  * CMD55: Next command is application specific command
@@ -97,7 +107,7 @@ void cmd55(void) __z88dk_callee;
 /**
  * CMD58: Read OCR register
  */
-void cmd58(uint8_t *resp) __z88dk_callee;
+void cmd58(uint8_t *resp) __z88dk_fastcall;
 
 /**
  * ACMD41: Send host capacity support information
@@ -146,10 +156,9 @@ void fast_sd_to_intram_full(uint16_t ram_addr) __z88dk_callee;
 /**
  * @brief Read a single 512-byte sector
  * 
- * @param addr cluster address
  * @param addr sector address
  */
-void read_sector(uint32_t addr);
+uint8_t read_sector(uint32_t addr) __z88dk_fastcall;
 
 /******************************************************************************
  * I/O CONTROL

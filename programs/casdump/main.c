@@ -33,6 +33,9 @@
 #include "terminal_ext.h"
 #include "tape.h"
 
+#define MODE_AUTOMATIC 0
+#define MODE_MANUAL    1
+
 // set printf io
 #pragma printf "%i %X %lX %c %s %lu %u"
 
@@ -43,6 +46,8 @@ void copy_current_tapeblock(void);
 // pre-allocate a big read buffer
 static uint8_t cassette_buffer[0x400];
 static char filename[11];
+uint8_t wait = 1;
+uint8_t mode = MODE_AUTOMATIC;
 
 int main(void) {
     // initialize environment
@@ -70,9 +75,32 @@ int main(void) {
 
     for(;;) {
         // whether to proceed to next cassette
-        print_recall("Start reading tape? (Y/N)");
-        if(wait_for_key_fixed(33) == 0) {
-            break;
+        print("Select operation:");
+        print("   (M)anual   (A)utomatic   (Q)uit");
+        print_recall("   Enter command...");
+        wait = 1;
+        while(wait == 1) {
+            wait_for_key();
+            switch(keymem[0x00]) {
+                case 34:    // A
+                    mode = MODE_AUTOMATIC;
+                    wait = 0;
+                    print("Automatic mode set");
+                break;
+                case 30:    // M
+                    mode = MODE_MANUAL;
+                    wait = 0;
+                    print("Manual mode set");
+                break;
+                case 3:     // Q
+                    return 0;
+                break;
+                default:
+                    print("Invalid option");
+                    print_recall("Enter command...");
+                    wait = 1;
+                break;
+            }
         }
 
         // rewind the tape
@@ -107,11 +135,42 @@ int main(void) {
             sprintf(termbuffer, "Found: %c%.16s %.3s%c%i%c%i", COL_YELLOW, description, 
                     ext,COL_CYAN,totalblocks,COL_MAGENTA,length);
             terminal_printtermbuffer();
-            print_recall("Copy program to sd-card? (Y/N)");
 
-            // check if user presses YES key
-            uint8_t store_continue = wait_for_key_fixed(33);
+            uint8_t store_continue = 1;
             uint8_t continue_copying = YES;
+            if(mode == MODE_MANUAL) {
+                print_recall("Copy program to sd-card? (Y/N) Abort (A)");
+                wait = 1;
+                while(wait == 1) {
+                    wait_for_key();
+                    switch(keymem[0x00]) {
+                        case 33:    // Y
+                            wait = 0;
+                            continue_copying = YES;
+                            store_continue = 1;
+                        break;
+                        case 25:    // N
+                            wait = 0;
+                            store_continue = 0;
+                            print("Skipping program.");
+                        break;
+                        case 34:    // A
+                            wait = 0;
+                            continue_copying = NO;
+                            print("Aborting copying.");
+                        break;
+                        default:
+                            print("Invalid option");
+                            print_recall("Copy program to sd-card? (Y/N) Abort (A)");
+                            wait = 1;
+                        break;
+                    }
+                }
+            }
+
+            if(continue_copying == NO) {
+                break;
+            }
 
             if(store_continue == 1) {
                 // grab total blocks and start copying first block
@@ -168,7 +227,7 @@ int main(void) {
                     }
                     copy_current_tapeblock();
                 }
-                sprintf(termbuffer, "%c%s >%c%.8s.%.3s", COL_GREEN, description, COL_YELLOW, filename, &filename[8]);
+                sprintf(termbuffer, "%c%.16s%.3s%c>%c%.8s.%.3s", COL_GREEN, description, ext, COL_WHITE, COL_YELLOW, filename, &filename[8]);
                 terminal_printtermbuffer();
             } else {
                 // skip all blocks
@@ -186,8 +245,6 @@ int main(void) {
         print("copying from tape to SD-card.");
         print("");
     }
-
-    return 0;
 }
 
 void init(void) {
@@ -209,19 +266,32 @@ void init(void) {
     // turn LEDs off
     z80_outp(PORT_LED_IO, 0x00);
 
-    // mount sd card
+    // mount sd card for SLOT1 cartridge, else assume that the
+    // card is already mounted
+    #ifdef SLOT1
     print_recall("Initializing SD card..");
     if(init_sdcard() != 0) {
         print_error("Cannot connect to SD-CARD.");
         for(;;){}
     }
+    #endif
 
     // mount first partition
     uint32_t lba0 = read_mbr();
-    read_partition(lba0);
-
-    // sd card successfully mounted
-    print("Partition 1 mounted");
+    if(lba0 == 0) {
+        print_error("Invalid signature");
+        sprintf(termbuffer, "Signature read: %04X", ram_read_uint16_t(SDCACHE0 + 510));
+        terminal_printtermbuffer();
+        #ifndef SLOT1
+        print("Press any key to return to launcher");
+        wait_for_key();
+        #else
+        for(;;){}
+        #endif
+    } else {
+        read_partition(lba0);
+        print("Partition 1 mounted");
+    }
 }
 
 /**

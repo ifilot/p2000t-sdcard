@@ -7,6 +7,7 @@ cassettedump-slot1: main.c fat32.c memory.c terminal.c sdcard.c sdcard.asm util.
 	fat32.c main.c memory.c terminal.c terminal_ext.c \
 	util.c sdcard.c sdcard.asm ram.asm util.asm tape.asm \
 	-startup=1 \
+	-pragma-define:SLOT1=0 \
 	-pragma-define:CRT_ORG_CODE=0x1000 \
 	-pragma-define:CRT_ORG_DATA=0x6100 \
 	-pragma-define:REGISTER_SP=0x9FFF \

@@ -21,7 +21,7 @@
 #ifndef _FAT32_H
 #define _FAT32_H
 
-#define LINKEDLIST_SIZE     16
+#define F_LL_SIZE               16
 
 #include "sdcard.h"
 #include "util.h"
@@ -38,7 +38,7 @@ extern uint32_t _root_dir_first_cluster;
 extern uint32_t _fat_begin_lba;
 extern uint32_t _cluster_begin_lba;
 extern uint32_t _lba_addr_root_dir;
-extern uint32_t _linkedlist[LINKEDLIST_SIZE];
+extern uint32_t _linkedlist[F_LL_SIZE];
 extern uint32_t _current_folder_cluster;
 
 // global variables for currently active file or folder
@@ -68,12 +68,11 @@ void read_partition(uint32_t lba0);
  *        by file id. When a negative file_id is supplied, the directory is
  *        simply scanned and the list of files are outputted to the screen.
  * 
- * @param cluster cluster address of the folder
  * @param file_id ith file in the folder
  * @param casrun whether we are performing a run with CAS file metadata scan
  * @return uint32_t first cluster of the file
  */
-uint32_t read_folder(uint32_t cluster, int16_t file_id, uint8_t casrun);
+uint32_t read_folder(int16_t file_id, uint8_t casrun);
 
 /**
  * @brief Find a file identified by BASENAME and EXT in the folder correspond
@@ -100,7 +99,14 @@ void build_linked_list(uint32_t nextcluster);
  * @param sector which sector on the cluster (0-Nclusters)
  * @return uint32_t sector address (512 byte address)
  */
-uint32_t get_sector_addr(uint32_t cluster, uint8_t sector);
+uint32_t calculate_sector_address(uint32_t cluster, uint8_t sector);
+
+/**
+ * @brief Grab cluster address from file entry
+ * 
+ * @return uint32_t 
+ */
+uint32_t grab_cluster_address_from_fileblock(uint16_t loc);
 
 /**
  * @brief Store entry metadata in special global variables

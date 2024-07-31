@@ -43,7 +43,7 @@ void copy_ram_rom(uint16_t ram_src, uint16_t nbytes, uint8_t verbose) {
         uint8_t j = 0;
 
         do {
-            sst39sf_write_byte(rom_addr++, ram_read_byte(ram_src++));
+            sst39sf_write_byte(rom_addr++, ram_read_uint8_t(ram_src++));
         } while (j++ != 255);
 
         if(verbose == 1) {
@@ -54,7 +54,7 @@ void copy_ram_rom(uint16_t ram_src, uint16_t nbytes, uint8_t verbose) {
     }
 
     for(uint8_t j=0; j<remaining; j++) {
-        sst39sf_write_byte(rom_addr++, ram_read_byte(ram_src++));
+        sst39sf_write_byte(rom_addr++, ram_read_uint8_t(ram_src++));
     }
 
     if(verbose == 1) {

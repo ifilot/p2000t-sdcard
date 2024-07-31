@@ -25,18 +25,77 @@ uint8_t _resp8[5];
 uint8_t _resp58[5];
 uint8_t _flag_sdcard_mounted = 0;
 
-/******************************************************************************
- * BLOCK OPERATIONS
- ******************************************************************************/
-
 /**
- * @brief Read a single 512-byte sector
+ * @brief Output information of the SD-CARD to the user
  * 
- * @param addr sector address
  */
-void read_sector(uint32_t addr) {
+uint8_t init_sdcard(void) {
+    // mount sd card
+    print_recall("Initializing SD card..");
+    
+    // settings ~CS and PULL-UP resistor
+    sdcs_set();
+    sdout_set();
+
+    // reset SD card
+    sdpulse();
+
+    // byte for capturing responses
+    uint8_t c = 0x00;
+
+    // CMD0: Reset the SD Memory Card
     open_command();
-    cmd17(addr);
-    read_block();
+    c = cmd0();
     close_command();
+
+    // CMD8: Sends interface condition    
+    open_command();
+    cmd8(_resp8);
+    close_command();
+
+    // output resp8 to terminal
+    // Typical responses:
+    // Intenso cards: 01 00 00 00 01 AA
+    // sprintf(termbuffer, "CMD8: %02X %02X %02X %02X %02X", _resp8[0], _resp8[1], _resp8[2], _resp8[3], _resp8[4]);
+    // terminal_printtermbuffer();
+
+    if(_resp8[0] >= 0x02) {
+        return -1;
+    }
+
+    // keep on looping until zero result is found
+    c = 0xFF;
+    uint16_t ctr = 0;
+    while(c != 0 & ctr < 1000) {
+        open_command();
+        cmd55();
+        close_command();
+        open_command();
+        c = acmd41();   // Send host capacity support information
+        close_command();
+        ctr++;
+    }
+
+    if(ctr == 1000) {
+        print_error("SD card time-out");
+        return -1;
+    } else {
+        // sprintf(termbuffer, "ACMD41 attempts: %i", ctr);
+        // terminal_printtermbuffer();
+    }
+
+    // CMD53: Read OCR register
+    open_command();
+    cmd58(_resp58);
+    close_command();
+
+    // output resp58 to terminal
+    // sprintf(termbuffer, "CMD58: %02X %02X %02X %02X %02X", _resp58[0], _resp58[1], _resp58[2], _resp58[3], _resp58[4]);
+    // terminal_printtermbuffer();
+
+    // inform user that the SD card is initialized and that we are ready to read
+    // the first block from the SD card and print it to the screen
+    print("SD Card initialized");
+
+    return 0;
 }

@@ -25,12 +25,14 @@ INCLUDE "ports.inc"
 SDCACHE0        EQU  $0000
 SDCACHE1        EQU  $0200
 SDCACHE2        EQU  $0400
+TIMEOUT_READ    EQU  4000
+TIMEOUT_WRITE   EQU  10000
 
-PUBLIC _init_sdcard
-
+PUBLIC _sdpulse
 PUBLIC _cmd0
 PUBLIC _cmd8
 PUBLIC _cmd17
+PUBLIC _cmd24
 PUBLIC _cmd55
 PUBLIC _cmd58
 PUBLIC _acmd41
@@ -45,6 +47,8 @@ PUBLIC _fast_sd_to_ram_last_0x100
 PUBLIC _fast_sd_to_ram_full
 PUBLIC _fast_sd_to_intram_full
 
+PUBLIC _read_sector
+
 PUBLIC _sdout_set
 PUBLIC _sdout_reset
 PUBLIC _sdcs_set
@@ -58,6 +62,7 @@ defb 0 |0x40,0x00,0x00,0x00,0x00,0x94|0x01
 
 cmd8str:
 defb 8 |0x40,0x00,0x00,0x01,0xaa,0x86|0x01
+;                      VHS  CHK  CRC
 
 cmd55str:
 defb 55|0x40,0x00,0x00,0x00,0x00,0x00|0x01
@@ -69,61 +74,16 @@ acmd41str:
 defb 41|0x40,0x40,0x00,0x00,0x00,0x00|0x01
 
 ;-------------------------------------------------------------------------------
-; Initialize the SD card
-;
-; uint8_t init_sdcard(uint8_t *resp8, uint8_t *resp58);
-;
-; return 0 on success, return 1 on fail
+; Send pulses to the SD-card to trigger it into a reset state
 ;-------------------------------------------------------------------------------
-_init_sdcard:
-    di                          ; disable interrupts
-    pop hl                      ; retrieve return address
-    exx                         ; swap to shadow registers
-    call _sdcs_set
-    call _sdout_set
+_sdpulse:
     ld b,12
     ld a,0xFF
     out (SERIAL),a
-pulse:
+nextpulse:
     out (CLKSTART),a
-    djnz pulse
-    call _open_command
-    call _cmd0
-    call _close_command
-    call _open_command
-    call _cmd8                  ; this command will retrieve resp8 from stack
-    call _close_command
-    ld b,5
-decde:                          ; decrement address counter by 5
-    dec de
-    djnz decde
-    ld a,(de)                   ; grab echo byte in a
-    cp 0x02                     ; bigger than 1?
-    jp nc,carderror
-hosttry:
-    call _open_command
-    call _cmd55
-    call _close_command
-    call _open_command
-    call _acmd41                ; value in l
-    call _close_command
-    ld a,l
-    cp 0
-    jr nz,hosttry               ; if not zero, try again
-    call _open_command
-    call _cmd58                 ; this command will retrieve resp58 from stack
-    call _close_command
-    ld iyl,0                    ; store return value
-exitinit:
-    exx                         ; swap back from shadow registers
-    push hl                     ; put return address back onto stack
-    ei                          ; enable interrupts
-    ld a,iyl                    ; retrieve return value
-    ld l,a
+    djnz nextpulse
     ret
-carderror:
-    ld iyl,1                    ; store return value
-    jp exitinit
 
 ;-------------------------------------------------------------------------------
 ; CMD0: Reset the SD Memory Card
@@ -140,29 +100,23 @@ _cmd0:
 ; CMD8: Sends interface condition
 ;
 ; garbles: a,b,hl
-; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd8:
-    pop iy                      ; retrieve return address
-    pop de                      ; retrieve ram pointer
+    ex de,hl
     ld hl,cmd8str               ; load command list
     call sendcommand            ; garbles a,b,hl
     call receiveR7              ; garbles a,b,de
-    push iy                     ; push return address back onto stack
     ret
 
 ;-------------------------------------------------------------------------------
 ; CMD17: Read block
 ;
-; void cmd17(uint32_t addr);
+; uint8_t cmd17(uint32_t addr);
 ;
 ; garbles: a,b,de,hl,iy
-; result of R1 is stored in l, but ignored
+; result of R1 is stored in l
 ;-------------------------------------------------------------------------------
 _cmd17:
-    pop iy                      ; retrieve return address
-    pop hl                      ; retrieve upper bytes of 32 bit address
-    pop de                      ; retrieve lower bytes of 32 bit address
     ld a,17|0x40
     out (SERIAL),a
     out (CLKSTART),a            ; send out
@@ -190,12 +144,56 @@ _cmd17:
     call _receive_R1
     ld a,0xFF                   ; flush with ones
     out (SERIAL),a
+    ld bc,TIMEOUT_READ          ; set timeout timer
 cmd17next:
+    dec bc
+    ld a,b
+    or c
+    jp z,cmd17timeout
     out (CLKSTART),a            ; send out
     in a,(SERIAL)
-    cp 0xFE
+    cp 0xFE                     ; wait for 0xFE to be received
     jr nz,cmd17next
-    push iy                     ; put return address back on stack
+    ld l,a
+    ret
+cmd17timeout:
+    ld l,0xFF
+    ret
+
+;-------------------------------------------------------------------------------
+; CMD24: Write block
+;
+; void cmd24(uint32_t addr);
+;
+; garbles: a,b,de,hl,iy
+; result of R1 is stored in l
+;-------------------------------------------------------------------------------
+_cmd24:
+    ld a,24|0x40
+    out (SERIAL),a
+    out (CLKSTART),a            ; send out
+
+    ld a,d
+    out (SERIAL),a              ; byte 0
+    out (CLKSTART),a            ; send out
+
+    ld a,e
+    out (SERIAL),a              ; byte 1
+    out (CLKSTART),a            ; send out
+
+    ld a,h
+    out (SERIAL),a              ; byte 2
+    out (CLKSTART),a            ; send out
+
+    ld a,l
+    out (SERIAL),a              ; byte 3
+    out (CLKSTART),a            ; send out
+
+    ld a,0x00|0x01
+    out (SERIAL),a
+    out (CLKSTART),a            ; send out
+
+    call _receive_R1
     ret
 
 ;-------------------------------------------------------------------------------
@@ -212,16 +210,15 @@ _cmd55:
 ;-------------------------------------------------------------------------------
 ; CMD58: Read OCR register
 ;
+; input: hl - pointer to response array
 ; garbles: a,b,hl
 ; result of R1 is stored in l, but ignored
 ;-------------------------------------------------------------------------------
 _cmd58:
-    pop iy                      ; retrieve return address
-    pop de                      ; retrieve ram pointer
+    ex de,hl                    ; store pointer in de
     ld hl,cmd58str              ; load command list
     call sendcommand            ; garbles a,b,hl
-    call receiveR3              ; garbles a,b,de
-    push iy                     ; push return address back onto stack
+    call receiveR3              ; garbles a,b,de; de is pointer address for R3
     ret
 
 ;-------------------------------------------------------------------------------
@@ -266,7 +263,8 @@ sendnextbyte:
 ;
 ; uint8_t receive_R1(void);
 ;
-; Result is stored in l
+; Garbles: A
+; Return: R1 value in l
 ;-------------------------------------------------------------------------------
 _receive_R1:
     ld a,0xFF
@@ -301,11 +299,14 @@ recvbyte:
 ; Read block from SD card
 ;
 ; void read_block(void);
+;
+; Input: None
+; Garbles: a,c,hl
+; Output: None
 ;-------------------------------------------------------------------------------
 _read_block:
     ld a,0x02
     out (LED_IO),a              ; turn write led on
-    di
     ld a,$FF
     out (SERIAL),a              ; flush shift register with ones
     ld hl,SDCACHE0              ; set external RAM address
@@ -326,9 +327,32 @@ blocknext:
     jp nz, blockouter
     out (CLKSTART),a            ; two more pulses for the checksum
     out (CLKSTART),a            ; which are ignored
-    ei
     ld a,0x00
     out (LED_IO),a              ; turn write led off
+    ret
+
+;-------------------------------------------------------------------------------
+; Read a sector from the SD card
+;
+; INPUT: DEHL - 32 bit SD card sector address
+; OUTPUT: L - read token (0xFE is success, failure otherwise)
+;-------------------------------------------------------------------------------
+_read_sector:
+    di
+    call _open_command
+    call _cmd17                 ; return SD card status
+    ld a,l                      ; load response into a
+    cp 0xFE                     ; check if equal to success token
+    jp nz,readsectorexit        ; if not, exit with an error
+    call _read_block            ; if success token, read block
+    jmp readsectorsuccess
+readsectorfail:
+    jmp readsectorexit
+readsectorsuccess:
+    ld l,0xFE
+readsectorexit:
+    call _close_command
+    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -475,6 +499,11 @@ fstifinner:
 
 ;-------------------------------------------------------------------------------
 ; void open_command(void);
+;
+; See also this post: 
+; https://electronics.stackexchange.com/questions/303745/sd-card-initialization-problem-cmd8-wrong-response
+;
+; Garbles: a
 ;-------------------------------------------------------------------------------
 _open_command:
     ld a,0xFF
@@ -486,6 +515,8 @@ _open_command:
 
 ;-------------------------------------------------------------------------------
 ; void close_command(void);
+;
+; Garbles: a
 ;-------------------------------------------------------------------------------
 _close_command:
     ld a,0xFF

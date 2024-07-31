@@ -45,22 +45,27 @@
 #define RAM_BANK_CACHE          0
 #define RAM_BANK_CASSETTE       1
 
-/**
- * @brief Write a single byte to external RAM
- * 
- * @param addr external memory address
- * @param val nbyte to write
- */
-void ram_write_byte(uint16_t addr, uint8_t val) __z88dk_callee;
+//------------------------------------------------------------------------------
+// SETTER FUNCTIONS
+//------------------------------------------------------------------------------
 
 /**
- * @brief Write fixed byte size to memory, can be used for clearing memory
+ * @brief Set the external RAM pointer
  * 
- * @param addr memory start address
- * @param val value to write
- * @param num_bytes number of bytes to write
+ * @param addr 
  */
-void ram_set(uint16_t addr, uint8_t val, uint16_t num_bytes) __z88dk_callee;
+void set_ram_address(uint16_t addr) __z88dk_fastcall;
+
+/**
+ * @brief Set the ram bank
+ * 
+ * @param bank id
+ */
+void set_ram_bank(uint8_t val) __z88dk_fastcall;
+
+//------------------------------------------------------------------------------
+// READ FUNCTIONS
+//------------------------------------------------------------------------------
 
 /**
  * @brief Retrieve single byte from external RAM
@@ -68,7 +73,35 @@ void ram_set(uint16_t addr, uint8_t val, uint16_t num_bytes) __z88dk_callee;
  * @param addr external memory address
  * @return uint8_t byte at address
  */
-uint8_t ram_read_byte(uint16_t addr) __z88dk_callee;
+uint8_t ram_read_uint8_t(uint16_t addr) __z88dk_fastcall;
+
+/**
+ * @brief Retrieve 16 bit value from external RAM
+ * 
+ * @param addr  external memory address
+ * @return uint16_t value to receive
+ */
+uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_fastcall;
+
+/**
+ * @brief Retrieve 32 bit value from external RAM
+ * 
+ * @param addr  external memory address
+ * @return uint32_t value to receive
+ */
+uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_fastcall;
+
+//------------------------------------------------------------------------------
+// WRITE FUNCTIONS
+//------------------------------------------------------------------------------
+
+/**
+ * @brief Write a single byte to external RAM
+ * 
+ * @param addr external memory address
+ * @param val nbyte to write
+ */
+void ram_write_uint8_t(uint16_t addr, uint8_t val) __z88dk_callee;
 
 /**
  * @brief Write 16-bit value to external RAM
@@ -79,35 +112,33 @@ uint8_t ram_read_byte(uint16_t addr) __z88dk_callee;
 void ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;
 
 /**
- * @brief Retrieve 16 bit value from external RAM
+ * @brief Write 32-bit value to external RAM
  * 
  * @param addr  external memory address
- * @return uint16_t value to receive
+ * @param val 32-bit value to write
  */
-uint16_t ram_read_uint16_t(uint16_t addr) __z88dk_callee;
+void ram_write_uint32_t(uint16_t addr, uint32_t val) __z88dk_callee;
 
 /**
- * @brief Retrieve 32 bit value from external RAM
+ * @brief Write fixed byte size to memory, can be used for clearing memory
  * 
- * @param addr  external memory address
- * @return uint32_t value to receive
+ * @param addr memory start address
+ * @param val value to write
+ * @param num_bytes number of bytes to write
  */
-uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_callee;
+void ram_set(uint16_t addr, uint8_t val, uint16_t num_bytes) __z88dk_callee;
 
-/**
- * @brief Set the ram bank
- * 
- * @param bank id
- */
-void set_ram_bank(uint8_t val) __z88dk_callee;
+//------------------------------------------------------------------------------
+// COPY FUNCTIONS
+//------------------------------------------------------------------------------
 
 /**
  * @brief Copy data from internal memory to external RAM
  * 
  * See: ram.asm
  *
- * @param src      address on external RAM
- * @param dest     internal address
+ * @param src      internal address
+ * @param dest     external address
  * @param nrbytes  number of bytes to copy
  */
 void copy_to_ram(uint8_t *src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
@@ -133,6 +164,10 @@ void copy_from_ram(uint16_t src, uint8_t *dest, uint16_t nrbytes) __z88dk_callee
  * @param nrbytes  number of bytes to copy
  */
 void ram_transfer(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
+
+//------------------------------------------------------------------------------
+// OTHER FUNCTIONS
+//------------------------------------------------------------------------------
 
 /**
  * @brief Calculate CRC16 checksum for N bytes starting at external ram address
