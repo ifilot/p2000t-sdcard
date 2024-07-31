@@ -83,9 +83,11 @@ void command_lscas(void) {
  * @brief change directory to folder indicated by id
  */
 void command_cd(void) {
+    static const char err[] = "Invalid entry or not a directory";
     if(check_mounted() == 1) { return; }
 
     int id = atoi(&__lastinput[2]);
+    _current_attrib = 0x00;
 
     uint32_t clus = read_folder(id, 0);
     if(clus != _root_dir_first_cluster) {
@@ -95,9 +97,11 @@ void command_cd(void) {
             } else {
                 _current_folder_cluster = clus;
             }
+        } else {
+            print_error(err);
         }
     } else {
-        print_error("Invalid entry or not a directory");
+        print_error(err);
     }
 }
 
