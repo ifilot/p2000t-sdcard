@@ -841,7 +841,7 @@ jobs:
   
   deploy-casdump-0x40:
     runs-on: ubuntu-latest
-    needs: [sign-prg-casdump, create-release]
+    needs: [sign-prg-casdump-0x40, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -863,7 +863,7 @@ jobs:
 
   deploy-casdump-0x60:
     runs-on: ubuntu-latest
-    needs: [sign-prg-casdump, create-release]
+    needs: [sign-prg-casdump-0x60, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
