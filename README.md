@@ -56,10 +56,10 @@ download file does.
 * [BASICBOOTSTRAP-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x40.BIN)
 * [FLASHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40.BIN)
 * [LAUNCHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40.BIN)
+* [CASDUMP-0x40.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x40.PRG)
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 * [MULTIROM-4x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x40.BIN) (W27C512 / 64 KiB)
 * [MULTIROM-32x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x40.BIN) (SST39SF040 / 512 KiB)
-* [CASDUMP.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP.PRG) (only works for 0x40 version)
 
 ### 0x60 version
 
@@ -72,6 +72,7 @@ download file does.
 * [BASICBOOTSTRAP-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x60.BIN)
 * [FLASHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60.BIN)
 * [LAUNCHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60.BIN)
+* [CASDUMP-0x60.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x60.PRG)
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
 * [MULTIROM-4x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x60.BIN) (W27C512 / 64 KiB)
 * [MULTIROM-32x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x60.BIN) (SST39SF040 / 512 KiB)
