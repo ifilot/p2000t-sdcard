@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "philips_p2000t")(type "KiCad")(uri "${KIPRJMOD}/components/philips_p2000t.kicad_sym")(options "")(descr ""))
+)
