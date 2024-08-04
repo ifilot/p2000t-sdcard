@@ -5,12 +5,12 @@
       "Application": "Pcbnew",
       "Version": "8.0.2"
     },
-    "CreationDate": "2024-06-15T19:56:31+02:00"
+    "CreationDate": "2024-08-04T17:16:15+02:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
-      "Name": "p2000t-multifunctiebord",
-      "GUID": "70323030-3074-42d6-9d75-6c746966756e",
+      "Name": "internal-sdcard-interface",
+      "GUID": "696e7465-726e-4616-9c2d-736463617264",
       "Revision": "P2000T Multifunctiebord"
     },
     "Size": {
@@ -34,47 +34,47 @@
   ],
   "FilesAttributes": [
     {
-      "Path": "p2000t-multifunctiebord-F_Cu.gbr",
+      "Path": "internal-sdcard-interface-F_Cu.gbr",
       "FileFunction": "Copper,L1,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "p2000t-multifunctiebord-B_Cu.gbr",
+      "Path": "internal-sdcard-interface-B_Cu.gbr",
       "FileFunction": "Copper,L2,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "p2000t-multifunctiebord-F_Paste.gbr",
+      "Path": "internal-sdcard-interface-F_Paste.gbr",
       "FileFunction": "SolderPaste,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "p2000t-multifunctiebord-B_Paste.gbr",
+      "Path": "internal-sdcard-interface-B_Paste.gbr",
       "FileFunction": "SolderPaste,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "p2000t-multifunctiebord-F_Silkscreen.gbr",
+      "Path": "internal-sdcard-interface-F_Silkscreen.gbr",
       "FileFunction": "Legend,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "p2000t-multifunctiebord-B_Silkscreen.gbr",
+      "Path": "internal-sdcard-interface-B_Silkscreen.gbr",
       "FileFunction": "Legend,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "p2000t-multifunctiebord-F_Mask.gbr",
+      "Path": "internal-sdcard-interface-F_Mask.gbr",
       "FileFunction": "SolderMask,Top",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "p2000t-multifunctiebord-B_Mask.gbr",
+      "Path": "internal-sdcard-interface-B_Mask.gbr",
       "FileFunction": "SolderMask,Bot",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "p2000t-multifunctiebord-Edge_Cuts.gbr",
+      "Path": "internal-sdcard-interface-Edge_Cuts.gbr",
       "FileFunction": "Profile",
       "FilePolarity": "Positive"
     }
