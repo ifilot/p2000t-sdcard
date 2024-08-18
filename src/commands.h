@@ -121,11 +121,4 @@ void execute_command(void);
  */
 uint8_t read_file_metadata(int16_t file_id);
 
-/**
- * @brief Check whether the SD card is mounted
- * 
- * @return uint8_t 0 if mounted, 1 if not
- */
-uint8_t check_mounted(void);
-
 #endif // _COMMANDS_H

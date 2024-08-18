@@ -27,7 +27,7 @@
  */
 void terminal_hexdump(uint16_t addr, uint8_t mode) {
 
-    for(uint16_t j=0; j<16; j++) {  // loop over lines
+    for(uint8_t j=0; j<16; j++) {  // loop over lines
 
         // show address
         sprintf(termbuffer, "%c%04X", COL_YELLOW, addr);
