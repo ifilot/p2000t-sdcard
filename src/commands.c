@@ -64,8 +64,6 @@ void (*__operations[])(void) = {
  * 
  */
 void command_ls(void) {
-    if(check_mounted() == 1) { return; }
-
     read_folder(-1, 0);
 }
 
@@ -74,8 +72,6 @@ void command_ls(void) {
  * 
  */
 void command_lscas(void) {
-    if(check_mounted() == 1) { return; }
-
     read_folder(-1, 1);
 }
 
@@ -84,7 +80,6 @@ void command_lscas(void) {
  */
 void command_cd(void) {
     static const char err[] = "Invalid entry or not a directory";
-    if(check_mounted() == 1) { return; }
 
     int id = atoi(&__lastinput[2]);
     _current_attrib = 0x00;
@@ -229,7 +224,7 @@ void command_run(void) {
         // clean up memory including stack program stack
         memset(&memory[0xA000], 0x00, 0xDF00 - 0xA000);
     } else {
-        print_error("Cannot only run CAS or PRG files.");
+        print_error("Can only run CAS or PRG files.");
     }
 }
 
@@ -270,7 +265,7 @@ void command_ledtest(void) {
  */
 void command_stack(void) {
     const uint16_t stackloc = get_stack_location();
-    sprintf(termbuffer, "Stack location: %04X", stackloc);
+    sprintf(termbuffer, "Stack: %04X", stackloc);
     terminal_printtermbuffer();
 }
 
@@ -386,8 +381,6 @@ void execute_command(void) {
  * @return uint8_t whether file can be read, 0 true, 1 false
  */
 uint8_t read_file_metadata(int16_t file_id) {
-    if(check_mounted() == 1) { return 1; }
-
     // read file id and check its value
     if(file_id < 0) {
         print_error("Invalid file id");
@@ -401,25 +394,11 @@ uint8_t read_file_metadata(int16_t file_id) {
     }
 
     if(_current_attrib & (1 << 4)) {
-        print_error("This is not a file");
+        print_error("Not a file");
         return 1;
     }
 
     build_linked_list(cluster);
-
-    return 0;
-}
-
-/**
- * @brief Check whether the SD card is mounted
- * 
- * @return uint8_t 0 if mounted, 1 if not
- */
-uint8_t check_mounted(void) {
-    if(_flag_sdcard_mounted != 1) {
-        print_error("Please mount the SD card first.");
-        return 1;
-    }
 
     return 0;
 }

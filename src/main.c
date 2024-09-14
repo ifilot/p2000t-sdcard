@@ -39,6 +39,18 @@ void main(void) {
     // initialize environment
     init();
 
+    // check if there is a file called "AUTOBOOT.CAS", if so, immediately
+    // launch this CAS file
+    uint32_t fcl = find_file(_root_dir_first_cluster, "AUTOBOOT", "CAS");
+    if(fcl != 0) {
+        print("Loading AUTOBOOT.CAS...");
+        build_linked_list(fcl);
+        set_ram_bank(RAM_BANK_CASSETTE);
+        store_cas_ram(_linkedlist[0], 0x0000);
+        set_ram_bank(0);
+        __bootcas = 1;
+    }
+
     // put in infinite loop and wait for user commands
     // only terminate the loop when a program should be executed
     while(__bootcas == 0) {
@@ -92,7 +104,7 @@ void init(void) {
     // memory[0x605C] == 1 --> 16 KiB (0x6000 - 0x9FFF)
     //                   2 --> 32 KiB (0x6000 - 0xDFFF)
     //                   3 --> 40 KiB (0x6000 - 0xFFFF)
-    const uint8_t nrkb = memory[0x605C] <= 2 ? memory[0x605C] * 16 : 40;   
+    const uint8_t nrkb = memory[0x605C] <= 2 ? memory[0x605C] * 16 : 40;
 
     sprintf(&vidmem[0x50], "%c%cSDCARD READER", TEXT_DOUBLE, COL_CYAN);
     sprintf(&vidmem[0x50*22], "Version: %s. Memory model: %i kb.", __VERSION__, nrkb);
