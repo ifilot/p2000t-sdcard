@@ -17,6 +17,12 @@
 * [Building the hardware](#building-the-hardware)
 * [License](#license)
 
+## YouTube
+
+Check out the YouTube video below for a detailed review of the SD-card cartridge.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/OKvVlIvrEu0?si=eiHv6j02MohKcoT2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## Purpose
 
 Perhaps the most elegant solution for loading CAS files into your P2000T or
