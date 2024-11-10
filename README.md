@@ -21,7 +21,7 @@
 
 Check out the YouTube video below for a detailed review of the SD-card cartridge.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/OKvVlIvrEu0?si=eiHv6j02MohKcoT2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![YouTube](http://i.ytimg.com/vi/OKvVlIvrEu0/hqdefault.jpg)](https://www.youtube.com/watch?v=OKvVlIvrEu0)
 
 ## Purpose
 
