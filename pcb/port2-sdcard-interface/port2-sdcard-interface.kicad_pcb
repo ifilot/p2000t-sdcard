@@ -3915,11 +3915,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "b790e7cf-0002-4081-a541-66205a1c33b7")
+			(uuid "9125f5e0-ef18-4279-8e4b-72a15dbbb814")
 			(effects
 				(font
 					(size 1 1)
@@ -4141,11 +4142,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C2840304"
-			(at 0 0 0)
+		(property "LCSC Part #" "C2840304"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "b369908a-fd7a-48c3-8edf-6034cfe459e5")
+			(uuid "749ef597-15a8-4e76-92b1-1cb11f523a62")
 			(effects
 				(font
 					(size 1 1)
@@ -4749,11 +4751,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "396a75a6-3bc6-4b03-8487-3372900d8b7a")
+			(uuid "4d22babc-e6fb-4622-b6b3-b5b926e7827d")
 			(effects
 				(font
 					(size 1 1)
@@ -4975,11 +4978,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "3e094b5e-3c3e-4e2c-899c-f0837a715221")
+			(uuid "c036a487-5cb9-4e4d-98cb-0a62f0cb5f6d")
 			(effects
 				(font
 					(size 1 1)
@@ -5201,11 +5205,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5947"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5947"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "5673477e-8f20-4fc5-a15b-c554ad7d2c5b")
+			(uuid "273a1d66-dc13-48cd-afe1-ea00c78a18d1")
 			(effects
 				(font
 					(size 1 1)
@@ -6268,11 +6273,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "fe20b4a6-bddc-4ced-b36a-106925708eb5")
+			(uuid "ee4cc43a-4f4a-4a97-9fa3-a04eb98c6f96")
 			(effects
 				(font
 					(size 1 1)
@@ -6494,11 +6500,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C429158"
-			(at 0 0 0)
+		(property "LCSC Part #" "C429158"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "72a9a58a-3d7a-4fa1-90d8-f5874abb6725")
+			(uuid "1bb348a4-6770-464c-9c9e-1a4af1f87958")
 			(effects
 				(font
 					(size 1 1)
@@ -6720,11 +6727,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5953"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5953"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "84f6edce-f06a-4ae8-9857-ef0fd4fc3246")
+			(uuid "39af7efb-2222-4059-9d0e-d30392993ca8")
 			(effects
 				(font
 					(size 1 1)
@@ -7118,11 +7126,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "308a580d-4438-4330-9db0-41a890c10782")
+			(uuid "986db362-8fc7-4a14-94dd-f5a1d2be9135")
 			(effects
 				(font
 					(size 1 1)
@@ -7344,11 +7353,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C27597"
-			(at 0 0 0)
+		(property "LCSC Part #" "C27597"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "1d88c2c7-4406-4468-b82f-10586590f3db")
+			(uuid "4d91f49c-4192-4aa9-ab97-6395311ff3a4")
 			(effects
 				(font
 					(size 1 1)
@@ -7722,11 +7732,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C27597"
-			(at 0 0 0)
+		(property "LCSC Part #" "C27597"
+			(at 0 0 180)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "2730a501-832a-4024-9009-4e78e99ce482")
+			(uuid "c532ceea-1dbc-4e48-96d6-4c7e54c841a0")
 			(effects
 				(font
 					(size 1 1)
@@ -8100,11 +8111,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5602"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5602"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "b93eea43-1418-4693-964f-99d320ae632a")
+			(uuid "f9ed686e-5048-4b9d-8657-96aea84d9a10")
 			(effects
 				(font
 					(size 1 1)
@@ -8498,11 +8510,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "93351a6d-79ef-409e-84fe-dd60ce75ca91")
+			(uuid "0204349a-c803-4a83-8c0c-2403bb26c23a")
 			(effects
 				(font
 					(size 1 1)
@@ -8724,11 +8737,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5159708"
+		(property "LCSC Part #" "C5159708"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "b6fe2e84-b047-4f65-8ef0-d8f57aaf049c")
+			(uuid "57de29de-0975-4398-81df-aa01d4886632")
 			(effects
 				(font
 					(size 1 1)
@@ -8950,11 +8964,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "7cc0f4c9-83fb-4dbb-8a10-456112f67167")
+			(uuid "71ef0276-0fd3-4f48-91d4-dbba0c3d734b")
 			(effects
 				(font
 					(size 1 1)
@@ -9179,6 +9194,20 @@
 				(justify mirror)
 			)
 		)
+		(property "LCSC Part #" "C407459"
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "78a392db-f70f-4875-baa3-32a1f24e3881")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/50ac2ef1-641a-4bd2-831a-783f77bff050")
 		(sheetname "Root")
@@ -9392,11 +9421,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C131486"
-			(at 0 0 0)
+		(property "LCSC Part #" "C131486"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "848f1c94-9b3d-454d-b6d8-31336e9c1309")
+			(uuid "dcd44d90-70f2-4559-8a11-d3e3a5d3fae3")
 			(effects
 				(font
 					(size 1 1)
@@ -9832,7 +9862,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100uF"
 			(at 1.5 -2 180)
 			(layer "B.SilkS")
 			(uuid "a895bc54-b2fd-401e-a870-35ac975428d3")
@@ -9879,6 +9909,20 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+				)
+				(justify mirror)
+			)
+		)
+		(property "LCSC Part #" "C309030"
+			(at 0 0 180)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "c657bec4-6db9-4fcf-92ff-759792a12ed1")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
 				)
 				(justify mirror)
 			)
@@ -10097,11 +10141,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C429158"
-			(at 0 0 0)
+		(property "LCSC Part #" "C429158"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "e22a6a3b-b7c4-4e83-98d7-81c35cb31613")
+			(uuid "cb4a42bf-f41f-4823-a884-57f8336fd339")
 			(effects
 				(font
 					(size 1 1)
@@ -10326,6 +10371,20 @@
 				(justify mirror)
 			)
 		)
+		(property "LCSC Part #" "C407459"
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "989d3014-8fd5-4d72-af8a-1df33d88fb17")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/940d7bdb-7bf2-4494-a581-c2cfdb43c00d")
 		(sheetname "Root")
@@ -10538,6 +10597,20 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+				)
+				(justify mirror)
+			)
+		)
+		(property "LCSC Part #" "C5346136"
+			(at 0 0 180)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "c0f89afe-0ac1-4e8f-9bf6-1204b5f2a739")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
 				)
 				(justify mirror)
 			)
@@ -10819,11 +10892,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5613"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5613"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "54abf7d5-9eab-4c1b-9791-6c6e27426525")
+			(uuid "9e794ed2-f9e9-4745-83d7-953dc293cba9")
 			(effects
 				(font
 					(size 1 1)
@@ -11217,11 +11291,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C131486"
-			(at 0 0 0)
+		(property "LCSC Part #" "C131486"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "c3b9b5f9-8264-4010-a2c9-64648a3246d2")
+			(uuid "dab49cd8-a900-4c23-b178-416cc727d29b")
 			(effects
 				(font
 					(size 1 1)
@@ -11705,11 +11780,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5123594"
+		(property "LCSC Part #" "C5123594"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "dae66b6e-3c96-4109-a39c-e36696ea8cbb")
+			(uuid "9ef69450-328f-4d87-a718-71df2a024af8")
 			(effects
 				(font
 					(size 1 1)
@@ -11931,11 +12007,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C338758"
-			(at 0 0 0)
+		(property "LCSC Part #" "C338758"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "d452eedc-da70-45c2-83d6-794823bc2005")
+			(uuid "bd9051f2-2fbe-4c4a-a425-ee37c6e9f5c0")
 			(effects
 				(font
 					(size 1 1)
@@ -12329,11 +12406,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "0bb9d865-98da-4919-9c78-56c6e08aaf70")
+			(uuid "2e36c66d-2d00-4559-af65-9d38c097f9b6")
 			(effects
 				(font
 					(size 1 1)
@@ -12555,11 +12633,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C429158"
-			(at 0 0 0)
+		(property "LCSC Part #" "C429158"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "e24145d9-024d-478c-9f1d-efd1c30eb049")
+			(uuid "d2dd43f0-49fc-4fa3-a8de-b34d93d10013")
 			(effects
 				(font
 					(size 1 1)
@@ -12781,11 +12860,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C699445"
-			(at 0 0 0)
+		(property "LCSC Part #" "C699445"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "6f285d24-f624-485c-8c1d-02dbf73726e2")
+			(uuid "a42d7681-4763-4a20-82f7-0a2246fba2a0")
 			(effects
 				(font
 					(size 1 1)
@@ -13147,11 +13227,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5588"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5588"
+			(at 0 0 180)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "cb4f8828-64e4-4b1d-b70c-d0b862344bcd")
+			(uuid "57843f2a-e609-4592-a5e9-b91fb4972be5")
 			(effects
 				(font
 					(size 1 1)
@@ -13161,7 +13242,7 @@
 			)
 		)
 		(property ki_fp_filters "SO14* DIP*W7.62mm*")
-		(path "/eeb5fd9a-459a-466b-996b-3043172a40f6")
+		(path "/22a25053-46d5-4a8b-a186-0a0190cbe28d")
 		(sheetname "Root")
 		(sheetfile "port2-sdcard-interface.kicad_sch")
 		(attr smd)
@@ -13513,11 +13594,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" ""
-			(at 0 0 0)
+		(property "LCSC Part #" "C431818"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "2938b91f-ead1-4cb8-a11f-779655a90d5a")
+			(uuid "d5949ca7-c97c-4ab2-bd01-df62da630d86")
 			(effects
 				(font
 					(size 1 1)
@@ -13739,11 +13821,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "e3c7ab83-2900-48ab-8323-a8fbbf101bdd")
+			(uuid "a9c616c2-b5cb-4cc7-9a4e-ebc9145dadb5")
 			(effects
 				(font
 					(size 1 1)
@@ -13965,11 +14048,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5632"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5632"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "1bf3b5cb-463f-4998-94a7-53ff39f6ce7e")
+			(uuid "a1962724-e81c-4df3-9cd1-347c0d8f3e8b")
 			(effects
 				(font
 					(size 1 1)
@@ -14331,11 +14415,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "3f954b43-a7c4-43f0-9cda-cc994f70cceb")
+			(uuid "6659f375-ad91-44b2-88b9-f0a69ebe3125")
 			(effects
 				(font
 					(size 1 1)
@@ -14557,11 +14642,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "8109b6cb-bdd6-4775-8f86-bb6d04cdaa75")
+			(uuid "b0431373-8be0-4ac1-8857-ca27774b52c4")
 			(effects
 				(font
 					(size 1 1)
@@ -15148,11 +15234,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "b9adb3e6-1747-459c-97a9-cd816ff56891")
+			(uuid "e420fd56-e7a3-46fe-b8aa-ada05c075b59")
 			(effects
 				(font
 					(size 1 1)
@@ -15374,11 +15461,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "3b929e69-88ee-481e-be28-bd262d93c8e3")
+			(uuid "f4f61ddb-20f9-463b-ae36-abc50ffce0b9")
 			(effects
 				(font
 					(size 1 1)
@@ -15600,11 +15688,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5602"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5602"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "4b5548cf-c15f-4cb6-8597-b5399148a74a")
+			(uuid "06bfa629-5fbb-4cf4-a673-e113672e5543")
 			(effects
 				(font
 					(size 1 1)
@@ -15998,11 +16087,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C699445"
-			(at 0 0 0)
+		(property "LCSC Part #" "C699445"
+			(at 0 0 180)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "ad2fe843-7934-4b23-94d1-68c056b95d6e")
+			(uuid "c65eea5a-0d94-495b-ae62-4756e4ab6349")
 			(effects
 				(font
 					(size 1 1)
@@ -16012,7 +16102,7 @@
 			)
 		)
 		(property ki_fp_filters "DIP*W7.62mm* SO14*")
-		(path "/aa21e4e6-83de-4ff3-aaa3-2ec9d36a982c")
+		(path "/c33ac28d-8250-420c-832a-d82c5a6d4e41")
 		(sheetname "Root")
 		(sheetfile "port2-sdcard-interface.kicad_sch")
 		(attr smd)
@@ -16364,11 +16454,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "412886d4-c9a8-4a01-9ecc-5158b49d38d8")
+			(uuid "b8c03f25-4e44-4797-8284-4d4e3ba9ca62")
 			(effects
 				(font
 					(size 1 1)
@@ -16593,8 +16684,22 @@
 				(justify mirror)
 			)
 		)
+		(property "LCSC Part #" "C7494906"
+			(at 0 0 180)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "db104f88-de5b-4759-a5ca-53defa3eade7")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
 		(property ki_fp_filters "DIP*W7.62mm*")
-		(path "/c2eeafbd-390c-4b55-b80c-8b3afd78accb")
+		(path "/f0806bd4-1f6a-4124-a6b6-f1b741bd72d1")
 		(sheetname "Root")
 		(sheetfile "port2-sdcard-interface.kicad_sch")
 		(attr smd)
@@ -16958,11 +17063,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C525286"
+		(property "LCSC Part #" "C525286"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "f5afd572-169a-4ba1-bcd6-6e6b8da6a816")
+			(uuid "0a8963ca-a7ef-44e2-962b-eabd6c2369a0")
 			(effects
 				(font
 					(size 1 1)
@@ -17187,6 +17293,20 @@
 				(justify mirror)
 			)
 		)
+		(property "LCSC Part #" "C407459"
+			(at 0 0 -90)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "fd6e8448-f25d-4eaf-b572-2b540d1ff0b7")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/456df475-5662-43e1-8d5b-6e8554d0a1e4")
 		(sheetname "Root")
@@ -17400,11 +17520,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "8cdaec8d-709b-4898-9d12-52f34f5594b1")
+			(uuid "d7e2fe8c-01f7-4983-b075-720ec0362617")
 			(effects
 				(font
 					(size 1 1)
@@ -17626,11 +17747,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5159708"
+		(property "LCSC Part #" "C5159708"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "018a0ee4-cdbb-4add-91fc-13249ac3b1c8")
+			(uuid "e54bc4c8-cfc2-4f91-aaa4-53c271a1862b")
 			(effects
 				(font
 					(size 1 1)
@@ -17852,11 +17974,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "b5ad1069-501d-4aca-9306-53eda13a57fb")
+			(uuid "146c4c60-e74a-4c93-a92e-189782cde6f8")
 			(effects
 				(font
 					(size 1 1)
@@ -18078,6 +18201,20 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+				)
+				(justify mirror)
+			)
+		)
+		(property "LCSC Part #" "C381082"
+			(at 0 0 -90)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "c866c4cc-e098-40d9-b5d6-66a70eb253e7")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
 				)
 				(justify mirror)
 			)
@@ -18628,11 +18765,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C525286"
-			(at 0 0 0)
+		(property "LCSC Part #" "C525286"
+			(at 0 0 180)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "e92bf8f1-ca8b-44e2-b672-cee13100e97c")
+			(uuid "45da57a2-8f4c-491e-96da-e89a29f463c8")
 			(effects
 				(font
 					(size 1 1)
@@ -18854,11 +18992,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 180)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "93e237dc-60f3-4886-b877-414fa706041b")
+			(uuid "bb0f9afc-1852-41d6-8e14-2fa55c4e78ca")
 			(effects
 				(font
 					(size 1 1)
@@ -19080,11 +19219,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5632"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5632"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "5d3eb6d6-55ef-4762-bd80-23d72e76ed9c")
+			(uuid "0444a746-dfb6-46a7-b07c-07ee2929fde7")
 			(effects
 				(font
 					(size 1 1)
@@ -19094,7 +19234,7 @@
 			)
 		)
 		(property ki_fp_filters "DIP?14*")
-		(path "/d3c2817d-dee3-4aa5-8513-9f9ae0b9abad")
+		(path "/fc41044f-f3d2-4170-8516-9ffd9551c9bd")
 		(sheetname "Root")
 		(sheetfile "port2-sdcard-interface.kicad_sch")
 		(attr smd)
@@ -19446,11 +19586,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C5597"
-			(at 0 0 0)
+		(property "LCSC Part #" "C5597"
+			(at 0 0 -90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "923138ca-66e1-4cbe-b524-7f5879d20684")
+			(uuid "2d2e54a1-4cb4-46fd-aa54-b25cfc92fd1d")
 			(effects
 				(font
 					(size 1 1)
@@ -20257,6 +20398,20 @@
 				(justify mirror)
 			)
 		)
+		(property "LCSC Part #" "C407459"
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(uuid "42682d3c-1600-4b75-bce7-e4a9625e67fe")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify mirror)
+			)
+		)
 		(property ki_fp_filters "R_*")
 		(path "/164c08ec-6f44-41cc-8194-8c6a611c276a")
 		(sheetname "Root")
@@ -20470,11 +20625,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C699445"
-			(at 0 0 0)
+		(property "LCSC Part #" "C699445"
+			(at 0 0 180)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "0d75deeb-aecd-4ff5-95ba-cd8dba147f25")
+			(uuid "286e6248-0b7b-4ae8-95ae-a3f2670242c0")
 			(effects
 				(font
 					(size 1 1)
@@ -20484,7 +20640,7 @@
 			)
 		)
 		(property ki_fp_filters "DIP*W7.62mm* SO14*")
-		(path "/40575b6c-f43a-4a7e-b185-956420cae57f")
+		(path "/e0a41b60-892e-40ef-9abf-cba68b9fd61f")
 		(sheetname "Root")
 		(sheetfile "port2-sdcard-interface.kicad_sch")
 		(attr smd)
@@ -20836,11 +20992,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
+		(property "LCSC Part #" "C126469"
 			(at 0 0 0)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "9703f0a4-5e35-44f5-b133-c5d4fa02366f")
+			(uuid "d1cbb4f2-16b7-41ed-9d30-f03d57c4a7c7")
 			(effects
 				(font
 					(size 1 1)
@@ -21062,11 +21219,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "e3e10921-87d2-46cd-9add-57270e121c2d")
+			(uuid "0334c43a-2089-4953-b3bd-987bbc711ca5")
 			(effects
 				(font
 					(size 1 1)
@@ -21288,11 +21446,12 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C126469"
-			(at 0 0 0)
+		(property "LCSC Part #" "C126469"
+			(at 0 0 90)
+			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "e454be3b-1323-4e16-a8a4-9456099a9cf8")
+			(uuid "edd8eebd-e4b1-4102-92a6-2b91828037b6")
 			(effects
 				(font
 					(size 1 1)
