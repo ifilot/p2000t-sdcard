@@ -22,7 +22,7 @@
 ; bootstrap.asm
 ;
 ; Upon the first keyboard parse routine of the basic
-; rom, executes the code located at $4EE0. This will
+; rom, executes the code located at $4EC7. This will
 ; modify a few pointers and loads in the code from
 ; the I/O port to ADDR EXCODE and launches it from there.
 ;-------------------------------------------------------------------------------
@@ -47,32 +47,14 @@ ROM_BANK:       EQU $4A         ; address ROM bank
 RAM_BANK:       EQU $4B         ; address RAM bank
 NUMBYTES:       EQU $2D00       ; hardcoded length of launcher program
 PROGADDR:       EQU $0000       ; location on ROM where program resides
-DEPLOYADDR:     EQU $6152       ; storage location of deploy addr
+DEPLOYADDR:     EQU $6150       ; storage location of deploy addr
+BOOTSTR_HOOK:   EQU $60D3       ; Basic's hook address for our bootstrap
+
+	; The bootstrap code is injected into the end of the standard BASIC 
+	; cartridge starting at $4EC7
+    org $4EC7
 
 ;-------------------------------------------------------------------------------
-; CODE INJECTION PART
-;-------------------------------------------------------------------------------
-	; This part is injected into the standard BASIC cartridge
-	; starting at $4EE0
-    org $4EE0
-	
-    ; store bootstrap enable launch code  
-    ld a,$55
-    ld ($6150),a
-    
-    ; store byte character for jump
-    ld a,$C3
-    ld ($6151),a   
-
-    ; store loadcode pointer (will be executed after rom boot)
-    ld hl,loadcode
-    ld ($6152),hl
-    
-    ; continue with normal execution of the ROM startup
-    jp $1f5a
-
-;-------------------------------------------------------------------------------
-; OTHER CODE
 ;
 ; Load code from I/O port and launch the code
 ;
@@ -85,7 +67,9 @@ loadcode:
     ld a,0x01
     out (LED_IO), a     ; turn read LED on
     dec a               ; set a = 0
-    ld ($6150),a        ; disable bootstrap routine
+    ld (BOOTSTR_HOOK),a ; remove bootstrap hook
+    ld (BOOTSTR_HOOK+1),a
+    ld (BOOTSTR_HOOK+2),a
     ld hl,msgbl
     call printmsg
     di
@@ -106,7 +90,6 @@ lcnextbyte:
     jr nz,lcnextbyte
     out (LED_IO), a     ; turn read led off (a = 0 here)
     call EXCODE         ; call custom firmware code (will return here)
-    call zeroram
     jp loadrom
 
 msgbl:
@@ -138,6 +121,7 @@ loadrom:
     out (LED_IO), a     ; turn read LED off
     xor a               ; set flags z, nc
     jp $28d4            ; launch basic program
+    ;jp $1fc6            ; return to Basic
 
 msglp:
     DB $06,$0D,"Launching program",$FF
@@ -168,46 +152,27 @@ cdnextbyte:
 
     add hl,bc               ; add program length
 
-    ; set basic pointers to variable space
-    ld ($6405),hl
+    ld ($6405),hl           ; set basic pointers to variable space
     ld ($6407),hl
     ld ($6409),hl
-
     ei
-    ret
-
-;-------------------------------------------------------------------------------
-; Clear any remains from the previous program
-;-------------------------------------------------------------------------------
-zeroram:
-    ld hl,EXCODE
-    ld de,EXCODE+1
-    ld bc,NUMBYTES-1
-    ld a,0
-    ld (hl),a
-    ldir
     ret
 
 ;-------------------------------------------------------------------------------
 ; clear the screen
 ;-------------------------------------------------------------------------------
 clrscrn:
-    ld a,0 ; load 0 into first byte
-    ld ($5000),a
-    ld de,$5001
-    ld bc,$1000
-    dec bc
-    ld hl,$5000
-    ldir ; copy next byte from previous
+    ld a, $0C               ; char code for clear screen    
+    call $104A              ; Basic's print char routine
     ret
 
 ;-------------------------------------------------------------------------------
 ; Print message to screen
 ; hl - pointer to string
-;----------------------------------------------------
+;-------------------------------------------------------------------------------
 printmsg:
     call clrscrn
-    ld bc,$5000 + $50*10
+    ld bc,$5000 + $50*10    ; print on line 10
 pmprint:
     ld a,(hl)
     cp 255
@@ -216,12 +181,6 @@ pmprint:
     inc hl
     inc bc
     jp pmprint
-
-;-------------------------------------------------------------------------------
-; go into infinite loop
-;-------------------------------------------------------------------------------
-loop:
-    jp loop
 
 ;-------------------------------------------------------------------------------
 ; Reads a byte from the I/O port and put it in reg A.

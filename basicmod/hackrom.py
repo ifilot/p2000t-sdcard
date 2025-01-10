@@ -1,67 +1,36 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
+# This script adds the bootstrap code at the end of the BASIC ROM, and modifies
+# the ROM to call the bootstrap after startup.
 
-f = open('BASICROM.BIN', 'rb')
-rom = bytearray(f.read())
-f.close()
+CART_ORG = 0x1000
+BOOTSTRAP_ADDR = 0x4EC7
+BOOTSTRAP_OFFSET = BOOTSTRAP_ADDR - CART_ORG
 
-# verify checksum
-llb = rom[0x0001] # low byte length
-lhb = rom[0x0002] # high byte length
-nbytes = (lhb * 256 + llb)
+with open('BASICROM.BIN', 'rb') as f:
+    rom = bytearray(f.read())
 
-# calculate checksum
-checksum = np.uint16(0)
-for i in range(0x0005, 0x0005 + nbytes):
-    checksum += rom[i]
-checksum &= 0xFFFF
-
-# verify whether initial checksum passes
-if rom[0x0003] == checksum & 0xFF and rom[0x0004] == (checksum >> 8):
-    print('Checksum passed')
-
-# here a call is made to a hook address (0x1056)
-print(['%02X' % rom[i] for i in range(0x0F71,0x0F74)])
-
-# at 0x1056, a jump is made to the proper point, so by making
-# an adjustment here to 0x4EEO, we can insert our own
-# bootstrap code (bootstrap.asm)
-print(['%02X' % rom[i] for i in range(0x0056,0x0059)])
-rom[0x0057] = 0xE0 # lower byte
-rom[0x0058] = 0x4E # upper byte
-
-# adjust the check kb status call which normally links
-# to jp 0029h (launcher.asm)
-rom[0x008EB] = 0xC7
-rom[0x008EC] = 0x4E
+# To call our custom code (at $4EC7) after startup, page 18 of 'Adresboekje' 
+# tells us to use addresses $60D0 or $60D3 to hook into the Basic interpreter.
+# Note that $60D3 maps to $08E7 on the Basic ROM (see 'Adresboekje' page 13)
+rom[0x08E7] = 0xCD # 'call' opcode
+rom[0x08E8:0x08EA] = BOOTSTRAP_ADDR.to_bytes(2, byteorder='little')
 
 # recalculate checksum
-checksum = np.uint16(0)
+checksum = 0
+nbytes = int.from_bytes(rom[0x0001:0x0003], byteorder='little')
 for i in range(0x0005, 0x0005 + nbytes):
     checksum += rom[i]
-checksum &= 0xFFFF
 
-# adjust checksum such that the 16-bit sum is zero
-rom[0x0003] = (~(checksum & 0xFF) + 1) & 0xFF
-rom[0x0004] = ~((checksum >> 8) & 0xFF) & 0xFF
-#print("%04X" % checksum)
-#print("%02X%02X" % (rom[0x0004],rom[0x0003]))
+# put the 2's complement negation of the checksum back in the ROM header
+rom[0x0003:0x0005] = ((~checksum+1) & 0xFFFF).to_bytes(2, byteorder='little')
 
-# insert new data
-f = open('bootstrap.bin', 'rb')
-bootstrap = bytearray(f.read())
-f.close()
-rom[0x3EE0:0x3EE0+len(bootstrap)] = bootstrap
-print("Inserting custom boostrap: %i / 287 bytes" % len(bootstrap))
-
-# auto-launcher
-f = open('launcher.bin', 'rb')
-launcher = bytearray(f.read())
-f.close()
-rom[0x3EC7:0x3EC7+len(launcher)] = launcher
+# insert bootstrap code at 0x3EC7
+with open('bootstrap.bin', 'rb') as f:
+    bootstrap = bytearray(f.read())
+    rom[BOOTSTRAP_OFFSET : BOOTSTRAP_OFFSET + len(bootstrap)] = bootstrap
+    print(f"Inserting boostrap: {len(bootstrap)} / {0x4000 - 0x3EC7} bytes")
 
 print('Writing modified BASIC cartridge as BASICBOOTSTRAP.BIN...')
-f = open('BASICBOOTSTRAP.BIN', 'wb')
-f.write(rom)
-f.close()
+with open('BASICBOOTSTRAP.BIN', 'wb') as f:
+    f.write(rom)
