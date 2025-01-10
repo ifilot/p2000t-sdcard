@@ -23,8 +23,8 @@
 ;
 ; Upon the first keyboard parse routine of the basic
 ; rom, executes the code located at $4EC7. This will
-; modify a few pointers and loads in the code from
-; the I/O port to ADDR EXCODE and launches it from there.
+; load in the code from the I/O port to ADDR EXCODE 
+; and launches it from there.
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
