@@ -38,12 +38,6 @@ This repository contains the PCB for interfacing a P2000T with an SD-card and
 the necessary software routines to grab .CAS files from said SD card and load
 them into memory.
 
-> [!WARNING] 
-> Since version rev6 of the PCB, the I/O port has been changed to `0x40-0x4F`,
-> while older versions of the PCB use I/O port `0x60-0x6F`. Depending on which
-> version of the PCB you have, you need to use the right software packages.
-> The different versions are indicated by `0x40` and `0x60`.
-
 > [!TIP]
 > **Documentation**
 > * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
@@ -54,9 +48,10 @@ them into memory.
 Read the section ["How it functions"](#how-it-functions) to understand what each
 download file does.
 
-> [!IMPORTANT]
-> The files shown here cater specifically to PCB version 6 or later where the
-> SD-card listens to I/O port 0x4X.
+> [!WARNING] 
+> The files shown here cater specifically to PCB version 6 or later
+> where the SD-card listens to I/O port 0x4X. Earlier version of the PCB are no
+> longer actively maintained.
 
 * [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
 * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
