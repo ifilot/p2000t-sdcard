@@ -13,7 +13,6 @@ env:
   FLASHER_BIN: FLASHER.BIN
   LAUNCHER_BIN: LAUNCHER.BIN
   BASICROM_BIN: BASICBOOTSTRAP.BIN
-  MULTIROM_BIN: MULTIROM.BIN
 
 jobs:
   create-release:
@@ -36,7 +35,7 @@ jobs:
 ################################################################################
 
   # Launcher for the SLOT2 cartridge
-  build-launcher-0x60:
+  build-launcher:
     runs-on: ubuntu-latest
     container: 
       image: z88dk/z88dk
@@ -46,20 +45,18 @@ jobs:
     - name: Build launcher application
       run: |
         cd src
-        sed -i "s/0x40/0x60/" ports.h
-        sed -i "s/\$40/\$60/" ports.inc
         sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make launcher
         ls -alh LAUNCHER*
     - name: Upload launcher
       uses: actions/upload-artifact@v4
       with:
-        name: LAUNCHER-0x60-UNSIGNED
+        name: LAUNCHER-UNSIGNED
         path: src/${{env.LAUNCHER_BIN}}
 
-  sign-launcher-0x60:
+  sign-launcher:
     runs-on: ubuntu-latest
-    needs: [build-launcher-0x60]
+    needs: [build-launcher]
     permissions: write-all
     steps:
     - name: Install dependencies
@@ -76,7 +73,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: LAUNCHER-0x60-UNSIGNED
+        name: LAUNCHER-UNSIGNED
         path: ./
     - name: Sign binary
       run: |
@@ -84,19 +81,19 @@ jobs:
     - name: Upload launcher
       uses: actions/upload-artifact@v4
       with:
-        name: LAUNCHER-0x60
+        name: LAUNCHER
         path: ${{env.LAUNCHER_BIN}}
 
-  deploy-launcher-0x60:
+  deploy-launcher:
     runs-on: ubuntu-latest
-    needs: [build-launcher-0x60, create-release, sign-launcher-0x60]
+    needs: [build-launcher, create-release, sign-launcher]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download LAUNCHER
       uses: actions/download-artifact@v4
       with:
-        name: LAUNCHER-0x60
+        name: LAUNCHER
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset-launcher
@@ -106,133 +103,13 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.LAUNCHER_BIN}}
-        asset_name: LAUNCHER-0x60.BIN
-        asset_content_type: application/octet-stream
-
-#-------------------------------------------------------------------------------
-
-  # Launcher for the SLOT2 cartridge
-  build-launcher-0x40:
-    runs-on: ubuntu-latest
-    container: 
-      image: z88dk/z88dk
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build launcher application
-      run: |
-        cd src
-        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
-        make launcher
-        ls -alh LAUNCHER*
-    - name: Upload launcher
-      uses: actions/upload-artifact@v4
-      with:
-        name: LAUNCHER-0x40-UNSIGNED
-        path: src/${{env.LAUNCHER_BIN}}
-
-  sign-launcher-0x40:
-    runs-on: ubuntu-latest
-    needs: [build-launcher-0x40]
-    permissions: write-all
-    steps:
-    - name: Install dependencies
-      run: sudo apt install -y cmake build-essential libtclap-dev libboost-all-dev git
-    - name: Download repository
-      run: git clone https://github.com/ifilot/crc16sign.git --depth 1
-    - name: build crc16sign
-      run: |
-        cd crc16sign
-        mkdir build
-        cd build
-        cmake ../src
-        make -j
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: LAUNCHER-0x40-UNSIGNED
-        path: ./
-    - name: Sign binary
-      run: |
-        crc16sign/build/crc16sign -i ${{env.LAUNCHER_BIN}} -o ${{env.LAUNCHER_BIN}} -s
-    - name: Upload launcher
-      uses: actions/upload-artifact@v4
-      with:
-        name: LAUNCHER-0x40
-        path: ${{env.LAUNCHER_BIN}}
-
-  deploy-launcher-0x40:
-    runs-on: ubuntu-latest
-    needs: [build-launcher-0x40, create-release, sign-launcher-0x40]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download LAUNCHER
-      uses: actions/download-artifact@v4
-      with:
-        name: LAUNCHER-0x40
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset-launcher
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{env.LAUNCHER_BIN}}
-        asset_name: LAUNCHER-0x40.BIN
-        asset_content_type: application/octet-stream
-
-################################################################################
-
-  # Flasher for the SLOT2 cartridge
-  build-flasher-0x60:
-    runs-on: ubuntu-latest
-    container: 
-      image: z88dk/z88dk
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build launcher application
-      run: |
-        cd src
-        sed -i "s/0x40/0x60/" ports.h
-        sed -i "s/\$40/\$60/" ports.inc
-        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
-        make flasher
-        ls -alh FLASHER*
-    - name: Upload flasher
-      uses: actions/upload-artifact@v4
-      with:
-        name: FLASHER-0x60
-        path: src/${{env.FLASHER_BIN}}
-
-  deploy-flasher-0x60:
-    runs-on: ubuntu-latest
-    needs: [build-flasher-0x60, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: FLASHER-0x60
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{env.FLASHER_BIN}}
-        asset_name: FLASHER-0x60.BIN
+        asset_name: LAUNCHER.BIN
         asset_content_type: application/octet-stream
 
 #-------------------------------------------------------------------------------
 
   # Flasher for the SLOT2 cartridge
-  build-flasher-0x40:
+  build-flasher:
     runs-on: ubuntu-latest
     container: 
       image: z88dk/z88dk
@@ -248,19 +125,19 @@ jobs:
     - name: Upload flasher
       uses: actions/upload-artifact@v4
       with:
-        name: FLASHER-0x40
+        name: FLASHER
         path: src/${{env.FLASHER_BIN}}
 
-  deploy-flasher-0x40:
+  deploy-flasher:
     runs-on: ubuntu-latest
-    needs: [build-flasher-0x40, create-release]
+    needs: [build-flasher, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: FLASHER-0x40
+        name: FLASHER
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -270,58 +147,13 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.FLASHER_BIN}}
-        asset_name: FLASHER-0x40.BIN
+        asset_name: FLASHER.BIN
         asset_content_type: application/octet-stream
 
 ################################################################################
 
   # Modified BASIC cartridge
-  build-basic-0x60:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: sudo apt install -y python3 python3-numpy z80asm make
-    - name: Build modified basic cartridge
-      run: |
-        cd basicmod
-        sed -i "s/EQU \$4/EQU \$6/g" bootstrap.asm
-        z80asm bootstrap.asm -o bootstrap.bin
-        z80asm launcher.asm -o launcher.bin
-        python hackrom.py
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: BASICBOOTSTRAP-0x60
-        path: basicmod/${{env.BASICROM_BIN}}
-
-  deploy-basic-cartridge-0x60:
-    runs-on: ubuntu-latest
-    needs: [build-basic-0x60, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: BASICBOOTSTRAP-0x60
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{env.BASICROM_BIN}}
-        asset_name: BASICBOOTSTRAP-0x60.BIN
-        asset_content_type: application/octet-stream
-  
-#-------------------------------------------------------------------------------
-
-  # Modified BASIC cartridge
-  build-basic-0x40:
+  build-basic:
     runs-on: ubuntu-latest
 
     steps:
@@ -337,19 +169,19 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: BASICBOOTSTRAP-0x40
+        name: BASICBOOTSTRAP
         path: basicmod/${{env.BASICROM_BIN}}
 
-  deploy-basic-cartridge-0x40:
+  deploy-basic-cartridge:
     runs-on: ubuntu-latest
-    needs: [build-basic-0x40, create-release]
+    needs: [build-basic, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: BASICBOOTSTRAP-0x40
+        name: BASICBOOTSTRAP
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -359,264 +191,8 @@ jobs:
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.BASICROM_BIN}}
-        asset_name: BASICBOOTSTRAP-0x40.BIN
+        asset_name: BASICBOOTSTRAP.BIN
         asset_content_type: application/octet-stream
-
-################################################################################
-
-  # Multirom cartridges 0x60
-
-  build-multirom-4x16k-0x60:
-    runs-on: ubuntu-latest
-    needs: [build-basic-0x60, build-flasher-0x60]
-    steps:
-    - name: Install dependencies
-      run: sudo apt install -y wget
-    - uses: actions/checkout@v3
-    - name: Download modified BASIC rom
-      uses: actions/download-artifact@v4
-      with:
-        name: BASICBOOTSTRAP-0x60
-        path: ./
-    - name: Download flasher
-      uses: actions/download-artifact@v4
-      with:
-        name: FLASHER-0x60
-        path: ./
-    - name: Build modified basic cartridge
-      run: |
-        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
-        truncate -s 16k ${{env.BASICROM_BIN}}
-        truncate -s 16k ${{env.FLASHER_BIN}}
-        cat ${{env.BASICROM_BIN}} ${{env.FLASHER_BIN}} RAMTEST.BIN basicmod/BASICROM.BIN > MULTIROM.BIN
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: MULTIROM-4x16k-0x60
-        path: ${{env.MULTIROM_BIN}}
-    
-  build-multirom-32x16k-0x60:
-    runs-on: ubuntu-latest
-    needs: [build-basic-0x60, build-flasher-0x60]
-    steps:
-    - name: Install dependencies
-      run: sudo apt install -y wget python3
-    - uses: actions/checkout@v3
-    - name: Download modified BASIC rom
-      uses: actions/download-artifact@v4
-      with:
-        name: BASICBOOTSTRAP-0x60
-        path: ./
-    - name: Download flasher
-      uses: actions/download-artifact@v4
-      with:
-        name: FLASHER-0x60
-        path: ./
-    - name: Build modified basic cartridge
-      run: |
-        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
-        truncate -s 16k ${{env.BASICROM_BIN}}
-        truncate -s 16k ${{env.FLASHER_BIN}}
-        python3 roms/build_rom.py
-        truncate -s 512k MULTIROM.BIN # resize to 512kb
-        mv MULTIROM.BIN MULTIROM-32x16k-0x60.BIN
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: MULTIROM-32x16k-0x60
-        path: MULTIROM-32x16k-0x60.BIN
-
-  deploy-multirom-4x16k-0x60:
-    runs-on: ubuntu-latest
-    needs: [build-multirom-4x16k-0x60, build-multirom-32x16k-0x60, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name:  MULTIROM-4x16k-0x60
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-4x16k-0x60.BIN
-        asset_content_type: application/octet-stream
-
-  deploy-multirom-32x16k-0x60:
-    runs-on: ubuntu-latest
-    needs: [build-multirom-4x16k-0x60, build-multirom-32x16k-0x60, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name:  MULTIROM-32x16k-0x60
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: MULTIROM-32x16k-0x60.BIN
-        asset_name: MULTIROM-32x16k-0x60.BIN
-        asset_content_type: application/octet-stream
-  
-#-------------------------------------------------------------------------------
-
-  # Multirom cartridges 0x40
-
-  build-multirom-4x16k-0x40:
-    runs-on: ubuntu-latest
-    needs: [build-basic-0x40, build-flasher-0x40]
-    steps:
-    - name: Install dependencies
-      run: sudo apt install -y wget
-    - uses: actions/checkout@v3
-    - name: Download modified BASIC rom
-      uses: actions/download-artifact@v4
-      with:
-        name: BASICBOOTSTRAP-0x40
-        path: ./
-    - name: Download flasher
-      uses: actions/download-artifact@v4
-      with:
-        name: FLASHER-0x40
-        path: ./
-    - name: Build modified basic cartridge
-      run: |
-        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
-        truncate -s 16k ${{env.BASICROM_BIN}}
-        truncate -s 16k ${{env.FLASHER_BIN}}
-        cat ${{env.BASICROM_BIN}} ${{env.FLASHER_BIN}} RAMTEST.BIN basicmod/BASICROM.BIN > MULTIROM.BIN
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: MULTIROM-4x16k-0x40
-        path: ${{env.MULTIROM_BIN}}
-
-  build-multirom-32x16k-0x40:
-    runs-on: ubuntu-latest
-    needs: [build-basic-0x40, build-flasher-0x40]
-    steps:
-    - name: Install dependencies
-      run: sudo apt install -y wget python3
-    - uses: actions/checkout@v3
-    - name: Download modified BASIC rom
-      uses: actions/download-artifact@v4
-      with:
-        name: BASICBOOTSTRAP-0x40
-        path: ./
-    - name: Download flasher
-      uses: actions/download-artifact@v4
-      with:
-        name: FLASHER-0x40
-        path: ./
-    - name: Build modified basic cartridge
-      run: |
-        wget https://github.com/ifilot/p2000t-ram-expansion-board/releases/latest/download/RAMTEST.BIN
-        truncate -s 16k ${{env.BASICROM_BIN}}
-        truncate -s 16k ${{env.FLASHER_BIN}}
-        python3 roms/build_rom.py
-        truncate -s 512k MULTIROM.BIN # resize to 512kb
-        mv MULTIROM.BIN MULTIROM-32x16k-0x40.BIN
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: MULTIROM-32x16k-0x40
-        path: MULTIROM-32x16k-0x40.BIN
-
-  deploy-multirom-4x16k-0x40:
-    runs-on: ubuntu-latest
-    needs: [build-multirom-4x16k-0x40, build-multirom-32x16k-0x40, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name:  MULTIROM-4x16k-0x40
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{env.MULTIROM_BIN}}
-        asset_name: MULTIROM-4x16k-0x40.BIN
-        asset_content_type: application/octet-stream
-
-  deploy-multirom-32x16k-0x40:
-    runs-on: ubuntu-latest
-    needs: [build-multirom-4x16k-0x40, build-multirom-32x16k-0x40, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name:  MULTIROM-32x16k-0x40
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: MULTIROM-32x16k-0x40.BIN
-        asset_name: MULTIROM-32x16k-0x40.BIN
-        asset_content_type: application/octet-stream
-
-################################################################################
-
-  build-card:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install dependencies
-      run: sudo apt install -y python3 python3-pil
-    - uses: actions/checkout@v3
-    - name: Build card
-      run: |
-        python3 roms/card/card_creator.py
-        mv card.png multirom-card.png
-    - name: Upload card
-      uses: actions/upload-artifact@v4
-      with:
-        name: multirom-card.png
-        path: multirom-card.png
-
-  deploy-card:
-    runs-on: ubuntu-latest
-    needs: [build-card, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name:  multirom-card.png
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: multirom-card.png
-        asset_name: multirom-card.png
-        asset_content_type: image/png  
 
 ################################################################################
 
@@ -707,7 +283,7 @@ jobs:
 
 #-------------------------------------------------------------------------------
 
-  build-prg-casdump-0x40:
+  build-prg-casdump:
     runs-on: ubuntu-latest
     container: 
       image: z88dk/z88dk
@@ -719,37 +295,16 @@ jobs:
         cd programs/casdump
         sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
         make cassettedump-prg
-        mv -v CASDUMP.PRG CASDUMP-0x40.PRG
+        mv -v CASDUMP.PRG CASDUMP.PRG
     - name: Upload CASDUMP.BIN
       uses: actions/upload-artifact@v4
       with:
-        name: CASDUMP-UNSIGNED-0x40.PRG
-        path: programs/casdump/CASDUMP-0x40.PRG
+        name: CASDUMP-UNSIGNED.PRG
+        path: programs/casdump/CASDUMP.PRG
 
-  build-prg-casdump-0x60:
+  sign-prg-casdump:
     runs-on: ubuntu-latest
-    container: 
-      image: z88dk/z88dk
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build CRC16 PRG
-      run: |
-        cd programs/casdump
-        sed -i "s/0x40/0x60/" ports.h
-        sed -i "s/\$40/\$60/" ports.inc
-        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
-        make cassettedump-prg
-        mv -v CASDUMP.PRG CASDUMP-0x60.PRG
-    - name: Upload CASDUMP.BIN
-      uses: actions/upload-artifact@v4
-      with:
-        name: CASDUMP-UNSIGNED-0x60.PRG
-        path: programs/casdump/CASDUMP-0x60.PRG
-
-  sign-prg-casdump-0x40:
-    runs-on: ubuntu-latest
-    needs: [build-prg-casdump-0x40]
+    needs: [build-prg-casdump]
     permissions: write-all
     steps:
     - uses: actions/checkout@v3
@@ -758,38 +313,16 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: CASDUMP-UNSIGNED-0x40.PRG
+        name: CASDUMP-UNSIGNED.PRG
         path: ./
     - name: Sign binary
       run: |
-        python3 scripts/signprg.py CASDUMP-0x40.PRG
+        python3 scripts/signprg.py CASDUMP.PRG
     - name: Upload CASDUMP.PRG
       uses: actions/upload-artifact@v4
       with:
-        name: CASDUMP-0x40.PRG
-        path: CASDUMP-0x40.PRG
-
-  sign-prg-casdump-0x60:
-    runs-on: ubuntu-latest
-    needs: [build-prg-casdump-0x60]
-    permissions: write-all
-    steps:
-    - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: sudo apt install -y python3
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: CASDUMP-UNSIGNED-0x60.PRG
-        path: ./
-    - name: Sign binary
-      run: |
-        python3 scripts/signprg.py CASDUMP-0x60.PRG
-    - name: Upload CASDUMP.PRG
-      uses: actions/upload-artifact@v4
-      with:
-        name: CASDUMP-0x60.PRG
-        path: CASDUMP-0x60.PRG
+        name: CASDUMP.PRG
+        path: CASDUMP.PRG
 
 #-------------------------------------------------------------------------------
 
@@ -839,16 +372,16 @@ jobs:
         asset_name: PROGRAMS.zip
         asset_content_type: application/octet-stream
   
-  deploy-casdump-0x40:
+  deploy-casdump:
     runs-on: ubuntu-latest
-    needs: [sign-prg-casdump-0x40, create-release]
+    needs: [sign-prg-casdump, create-release]
     permissions: write-all
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Download CASDUMP.PRG
       uses: actions/download-artifact@v4
       with:
-        name: CASDUMP-0x40.PRG
+        name: CASDUMP.PRG
         path: ./
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -857,28 +390,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: CASDUMP-0x40.PRG
-        asset_name: CASDUMP-0x40.PRG
-        asset_content_type: application/octet-stream
-
-  deploy-casdump-0x60:
-    runs-on: ubuntu-latest
-    needs: [sign-prg-casdump-0x60, create-release]
-    permissions: write-all
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-    - name: Download CASDUMP.PRG
-      uses: actions/download-artifact@v4
-      with:
-        name: CASDUMP-0x60.PRG
-        path: ./
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: CASDUMP-0x60.PRG
-        asset_name: CASDUMP-0x60.PRG
+        asset_path: CASDUMP.PRG
+        asset_name: CASDUMP.PRG
         asset_content_type: application/octet-stream

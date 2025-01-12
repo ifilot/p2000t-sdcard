@@ -38,12 +38,6 @@ This repository contains the PCB for interfacing a P2000T with an SD-card and
 the necessary software routines to grab .CAS files from said SD card and load
 them into memory.
 
-> [!WARNING] 
-> Since version rev6 of the PCB, the I/O port has been changed to `0x40-0x4F`,
-> while older versions of the PCB use I/O port `0x60-0x6F`. Depending on which
-> version of the PCB you have, you need to use the right software packages.
-> The different versions are indicated by `0x40` and `0x60`.
-
 > [!TIP]
 > **Documentation**
 > * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
@@ -54,37 +48,14 @@ them into memory.
 Read the section ["How it functions"](#how-it-functions) to understand what each
 download file does.
 
-### 0x40 version
+> [!WARNING] 
+> The files shown here cater specifically to PCB version 6 or later
+> where the SD-card listens to I/O port 0x4X. Earlier version of the PCB are no
+> longer actively maintained.
 
-**Compatible with PCB rev6 or newer.**
-
-> [!NOTE] 
-> Do not forget to change the `LAUNCHER-0x40.BIN` to `LAUNCHER.BIN` when copying
-> the file to the SD-card.
-
-* [BASICBOOTSTRAP-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x40.BIN)
-* [FLASHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40.BIN)
-* [LAUNCHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40.BIN)
-* [CASDUMP-0x40.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x40.PRG)
-* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
-* [MULTIROM-4x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x40.BIN) (W27C512 / 64 KiB)
-* [MULTIROM-32x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x40.BIN) (SST39SF040 / 512 KiB)
-
-### 0x60 version
-
-**Compatible with PCB rev0-rev5.**
-
-> [!NOTE] 
-> Do not forget to change the `LAUNCHER-0x60.BIN` to `LAUNCHER.BIN` when copying
-> the file to the SD-card.
-
-* [BASICBOOTSTRAP-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x60.BIN)
-* [FLASHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60.BIN)
-* [LAUNCHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60.BIN)
-* [CASDUMP-0x60.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x60.PRG)
-* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
-* [MULTIROM-4x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x60.BIN) (W27C512 / 64 KiB)
-* [MULTIROM-32x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x60.BIN) (SST39SF040 / 512 KiB)
+* [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
+* [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
+* [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
 
 ## How it functions
 
