@@ -218,7 +218,7 @@ solution.
 To install this board, you will need two custom brackets. You can find the
 necessary bracket files [here](brackets).
 
-![internal SD-card board](img/pcb-design-internal-board.png)
+![internal SD-card board](img/pcb-design-internal-board.jpg)
 
 ## License
 
