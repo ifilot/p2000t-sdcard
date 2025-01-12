@@ -54,37 +54,17 @@ them into memory.
 Read the section ["How it functions"](#how-it-functions) to understand what each
 download file does.
 
-### 0x40 version
+> [!IMPORTANT]
+> The files shown here cater specifically to PCB version 6 or later where the
+> SD-card listens to I/O port 0x4X.
 
-**Compatible with PCB rev6 or newer.**
-
-> [!NOTE] 
-> Do not forget to change the `LAUNCHER-0x40.BIN` to `LAUNCHER.BIN` when copying
-> the file to the SD-card.
-
-* [BASICBOOTSTRAP-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x40.BIN)
-* [FLASHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40.BIN)
-* [LAUNCHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40.BIN)
-* [CASDUMP-0x40.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x40.PRG)
+* [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
+* [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
+* [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
+* [CASDUMP.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP.PRG)
 * [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
-* [MULTIROM-4x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x40.BIN) (W27C512 / 64 KiB)
-* [MULTIROM-32x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x40.BIN) (SST39SF040 / 512 KiB)
-
-### 0x60 version
-
-**Compatible with PCB rev0-rev5.**
-
-> [!NOTE] 
-> Do not forget to change the `LAUNCHER-0x60.BIN` to `LAUNCHER.BIN` when copying
-> the file to the SD-card.
-
-* [BASICBOOTSTRAP-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x60.BIN)
-* [FLASHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60.BIN)
-* [LAUNCHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60.BIN)
-* [CASDUMP-0x60.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x60.PRG)
-* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
-* [MULTIROM-4x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x60.BIN) (W27C512 / 64 KiB)
-* [MULTIROM-32x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x60.BIN) (SST39SF040 / 512 KiB)
+* [MULTIROM-4x16k.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k.BIN) (W27C512 / 64 KiB)
+* [MULTIROM-32x16k.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k.BIN) (SST39SF040 / 512 KiB)
 
 ## How it functions
 
