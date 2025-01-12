@@ -17,6 +17,7 @@
 * [Building the hardware](#building-the-hardware)
 * [Ordering a cartridge](#ordering-a-cartridge)
 * [Internal SD-card board](#internal-sd-card-board)
+* [Formatting SD-card](#formatting-sd-card)
 * [License](#license)
 
 ## YouTube
@@ -219,6 +220,31 @@ To install this board, you will need two custom brackets. You can find the
 necessary bracket files [here](brackets).
 
 ![internal SD-card board](img/pcb-design-internal-board.jpg)
+
+## Formatting SD-card
+
+The way that the SD-card is formatted is critical. The SD-card needs be
+formatted using a MBR/FAT32 partition. Often, directly formatting the SD-card
+via Windows Explorer or similar works well, but sometimes a more rigorous
+procedure is needed, which is explained below.
+
+1. Type `WINDOWS + R` and run `CMD`.
+2. Run `diskpart`.
+3. Type `list disk` followed by `select disk <NR>` where `<NR>` corresponds to
+   your SD-card.
+4. Type `clean`. You get a response with `DiskPart succeeded in cleaning the
+   disk.`.
+5. Type `list volume`, followed by `select volume <ID>` where `<ID>` corresponds
+   to your SD-card drive.
+6. Type `convert mbr`. You should get the response `DiskPart successfully
+   converted the selected disk to MBR format.`.
+7. Type `create partition primary`. The response should be `DiskPart succeeded
+   in creating the specified partition.`.
+8. Finally, type `format fs=fat32 quick label="P2000T"`, after which the
+   response is `DiskPart successfully formatted the volume.`.
+
+Your SD-card should now be ready to work in the SD-cartridge. Of course, you
+still need to copy files to it in order to load something of it.
 
 ## License
 
