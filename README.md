@@ -15,6 +15,8 @@
 * [Compilation instructions](#compilation-instructions)
 * [Repository contents](#repository-contents)
 * [Building the hardware](#building-the-hardware)
+* [Ordering a cartridge](#ordering-a-cartridge)
+* [Internal SD-card board](#internal-sd-card-board)
 * [License](#license)
 
 ## YouTube
@@ -204,6 +206,19 @@ parts, e.g. LEDs, oscillator and PLCC32 socket, have to be hand-soldered in.
 It is also possible to order a cartridge (typically there are always a few
 of them in stock). If you are interested, feel free to contact the author of
 this repository at `ivo at ivofilot dot nl` to discuss pricing and shipping.
+
+## Internal SD-card board
+
+This project also includes an [internal SD-card
+board](pcb/internal-sdcard-interface/) designed to mount on top of the main
+baseboard inside the P2000T. In addition to the SD-card reader functionality,
+the board also provides 64 KiB of additional memory, making it an all-in-one
+solution.
+
+To install this board, you will need two custom brackets. You can find the
+necessary bracket files [here](brackets).
+
+![internal SD-card board](img/pcb-design-internal-board.png)
 
 ## License
 
