@@ -15,6 +15,9 @@
 * [Compilation instructions](#compilation-instructions)
 * [Repository contents](#repository-contents)
 * [Building the hardware](#building-the-hardware)
+* [Ordering a cartridge](#ordering-a-cartridge)
+* [Internal SD-card board](#internal-sd-card-board)
+* [Formatting SD-card](#formatting-sd-card)
 * [License](#license)
 
 ## YouTube
@@ -35,12 +38,6 @@ This repository contains the PCB for interfacing a P2000T with an SD-card and
 the necessary software routines to grab .CAS files from said SD card and load
 them into memory.
 
-> [!WARNING] 
-> Since version rev6 of the PCB, the I/O port has been changed to `0x40-0x4F`,
-> while older versions of the PCB use I/O port `0x60-0x6F`. Depending on which
-> version of the PCB you have, you need to use the right software packages.
-> The different versions are indicated by `0x40` and `0x60`.
-
 > [!TIP]
 > **Documentation**
 > * Detailed documentation included how-to procedures can be found [here](https://www.philips-p2000t.nl/cartridges/sdcard-cartridge.html#sdcard-cartridge)
@@ -51,37 +48,18 @@ them into memory.
 Read the section ["How it functions"](#how-it-functions) to understand what each
 download file does.
 
-### 0x40 version
+> [!WARNING] 
+> The files shown here cater specifically to PCB version 6 or later
+> where the SD-card listens to I/O port 0x4X. Earlier version of the PCB are no
+> longer actively maintained.
 
-**Compatible with PCB rev6 or newer.**
+* [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
+* [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
+* [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
 
-> [!NOTE] 
-> Do not forget to change the `LAUNCHER-0x40.BIN` to `LAUNCHER.BIN` when copying
-> the file to the SD-card.
-
-* [BASICBOOTSTRAP-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x40.BIN)
-* [FLASHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x40.BIN)
-* [LAUNCHER-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x40.BIN)
-* [CASDUMP-0x40.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x40.PRG)
-* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
-* [MULTIROM-4x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x40.BIN) (W27C512 / 64 KiB)
-* [MULTIROM-32x16k-0x40.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x40.BIN) (SST39SF040 / 512 KiB)
-
-### 0x60 version
-
-**Compatible with PCB rev0-rev5.**
-
-> [!NOTE] 
-> Do not forget to change the `LAUNCHER-0x60.BIN` to `LAUNCHER.BIN` when copying
-> the file to the SD-card.
-
-* [BASICBOOTSTRAP-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP-0x60.BIN)
-* [FLASHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER-0x60.BIN)
-* [LAUNCHER-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER-0x60.BIN)
-* [CASDUMP-0x60.PRG](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/CASDUMP-0x60.PRG)
-* [PROGRAMS.ZIP](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/PROGRAMS.ZIP)
-* [MULTIROM-4x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-4x16k-0x60.BIN) (W27C512 / 64 KiB)
-* [MULTIROM-32x16k-0x60.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/MULTIROM-32x16k-0x60.BIN) (SST39SF040 / 512 KiB)
+> [!TIP]
+> * Precompiled SD-card images, including flashing instructions, can be found [here](https://github.com/ifilot/p2000t-sdcard-image)
+> * A list of PRG programs, specifically designed to operate with the SD-card cartridge, can be found [here](https://github.com/ifilot/p2000t-sdcard-cartridge-programs)
 
 ## How it functions
 
@@ -204,6 +182,44 @@ parts, e.g. LEDs, oscillator and PLCC32 socket, have to be hand-soldered in.
 It is also possible to order a cartridge (typically there are always a few
 of them in stock). If you are interested, feel free to contact the author of
 this repository at `ivo at ivofilot dot nl` to discuss pricing and shipping.
+
+## Internal SD-card board
+
+This project also includes an [internal SD-card
+board](pcb/internal-sdcard-interface/) designed to mount on top of the main
+baseboard inside the P2000T. In addition to the SD-card reader functionality,
+the board also provides 64 KiB of additional memory, making it an all-in-one
+solution.
+
+To install this board, you will need two custom brackets. You can find the
+necessary bracket files [here](brackets).
+
+![internal SD-card board](img/pcb-design-internal-board.jpg)
+
+## Formatting SD-card
+
+The way that the SD-card is formatted is critical. The SD-card needs be
+formatted using a MBR/FAT32 partition. Often, directly formatting the SD-card
+via Windows Explorer or similar works well, but sometimes a more rigorous
+procedure is needed, which is explained below.
+
+1. Type `WINDOWS + R` and run `CMD`.
+2. Run `diskpart`.
+3. Type `list disk` followed by `select disk <NR>` where `<NR>` corresponds to
+   your SD-card.
+4. Type `clean`. You get a response with `DiskPart succeeded in cleaning the
+   disk.`.
+5. Type `list volume`, followed by `select volume <ID>` where `<ID>` corresponds
+   to your SD-card drive.
+6. Type `convert mbr`. You should get the response `DiskPart successfully
+   converted the selected disk to MBR format.`.
+7. Type `create partition primary`. The response should be `DiskPart succeeded
+   in creating the specified partition.`.
+8. Finally, type `format fs=fat32 quick label="P2000T"`, after which the
+   response is `DiskPart successfully formatted the volume.`.
+
+Your SD-card should now be ready to work in the SD-cartridge. Of course, you
+still need to copy files to it in order to load something of it.
 
 ## License
 
