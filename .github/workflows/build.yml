@@ -168,7 +168,6 @@ jobs:
       run: |
         cd basicmod
         z80asm bootstrap.asm -o bootstrap.bin
-        z80asm launcher.asm -o launcher.bin
         python hackrom.py
     - name: Upload
       uses: actions/upload-artifact@v4
