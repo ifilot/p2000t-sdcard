@@ -57,6 +57,10 @@ download file does.
 * [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
 * [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
 
+> [!TIP]
+> * Precompiled SD-card images, including flashing instructions, can be found [here](https://github.com/ifilot/p2000t-sdcard-image)
+> * A list of PRG programs, specifically designed to operate with the SD-card cartridge, can be found [here](https://github.com/ifilot/p2000t-sdcard-cartridge-programs)
+
 ## How it functions
 
 To interface with the SD-card, an SD-card slot is connected to the I/O port of
