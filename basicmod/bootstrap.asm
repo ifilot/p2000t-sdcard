@@ -1,6 +1,7 @@
 ;-------------------------------------------------------------------------------
 ;                                                                       
-;   Author: Ivo Filot <ivo@ivofilot.nl>                                 
+;   Authors: Ivo Filot <ivo@ivofilot.nl>     
+;            Dion Olsthoorn <@dionoid>                          
 ;                                                                       
 ;   P2000T-SDCARD is free software:                                     
 ;   you can redistribute it and/or modify it under the terms of the     
@@ -21,10 +22,9 @@
 ;-------------------------------------------------------------------------------
 ; bootstrap.asm
 ;
-; Upon the first keyboard parse routine of the basic
-; rom, executes the code located at $4EE0. This will
-; modify a few pointers and loads in the code from
-; the I/O port to ADDR EXCODE and launches it from there.
+; Upon the first keyboard interrupt routine of the BASIC rom, executes the 
+; code located at $4EC7. This will load in the code bytes from the I/O port to 
+; address LNCHR_DST_ADDR and launches it from there.
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
@@ -37,177 +37,175 @@
 ;-------------------------------------------------------------------------------
 ; VARIABLES
 ;-------------------------------------------------------------------------------
-EXCODE:         EQU $7000       ; address to put and launch external code from
+LAUNCHER_SRC:   EQU $0000       ; launcher's source address on SLOT2 ROM
+LAUNCHER_ADDR:  EQU $7000       ; launcher's target address in P2000T RAM
+LAUNCHER_SIZE:  EQU $2D00       ; hardcoded length of launcher app
+PRG_SRC_ADDR:   EQU $0000       ; SLOT2 RAM start address of selected program
+PRG_SRC_META:   EQU $8000       ; ... and its metadata
 LED_IO:         EQU $44         ; LED I/O
-ROM_IO:         EQU $4C         ; external ROM
-RAM_IO:         EQU $4D         ; external RAM
+ROM_IO:         EQU $4C         ; SLOT2 ROM
+RAM_IO:         EQU $4D         ; SLOT2 RAM
 IO_AL:          EQU $48         ; address low
 IO_AH:          EQU $49         ; address high
 ROM_BANK:       EQU $4A         ; address ROM bank
 RAM_BANK:       EQU $4B         ; address RAM bank
-NUMBYTES:       EQU $2D00       ; hardcoded length of launcher program
-PROGADDR:       EQU $0000       ; location on ROM where program resides
-DEPLOYADDR:     EQU $6152       ; storage location of deploy addr
+BOOTSTR_HOOK:   EQU $60D3       ; Basic's hook address for our bootstrap
 
 ;-------------------------------------------------------------------------------
-; CODE INJECTION PART
+; MARCO DEFINITIONS
 ;-------------------------------------------------------------------------------
-	; This part is injected into the standard BASIC cartridge
-	; starting at $4EE0
-    org $4EE0
-	
-    ; store bootstrap enable launch code  
-    ld a,$55
-    ld ($6150),a
-    
-    ; store byte character for jump
-    ld a,$C3
-    ld ($6151),a   
-
-    ; store loadcode pointer (will be executed after rom boot)
-    ld hl,loadcode
-    ld ($6152),hl
-    
-    ; continue with normal execution of the ROM startup
-    jp $1f5a
-
-;-------------------------------------------------------------------------------
-; OTHER CODE
-;
-; Load code from I/O port and launch the code
-;
-; bc - number of bytes
-; de - start location on ROM
-; hl - destination in RAM
-;
-;-------------------------------------------------------------------------------
-loadcode:
-    ld a,0x01
-    out (LED_IO), a     ; turn read LED on
-    dec a               ; set a = 0
-    ld ($6150),a        ; disable bootstrap routine
-    ld hl,msgbl
-    call printmsg
-    di
-    ld a,0
-    out (ROM_BANK),a    ; set to bank 0
-    out (RAM_BANK),a    ; set to bank 0
-    ld bc,NUMBYTES      ; load number of bytes from internal ram
-    ld hl,EXCODE        ; location where to write
-    ld de,PROGADDR      ; location where to read
-lcnextbyte:
-    call read_rom
-    ld (hl),a
-    inc hl
-    inc de
-    dec bc
-    ld a,b
-    or c
-    jr nz,lcnextbyte
-    out (LED_IO), a     ; turn read led off (a = 0 here)
-    call EXCODE         ; call custom firmware code (will return here)
-    call zeroram
-    jp loadrom
-
-msgbl:
-    DB $06,$0D,"Booting launcher",$FF
-
-;-------------------------------------------------------------------------------
-; Load data from external rom
-;-------------------------------------------------------------------------------
-loadrom:
+led_on: macro
     ld a,1
-    out (LED_IO), a     ; set read LED
-    out (RAM_BANK), a   ; load programs from second RAM bank
-    ld hl,msglp
+    out (LED_IO), a
+    endm
+
+led_off: macro
+    xor a
+    out (LED_IO), a
+    endm
+
+print: macro string
+    ld hl,string
     call printmsg
-    ld de,$8000+1
-    call read_ram       ; load high byte deploy addr
-    ld (DEPLOYADDR+1),a
-    ld de,$8000
-    call read_ram       ; load low byte deploy addr
-    ld (DEPLOYADDR),a
-    ld de,$8000+3
-    call read_ram       ; load high byte file size
-    ld b,a
-    ld de,$8000+2
-    call read_ram       ; load low byte file size
-    ld c,a
-    call copydata       ; bc contains number of bytes
-    ld a,0
-    out (LED_IO), a     ; turn read LED off
-    xor a               ; set flags z, nc
-    jp $28d4            ; launch basic program
+    call $0AF2        ; Monitor routine to wait 500ms
+    endm
 
-msglp:
-    DB $06,$0D,"Launching program",$FF
+relocate_stack: macro
+    ld sp,$9FFF
+    ld a,($605C)
+    cp 1
+    ret z
+    ld sp,$DFFF
+    endm
 
 ;-------------------------------------------------------------------------------
-; Copy data from external ram to internal memory
-;
-; bc - number of bytes
+; This bootstrap code is injected into the end of the standard BASIC ROM
+; starting at $4EC7
 ;-------------------------------------------------------------------------------
-copydata:
-    di
-    push bc                 ; store number of bytes
-    ld de,$0000             ; start of external ram address
-    ld hl,(DEPLOYADDR)      ; start of ram address
-cdnextbyte:
-    call read_ram           ; load from external ram into a register
-    ld (hl),a
-    inc de
-    inc hl
-    dec bc
-    ld a,b
-    or c
-    jp nz,cdnextbyte
-    pop bc
+    org $4EC7
+    
+start:
+    relocate_stack
+    call remove_hook
+    led_on
+    print msg_booting
+    call copy_launcher
+    led_off
+    call LAUNCHER_ADDR  ; start launcher app (returns after program selection)
+    led_on
+    call load_program
+    led_off
+    call run_program
+    jp start            ; restart bootstrap (in case program returns)
 
-    ld hl,(DEPLOYADDR)      ; set deploy address
-    ld ($625C), hl
-
-    add hl,bc               ; add program length
-
-    ; set basic pointers to variable space
-    ld ($6405),hl
-    ld ($6407),hl
-    ld ($6409),hl
-
-    ei
+;-------------------------------------------------------------------------------
+; SUBROUTINES
+;-------------------------------------------------------------------------------
+remove_hook:
+    xor a               ; set a = 0
+    ld (BOOTSTR_HOOK),a ; clear bootstrap hook
+    ld (BOOTSTR_HOOK+1),a
+    ld (BOOTSTR_HOOK+2),a
     ret
 
 ;-------------------------------------------------------------------------------
-; Clear any remains from the previous program
+; Copies launcher code from SLOT2 ROM to P2000T RAM
+; 
+; hl - source in SLOT2 ROM
+; de - destination in P2000T RAM
+; bc - number of bytes
 ;-------------------------------------------------------------------------------
-zeroram:
-    ld hl,EXCODE
-    ld de,EXCODE+1
-    ld bc,NUMBYTES-1
-    ld a,0
-    ld (hl),a
-    ldir
+copy_launcher:
+    xor a               ; set a = 0
+    out (ROM_BANK),a    ; set SLOT2 ROM to bank 0
+    out (RAM_BANK),a    ; set SLOT2 RAM to bank 0
+    ld bc,LAUNCHER_SIZE ; number of bytes to load from SLOT2's internal RAM
+    ld hl,LAUNCHER_SRC  ; location on SLOT2 ROM where to read (source)
+    ld de,LAUNCHER_ADDR ; location on P2000T RAM where to write (dest)
+cl_loop:
+    call read_rom_byte  ; load byte from SLOT2 ROM
+    ld (de),a
+    inc hl
+    inc de
+    dec bc
+    ld a,b
+    or c
+    jr nz,cl_loop
+    ret
+
+load_program:
+    ld a,1
+    out (RAM_BANK), a   ; load programs from second RAM bank
+    print msg_loading
+put_deploy_addr_into_de:
+    ld hl,PRG_SRC_META
+    call read_ram_byte  ; load low byte deploy addr
+    ld e,a
+    ld hl,PRG_SRC_META+1
+    call read_ram_byte  ; load high byte deploy addr
+    ld d,a              ; de now contains deploy address
+put_file_size_into_bc:
+    ld hl,PRG_SRC_META+2
+    call read_ram_byte  ; load low byte file size
+    ld c,a
+    ld hl,PRG_SRC_META+3
+    call read_ram_byte  ; load high byte file size
+    ld b,a              ; bc now contains number of bytes
+put_source_addr_into_hl:
+    ld hl,PRG_SRC_ADDR  ; hl now contains start of SLOT2 ram address
+    jp copy_program
+
+run_program:
+    xor a               ; set flags z, nc
+    jp $28d4            ; run basic program (or use $1fc6 to return to BASIC)
+
+;-------------------------------------------------------------------------------
+; Copy data from SLOT2 RAM to P2000T RAM and set basic pointers
+;
+; hl - source in SLOT2 RAM
+; de - destination in P2000T RAM
+; bc - number of bytes
+;-------------------------------------------------------------------------------
+copy_program:
+    push bc
+    push de
+cp_loop:
+    call read_ram_byte  ; load from SLOT2 ram into a register
+    ld (de),a
+    inc de
+    inc hl
+    dec bc
+    ld a,b
+    or c
+    jp nz,cp_loop
+set_deploy_addr:
+    pop hl              ; read destination addres back in hl
+    ld ($625C), hl
+set_basic_pointers:
+    pop bc
+    add hl,bc           ; add program length
+    ld ($6405),hl       ; set basic pointers to variable space
+    ld ($6407),hl
+    ld ($6409),hl
     ret
 
 ;-------------------------------------------------------------------------------
 ; clear the screen
 ;-------------------------------------------------------------------------------
 clrscrn:
-    ld a,0 ; load 0 into first byte
-    ld ($5000),a
-    ld de,$5001
-    ld bc,$1000
-    dec bc
-    ld hl,$5000
-    ldir ; copy next byte from previous
-    ret
+    ld hl,$5000         ; start of screen memory
+    ld a,24             ; 24 lines to clear
+    jp $0035          ; call Monitor's clear_lines routine
 
 ;-------------------------------------------------------------------------------
 ; Print message to screen
-; hl - pointer to string
-;----------------------------------------------------
+; hl - pointer to string data
+;-------------------------------------------------------------------------------
 printmsg:
+    push hl
     call clrscrn
-    ld bc,$5000 + $50*10
+    pop hl
+    ld bc,$5000 + $50*10 ; print on screen line 10
 pmprint:
     ld a,(hl)
     cp 255
@@ -218,39 +216,33 @@ pmprint:
     jp pmprint
 
 ;-------------------------------------------------------------------------------
-; go into infinite loop
-;-------------------------------------------------------------------------------
-loop:
-    jp loop
-
-;-------------------------------------------------------------------------------
-; Reads a byte from the I/O port and put it in reg A.
-; The address stored at IOREADADDR is used as the load
-; address for the I/O port. Upon loading a byte, this
-; address is incremented and stored back into the storage
-; location.
+; read a byte from SLOT2 ROM into a register
 ;
-; input: (IOREADADDR) I/O port address to read code from
-;  uses: a,de
-;
+; hl - address
 ;-------------------------------------------------------------------------------
-read_rom:
-    ld a,d
-    out (IO_AH),a         ; store upper bytes in register
-    ld a,e
-    out (IO_AL),a         ; store lower bytes in register
-    in a,(ROM_IO)         ; load byte
+read_rom_byte:
+    ld a,h
+    out (IO_AH),a       ; store upper bytes in register
+    ld a,l
+    out (IO_AL),a       ; store lower bytes in register
+    in a,(ROM_IO)       ; load byte
     ret
 
 ;-------------------------------------------------------------------------------
-; read a byte to external ram
+; read a byte from SLOT2 RAM into a register
 ;
-; de - address
+; hl - address
 ;-------------------------------------------------------------------------------
-read_ram:
-    ld a,d
-    out (IO_AH),a         ; store upper bytes in register
-    ld a,e
-    out (IO_AL),a         ; store lower bytes in register
-    in a,(RAM_IO)         ; load byte
+read_ram_byte:
+    ld a,h
+    out (IO_AH),a       ; store upper bytes in register
+    ld a,l
+    out (IO_AL),a       ; store lower bytes in register
+    in a,(RAM_IO)       ; load byte
     ret
+
+; Messages
+msg_booting:
+    DB $06,$0D,"Booting launcher",$FF
+msg_loading:
+    DB $06,$0D,"Loading program",$FF
