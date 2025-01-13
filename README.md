@@ -21,9 +21,10 @@
 * [Formatting SD-card](#formatting-sd-card)
 * [License](#license)
 
-> [!TIP]
-> Questions or comments about the P2000T SD-card cartridge? You can chat with
-> the developers over at [Discord](https://discord.gg/YtzJTWYAxy)
+> [!TIP] 
+> Have questions or comments about the **P2000T SD-card cartridge**? Join
+> the conversation and chat with the developers on our [Discord
+> server](https://discord.gg/YtzJTWYAxy).
 
 ## YouTube
 
