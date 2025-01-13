@@ -93,6 +93,7 @@ start:
     led_off
     call LAUNCHER_ADDR  ; start launcher app (returns after program selection)
     led_on
+    print msg_loading
     call load_program
     led_off
     call run_program
@@ -136,7 +137,6 @@ cl_loop:
 load_program:
     ld a,1
     out (RAM_BANK), a   ; load programs from second RAM bank
-    print msg_loading
 put_deploy_addr_into_de:
     ld hl,PRG_SRC_META
     call read_ram_byte  ; load low byte deploy addr
