@@ -35,8 +35,6 @@
 #define SDCACHE6 0x0C00
 #define SDCACHE7 0x0E00
 
-#define VIDMEM_CACHE 0x1000      // video memory address
-
 /*
  * The internal memory on the SD-card cartridge has a capacity of 128kb divided
  * over 2x64kb banks. The lower bank is used for caching SD-card data while the

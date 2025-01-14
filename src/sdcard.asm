@@ -45,7 +45,6 @@ PUBLIC _read_block
 PUBLIC _fast_sd_to_ram_first_0x100
 PUBLIC _fast_sd_to_ram_last_0x100
 PUBLIC _fast_sd_to_ram_full
-PUBLIC _fast_sd_to_intram_full
 
 PUBLIC _read_sector
 
@@ -338,7 +337,6 @@ blocknext:
 ; OUTPUT: L - read token (0xFE is success, failure otherwise)
 ;-------------------------------------------------------------------------------
 _read_sector:
-    di
     call _open_command
     call _cmd17                 ; return SD card status
     ld a,l                      ; load response into a
@@ -352,7 +350,6 @@ readsectorsuccess:
     ld l,0xFE
 readsectorexit:
     call _close_command
-    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -361,7 +358,6 @@ readsectorexit:
 ; void fast_sd_to_ram_first_0x100(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_first_0x100:
-    di
     ld a,0x02
     out (LED_IO),a              ; turn WRITE led on
     pop de                      ; return address
@@ -390,7 +386,6 @@ nb11:
     out (CLKSTART),a
     ld a,0
     out (LED_IO),a              ; turn write LED off
-    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -399,7 +394,6 @@ nb11:
 ; void fast_sd_to_ram_last_0x100(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_last_0x100:
-    di
     ld a,0x02
     out (LED_IO),a              ; turn WRITE led on
     pop de                      ; return address
@@ -428,7 +422,6 @@ nb21:
     out (CLKSTART),a
     ld a,0
     out (LED_IO),a              ; turn write LED off
-    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -437,7 +430,6 @@ nb21:
 ; void fast_sd_to_ram_full(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_full:
-    di
     ld a,0x02
     out (LED_IO),a              ; turn WRITE led on
     pop de                      ; return address
@@ -466,35 +458,6 @@ nb30:
     out (CLKSTART),a
     ld a,0
     out (LED_IO),a              ; turn write LED off
-    ei
-    ret
-
-;-------------------------------------------------------------------------------
-; Copy the full 0x200 bytes from a block to internal RAM
-;
-; void fast_sd_to_intram_full(uint16_t ram_addr);
-;-------------------------------------------------------------------------------
-_fast_sd_to_intram_full:
-    di
-    pop de                      ; return address
-    pop hl                      ; ramptr
-    push de                     ; put return address back on stack
-    ld a,$FF
-    out (SERIAL),a              ; flush shift register with ones
-    ld c,2                      ; number of outer loops
-fstifouter:
-    ld b,0                      ; 256 iterations for inner loop
-fstifinner:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    in a, (SERIAL)              ; read value
-    ld (hl),a
-    inc hl                      ; increment RAM pointer
-    djnz fstifinner
-    dec c
-    jp nz, fstifouter
-    out (CLKSTART),a            ; two more pulses for the checksum
-    out (CLKSTART),a
-    ei
     ret
 
 ;-------------------------------------------------------------------------------

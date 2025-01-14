@@ -40,7 +40,7 @@
 #define __clock_freq 2500000
 
 extern char __lastinput[INPUTLENGTH];
-extern uint8_t __bootcas;
+extern uint8_t __launch;
 
 void commands_ls(void);
 
@@ -66,6 +66,12 @@ void command_fileinfo(void);
  * 
  */
 void command_run(void);
+
+/**
+ * @brief Load a (CAS) file into memory and return to BASIC prompt
+ * 
+ */
+void command_load(void);
 
 /**
  * @brief Test burning of read and write LEDs

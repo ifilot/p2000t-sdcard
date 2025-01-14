@@ -27,18 +27,18 @@ launcher: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.
 	util.c sdcard.c sdcard.asm ram.asm util.asm rom.asm \
 	terminal_ext.c crc16.asm \
 	-startup=0 \
-	-pragma-define:CRT_ORG_CODE=0x7000 \
+	-pragma-define:CRT_ORG_CODE=0x6549 \
 	-pragma-define:REGISTER_SP=-1 \
 	-pragma-define:CLIB_FOPEN_MAX=0 \
 	-pragma-define:CRT_ON_EXIT=0x10002 \
-	-pragma-define:CRT_ENABLE_EIDI=0x33 \
+	-pragma-define:CRT_ENABLE_EIDI=0 \
 	--max-allocs-per-node200000 \
 	--opt-code-size \
 	-SO3 -bn LAUNCHER.BIN \
 	-create-app -m \
 	&& mv LAUNCHER.bin LAUNCHER.BIN \
 	&& wc -c < LAUNCHER.BIN \
-	&& truncate -s 11520 LAUNCHER.BIN
+	&& truncate -s 14966 LAUNCHER.BIN
 
 launcher-slot1: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm util.asm rom.asm crc16.asm
 	zcc \

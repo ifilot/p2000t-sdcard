@@ -48,12 +48,12 @@ void main(void) {
         set_ram_bank(RAM_BANK_CASSETTE);
         store_cas_ram(_linkedlist[0], 0x0000);
         set_ram_bank(0);
-        __bootcas = 1;
+        __launch = 1;
     }
 
     // put in infinite loop and wait for user commands
     // only terminate the loop when a program should be executed
-    while(__bootcas == 0) {
+    while(__launch == 0) {
         if(keymem[0x0C] > 0) {
             for(uint8_t i=0; i<keymem[0x0C]; i++) {
                 if(keymem[i] == 52) { // return key

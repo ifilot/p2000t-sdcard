@@ -4,6 +4,7 @@
 [![build](https://github.com/ifilot/p2000t-sdcard/actions/workflows/build.yml/badge.svg)](https://github.com/ifilot/p2000t-sdcard/actions/workflows/build.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![License: CC-BY-SA v4](https://img.shields.io/badge/license-CC--4.0--BY--SA-lightgrey)](https://creativecommons.org/licenses/by-sa/4.0/deed.en)
+[![discord](https://img.shields.io/discord/1167925678868541451?logo=discord&logoColor=white)](https://discord.gg/YtzJTWYAxy)
 
 ## Table of contents
 
@@ -19,6 +20,11 @@
 * [Internal SD-card board](#internal-sd-card-board)
 * [Formatting SD-card](#formatting-sd-card)
 * [License](#license)
+
+> [!TIP] 
+> Have questions or comments about the **P2000T SD-card cartridge**? Join
+> the conversation and chat with the developers on our [Discord
+> server](https://discord.gg/YtzJTWYAxy).
 
 ## YouTube
 

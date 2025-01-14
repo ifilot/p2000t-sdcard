@@ -24,17 +24,11 @@
 #include <z80.h>
 #include "constants.h"
 
-#define LOWMEM          0x6200 // starting point of lower memory
-#define HIGHMEM_START   0xA000 // start address of upper memory
-#define HIGHMEM_STOP    0xDFFF // end address of upper memory
-#define BANKMEM_START   0xE000 // starting point of bankable memory
-#define BANKMEM_STOP    0xFFFF // starting point of bankable memory
-#define BANK_BYTES      0x2000 // number of bytes per bank
-#define STACK           0x9F00 // lower position of the stack
-#define NUMBANKS        6      // assuming 64kb memory expansion
-#define MEMBANK         0x94   // Z80 I/O address for memory banking
-
-#define PROGRAM_LOCATION 0xA000  // where to store custom programs
+#define BASIC_PRG_START 0x6547 // start of BASIC program memory
+#define CUST_PRG_START  0x6549 // start of custom PRG program memory
+#define MAX_BYTES_16K   14966  // maximum bytes free on a 16K P2000T
+#define BASIC_RESET     0x1FC6 // call address to reset to BASIC prompt
+#define BASIC_RUN       0x28D4 // call address to RUN a BASIC program
 
 extern char* memory;
 extern char* vidmem;

@@ -163,13 +163,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: sudo apt install -y python3 python3-numpy z80asm make
+      run: sudo apt install -y python3 z80asm make
     - name: Build modified basic cartridge
       run: |
         cd basicmod
-        z80asm bootstrap.asm -o bootstrap.bin
-        z80asm launcher.asm -o launcher.bin
-        python hackrom.py
+        make
     - name: Upload
       uses: actions/upload-artifact@v4
       with:

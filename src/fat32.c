@@ -412,7 +412,7 @@ void store_cas_ram(uint32_t faddr, uint16_t ram_addr) {
                 // program length and transfer address
                 read_sector(caddr); // read sector data
                 ram_write_uint16_t(0x8000, ram_read_uint16_t(SDCACHE0 + 0x0030));
-                ram_write_uint16_t(0x8002, ram_read_uint16_t(SDCACHE0 + 0x0032));
+                ram_write_uint16_t(0x8002, ram_read_uint16_t(SDCACHE0 + 0x0034));
                 ram_transfer(0x100, ram_addr, 0x100);
                 ram_addr += 0x100;
             } else {
@@ -445,7 +445,7 @@ void store_cas_ram(uint32_t faddr, uint16_t ram_addr) {
             sprintf(termbuffer, "Loading %i / %i sectors", sector_ctr, total_sectors);
             terminal_redoline();
 
-            nbytes += 512;
+            nbytes += 0x200;
             if(nbytes >= _filesize_current_file) {
                 break;
             }
@@ -468,7 +468,7 @@ void store_cas_ram(uint32_t faddr, uint16_t ram_addr) {
  * @param faddr    cluster address of the file
  * @param ram_addr first position in ram to store the file
  */
-void store_prg_intram(uint32_t faddr, uint16_t ram_addr) {
+void store_prg_ram(uint32_t faddr, uint16_t ram_addr) {
     build_linked_list(faddr);
 
     // count number of clusters
@@ -485,8 +485,8 @@ void store_prg_intram(uint32_t faddr, uint16_t ram_addr) {
         // calculate address of sector
         caddr = calculate_sector_address(_linkedlist[ctr], 0);
 
-        sprintf(termbuffer, "Copying program to %04X", ram_addr);
-        terminal_printtermbuffer();
+        //sprintf(termbuffer, "Copying program to %04X", ram_addr);
+        //terminal_printtermbuffer();
 
         // loop over all sectors given a cluster and copy the data to RAM
         for(uint8_t i=0; i<_sectors_per_cluster; i++) {
@@ -494,7 +494,8 @@ void store_prg_intram(uint32_t faddr, uint16_t ram_addr) {
             // copy sector over to internal memory
             open_command();
             cmd17(caddr);
-            fast_sd_to_intram_full(ram_addr);
+            fast_sd_to_ram_full(ram_addr);
+            
             close_command();
 
             // increment ram pointer
@@ -503,7 +504,7 @@ void store_prg_intram(uint32_t faddr, uint16_t ram_addr) {
             sprintf(termbuffer, "Loading %i / %i sectors", cursec, total_sectors);
             terminal_redoline();
 
-            nbytes += 512;
+            nbytes += 0x200;
             if(nbytes >= _filesize_current_file) {
                 break;
             }
