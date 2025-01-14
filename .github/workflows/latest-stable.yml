@@ -101,7 +101,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: sudo apt install -y python3 z80asm make
+      run: sudo apt install -y python3 z80asm make python3-numpy
     - name: Build modified basic cartridge
       run: |
         cd basicmod
