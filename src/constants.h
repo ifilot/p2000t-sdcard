@@ -29,6 +29,8 @@
 #define COL_MAGENTA 0x05
 #define COL_CYAN    0x06
 #define COL_WHITE   0x07
+#define TEXT_FLASH  0x08
+#define TEXT_STEADY 0x09
 #define TEXT_DOUBLE 0x0D
 
 #define INPUTLENGTH 20

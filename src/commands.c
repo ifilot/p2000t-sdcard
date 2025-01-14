@@ -144,9 +144,9 @@ void command_loadrun(unsigned type) {
         return;
     }
 
-    sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
+    sprintf(termbuffer, "Filename:        %c%s.%s", COL_CYAN, _basename, _ext);
     terminal_printtermbuffer();
-    sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
+    sprintf(termbuffer, "Filesize:        %c%lu bytes", COL_CYAN, _filesize_current_file);
     terminal_printtermbuffer();
     uint16_t transfer_addr = 0;
     uint16_t file_length = 0;
@@ -206,7 +206,7 @@ void command_loadrun(unsigned type) {
         sprintf(termbuffer, "Launch address:  %c0x%04X", COL_CYAN, start_addr);
         terminal_printtermbuffer();
 
-        sprintf(termbuffer, "Press any key to %s the program.", 
+        sprintf(termbuffer, "Press%cany key%cto %s the program.", TEXT_FLASH, TEXT_STEADY, 
             (type && memcmp(_ext, "CAS", 3) == 0) ? "LOAD" : "RUN");
         terminal_printtermbuffer();
         wait_for_key();
