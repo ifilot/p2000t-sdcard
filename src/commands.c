@@ -134,10 +134,10 @@ void command_fileinfo(void) {
  * @brief Load a (CAS) file into memory and either launch it or return to BASIC
  * prompt
  */
-void command_loadrun(unsigned type) {
+void command_loadrun(unsigned cmd_load) {
     print_recall("Searching file...");
 
-    int fileid = atoi(&__lastinput[type ? 4 : 3]); // file nr after LOAD / RUN
+    int fileid = atoi(&__lastinput[cmd_load ? 4 : 3]); // file nr after LOAD / RUN
 
     // find a file and store its cluster structure into the linked list
     if(read_file_metadata(fileid) != 0) {
@@ -151,19 +151,21 @@ void command_loadrun(unsigned type) {
     uint16_t transfer_addr = 0;
     uint16_t file_length = 0;
     uint16_t start_addr = 0;
+    uint8_t is_cas = (memcmp(_ext, "CAS", 3) == 0);
+    uint8_t is_prg = (memcmp(_ext, "PRG", 3) == 0);
     set_ram_bank(RAM_BANK_CASSETTE);
 
-    if(memcmp(_ext, "CAS", 3) == 0) {
+    if(is_cas) {
         //copy cas
         store_cas_ram(_linkedlist[0], 0x0000);
 
         transfer_addr = ram_read_uint16_t(0x8000);
         file_length = ram_read_uint16_t(0x8002);
-        start_addr = type ? BASIC_RESET : BASIC_RUN;
+        start_addr = cmd_load ? BASIC_RESET : BASIC_RUN;
         // set start-address in 0x8004
         ram_write_uint16_t(0x8004, start_addr);
     }
-    if(memcmp(_ext, "PRG", 3) == 0) {
+    if(is_prg) {
         //copy program
         store_prg_ram(_linkedlist[0], 0x0000);
 
@@ -192,8 +194,9 @@ void command_loadrun(unsigned type) {
         ram_write_uint16_t(0x8004, start_addr);
     }
 
-    if (transfer_addr != 0) {
-        if(memory[0x605C] == 1 && file_length > MAX_BYTES_16K) {
+    if (is_cas || is_prg) {
+        if(memory[0x605C] == 1 &&
+            file_length > (is_cas ? MAX_BYTES_CAS_16K : MAX_BYTES_PRG_16K)) {
             print_error("File too large to load");
             return;
         }
@@ -207,7 +210,7 @@ void command_loadrun(unsigned type) {
         terminal_printtermbuffer();
 
         sprintf(termbuffer, "Press%cany key%cto %s the program.", TEXT_FLASH, TEXT_STEADY, 
-            (type && memcmp(_ext, "CAS", 3) == 0) ? "LOAD" : "RUN");
+            (cmd_load && is_cas) ? "LOAD" : "RUN");
         terminal_printtermbuffer();
         wait_for_key();
 

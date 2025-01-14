@@ -40,9 +40,8 @@
 LAUNCHER_SRC:   EQU $0000       ; Launcher's source address on SLOT2 ROM
 LAUNCHER_DEST:  EQU $6549       ; Launcher's destination address in P2000T RAM
                                 ; note: this is BASIC's prog start addres + 2
-LAUNCHER_SIZE:  EQU 14966       ; hardcoded max length of Launcher app
-                                ; note: Launcher loaded from $6549 to $9FBE
-                                ; leaving 65 ($41) bytes for stack
+LAUNCHER_SIZE:  EQU 15031       ; hardcoded max length of Launcher app
+                                ; note: Launcher is loaded from $6549 to $9FFF
 PRG_SRC_ADDR:   EQU $0000       ; SLOT2 RAM start address of selected program
 PRG_SRC_META:   EQU $8000       ; ... and its metadata
 LED_IO:         EQU $44         ; LED I/O
@@ -52,6 +51,7 @@ IO_AL:          EQU $48         ; address low
 IO_AH:          EQU $49         ; address high
 ROM_BANK:       EQU $4A         ; address ROM bank
 RAM_BANK:       EQU $4B         ; address RAM bank
+KEY_BUF_SZ:     EQU $600C       ; contains number of buffered keys
 BOOTSTR_HOOK:   EQU $60D3       ; BASIC's hook address for our bootstrap
 
 ;-------------------------------------------------------------------------------
@@ -73,15 +73,6 @@ print: macro string
     call $0AF2          ; call Monitor routine to wait 500ms
     endm
 
-; relocate the stack to the top of the RAM, but maximal at $E000
-relocate_stack: macro
-    ld sp,$A000         ; set stack to top of RAM +1 (for 16K RAM machines)
-    ld a,($605C)        ; $605C contains RAM size (1 = 16K, 2 = 32K, 3 = 48K)
-    cp 1
-    jr z, .finish
-    ld sp,$E000         ; max $E000, so the stack can handle bankswitching
-.finish: endm
-
 ; read the program's metadata from the SLOT2 RAM and store in registers
 read_metadata: macro address high_reg low_reg
     ld hl,address
@@ -99,12 +90,13 @@ read_metadata: macro address high_reg low_reg
     org $4EC7
     
 start:
-    relocate_stack
+    ld sp,$6200         ; relocate stack. this has at least 256 bytes available
     call remove_hook
     led_on
     print msg_booting
     call copy_launcher
     led_off
+    call clear_key_buffer
     call LAUNCHER_DEST  ; start launcher app (returns after program selection)
     led_on
     print msg_loading
@@ -122,6 +114,13 @@ remove_hook:
     ld (BOOTSTR_HOOK),a ; clear bootstrap hook
     ld (BOOTSTR_HOOK+1),a
     ld (BOOTSTR_HOOK+2),a
+    ret
+
+clear_key_buffer:
+    di                  ; disable interrupts
+    xor a               ; set a = 0
+    ld (KEY_BUF_SZ), a  ; set number of buffered keys to 0
+    ei                  ; enable interrupts
     ret
 
 ;-------------------------------------------------------------------------------

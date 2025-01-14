@@ -24,11 +24,12 @@
 #include <z80.h>
 #include "constants.h"
 
-#define BASIC_PRG_START 0x6547 // start of BASIC program memory
-#define CUST_PRG_START  0x6549 // start of custom PRG program memory
-#define MAX_BYTES_16K   14966  // maximum bytes free on a 16K P2000T
-#define BASIC_RESET     0x1FC6 // call address to reset to BASIC prompt
-#define BASIC_RUN       0x28D4 // call address to RUN a BASIC program
+#define BASIC_PRG_START     0x6547 // start of BASIC program memory
+#define CUST_PRG_START      0x6549 // start of custom PRG program memory
+#define MAX_BYTES_CAS_16K   14966  // max bytes free for BASIC on a 16K P2000T
+#define MAX_BYTES_PRG_16K   15031  // max bytes free for PRG on a 16K P2000T
+#define BASIC_RESET         0x1FC6 // call address to reset to BASIC prompt
+#define BASIC_RUN           0x28D4 // call address to RUN a BASIC program
 
 extern char* memory;
 extern char* vidmem;
