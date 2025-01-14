@@ -38,11 +38,11 @@
 ; VARIABLES
 ;-------------------------------------------------------------------------------
 LAUNCHER_SRC:   EQU $0000       ; Launcher's source address on SLOT2 ROM
-LAUNCHER_ADDR:  EQU $6549       ; Launcher's target address in P2000T RAM
+LAUNCHER_DEST:  EQU $6549       ; Launcher's destination address in P2000T RAM
                                 ; note: this is BASIC's prog start addres + 2
-LAUNCHER_SIZE:  EQU $3A37       ; hardcoded max length of Launcher app
-                                ; note: Launcher loaded from $6549 to $9F7F
-                                ; leaving 128 ($80) bytes for stack
+LAUNCHER_SIZE:  EQU 14966       ; hardcoded max length of Launcher app
+                                ; note: Launcher loaded from $6549 to $9FBE
+                                ; leaving 65 ($41) bytes for stack
 PRG_SRC_ADDR:   EQU $0000       ; SLOT2 RAM start address of selected program
 PRG_SRC_META:   EQU $8000       ; ... and its metadata
 LED_IO:         EQU $44         ; LED I/O
@@ -70,16 +70,27 @@ led_off: macro
 print: macro string
     ld de,string
     call printmsg
-    call $0AF2          ; Monitor routine which waits 500ms
+    call $0AF2          ; call Monitor routine to wait 500ms
     endm
 
+; relocate the stack to the top of the RAM, but maximal at $E000
 relocate_stack: macro
-    ld sp,$A000         ; set stack to top of RAM +1 (for minimal 16K RAM)
+    ld sp,$A000         ; set stack to top of RAM +1 (for 16K RAM machines)
     ld a,($605C)        ; $605C contains RAM size (1 = 16K, 2 = 32K, 3 = 48K)
     cp 1
     jr z, .finish
-    ld sp,$E000
+    ld sp,$E000         ; max $E000, so the stack can handle bankswitching
 .finish: endm
+
+; read the program's metadata from the SLOT2 RAM and store in registers
+read_metadata: macro address high_reg low_reg
+    ld hl,address
+    call read_ram_byte  ; load low byte
+    ld low_reg,a
+    ld hl,address + 1
+    call read_ram_byte  ; load high byte
+    ld high_reg,a
+    endm
 
 ;-------------------------------------------------------------------------------
 ; This bootstrap code is injected into the end of the standard BASIC ROM
@@ -94,7 +105,7 @@ start:
     print msg_booting
     call copy_launcher
     led_off
-    call LAUNCHER_ADDR  ; start launcher app (returns after program selection)
+    call LAUNCHER_DEST  ; start launcher app (returns after program selection)
     led_on
     print msg_loading
     call load_program
@@ -126,7 +137,7 @@ copy_launcher:
     out (RAM_BANK),a    ; set SLOT2 RAM to bank 0
     ld bc,LAUNCHER_SIZE ; number of bytes to load from SLOT2's internal RAM
     ld hl,LAUNCHER_SRC  ; location on SLOT2 ROM where to read (source)
-    ld de,LAUNCHER_ADDR ; location on P2000T RAM where to write (dest)
+    ld de,LAUNCHER_DEST ; location on P2000T RAM where to write (dest)
 cl_loop:
     call read_rom_byte  ; load byte from SLOT2 ROM
     ld (de),a
@@ -141,44 +152,24 @@ cl_loop:
 load_program:
     ld a,1
     out (RAM_BANK), a   ; load programs from second RAM bank
-put_transfer_addr_into_de:
-    ld hl,PRG_SRC_META
-    call read_ram_byte  ; load low byte transfer addr
-    ld e,a
-    ld hl,PRG_SRC_META+1
-    call read_ram_byte  ; load high byte transfer addr
-    ld d,a              ; de now contains transfer address
-put_file_size_into_bc:
-    ld hl,PRG_SRC_META+2
-    call read_ram_byte  ; load low byte file size
-    ld c,a
-    ld hl,PRG_SRC_META+3
-    call read_ram_byte  ; load high byte file size
-    ld b,a              ; bc now contains number of bytes
-put_source_addr_into_hl:
-    ld hl,PRG_SRC_ADDR  ; hl now contains start of SLOT2 ram address
+    read_metadata PRG_SRC_META d e   ; put transfer-address into de
+    read_metadata PRG_SRC_META+2 b c ; put filesize into bc
+    ld hl,PRG_SRC_ADDR  ; put start of SLOT2 ram into hl
     jp copy_program
 
 run_program:
-put_start_addr_into_de:
-    ld hl,PRG_SRC_META+4
-    call read_ram_byte  ; load low byte start addr
-    ld e,a
-    ld hl,PRG_SRC_META+5
-    call read_ram_byte  ; load high byte start addr
-    ld d,a              ; de now contains start address
-call_start_address:
+    read_metadata PRG_SRC_META+4 d e ; put launch-address into de
     push de
-    pop hl
+    pop hl              ; hl = de
     xor a               ; set flags z, nc (needed for BASIC run command)
-    jp (hl)             ; $28D4 = run BASIC program ; $1fc6 = return to BASIC
+    jp (hl)             ; call launch address. on return, `jp start` is called
 
 ;-------------------------------------------------------------------------------
 ; Copy data from SLOT2 RAM to P2000T RAM and set BASIC pointers
 ;
 ; hl - source in SLOT2 RAM
 ; de - destination in P2000T RAM
-; bc - number of bytes
+; bc - number of bytes to copy
 ;-------------------------------------------------------------------------------
 copy_program:
     push bc
@@ -218,14 +209,14 @@ clrscrn:
 printmsg:
     call clrscrn
     ld bc,$5000 + $50*10 ; print on screen line 10
-pmprint:
+pr_loop:
     ld a,(de)
     and a
     ret z
     ld (bc),a
     inc de
     inc bc
-    jp pmprint
+    jp pr_loop
 
 ;-------------------------------------------------------------------------------
 ; read a byte from SLOT2 ROM into a register
