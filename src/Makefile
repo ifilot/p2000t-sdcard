@@ -32,13 +32,15 @@ launcher: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.
 	-pragma-define:CLIB_FOPEN_MAX=0 \
 	-pragma-define:CRT_ON_EXIT=0x10002 \
 	-pragma-define:CRT_ENABLE_EIDI=0 \
+	-pragma-define:CLIB_MALLOC_HEAP_SIZE=0 \
+	-pragma-define:CLIB_STDIO_HEAP_SIZE=0 \
 	--max-allocs-per-node200000 \
 	--opt-code-size \
 	-SO3 -bn LAUNCHER.BIN \
 	-create-app -m \
 	&& mv LAUNCHER.bin LAUNCHER.BIN \
 	&& wc -c < LAUNCHER.BIN \
-	&& truncate -s 14966 LAUNCHER.BIN
+	&& truncate -s 15031 LAUNCHER.BIN
 
 launcher-slot1: main.c commands.c fat32.c memory.c terminal.c sdcard.c sdcard.asm ram.asm util.asm rom.asm crc16.asm
 	zcc \
