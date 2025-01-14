@@ -153,7 +153,7 @@ jobs:
           files: |
             ${{env.BASICROM_BIN}}
             ${{env.LAUNCHER_BIN}}
-            ${{env.FLASHER.BIN}}
+            ${{env.FLASHER_BIN}}
           tag_name: release-2.x
           release_name: release-2.x
           overwrite: true
