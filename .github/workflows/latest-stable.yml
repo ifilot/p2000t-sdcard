@@ -1,0 +1,161 @@
+name: latest-stable
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  BUILD_TYPE: Release
+  FLASHER_BIN: FLASHER.BIN
+  LAUNCHER_BIN: LAUNCHER.BIN
+  BASICROM_BIN: BASICBOOTSTRAP.BIN
+
+jobs:
+
+################################################################################
+# LAUNCHER
+################################################################################
+
+  # Launcher for the SLOT2 cartridge
+  build-launcher:
+    runs-on: ubuntu-latest
+    container: 
+      image: z88dk/z88dk
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build launcher application
+      run: |
+        cd src
+        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
+        make launcher
+        ls -alh LAUNCHER*
+    - name: Upload launcher
+      uses: actions/upload-artifact@v4
+      with:
+        name: LAUNCHER-UNSIGNED
+        path: src/${{env.LAUNCHER_BIN}}
+
+  sign-launcher:
+    runs-on: ubuntu-latest
+    needs: [build-launcher]
+    permissions: write-all
+    steps:
+    - name: Install dependencies
+      run: sudo apt install -y cmake build-essential libtclap-dev libboost-all-dev git
+    - name: Download repository
+      run: git clone https://github.com/ifilot/crc16sign.git --depth 1
+    - name: build crc16sign
+      run: |
+        cd crc16sign
+        mkdir build
+        cd build
+        cmake ../src
+        make -j
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: LAUNCHER-UNSIGNED
+        path: ./
+    - name: Sign binary
+      run: |
+        crc16sign/build/crc16sign -i ${{env.LAUNCHER_BIN}} -o ${{env.LAUNCHER_BIN}} -s
+    - name: Upload launcher
+      uses: actions/upload-artifact@v4
+      with:
+        name: LAUNCHER
+        path: ${{env.LAUNCHER_BIN}}
+
+################################################################################
+# FLASHER
+################################################################################
+
+  build-flasher:
+    runs-on: ubuntu-latest
+    container: 
+      image: z88dk/z88dk
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build launcher application
+      run: |
+        cd src
+        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
+        make flasher
+        ls -alh FLASHER*
+    - name: Upload flasher
+      uses: actions/upload-artifact@v4
+      with:
+        name: FLASHER
+        path: src/${{env.FLASHER_BIN}}
+
+################################################################################
+# MODIFIED BASIC CARTRIDGE
+################################################################################
+
+  build-basic:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: sudo apt install -y python3 z80asm make
+    - name: Build modified basic cartridge
+      run: |
+        cd basicmod
+        make
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: BASICBOOTSTRAP
+        path: basicmod/${{env.BASICROM_BIN}}
+
+################################################################################
+# DEPLOY TO SPECIAL RELEASE
+################################################################################
+
+  deploy-release-2_x:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # Needed for GitHub Releases
+      actions: write   # Needed for uploading artifacts
+
+    needs: [build-flasher, sign-launcher, build-basic]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: BASICBOOTSTRAP
+          path: ./
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: FLASHER
+          path: ./
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: LAUNCHER
+          path: ./
+
+      - name: Update the nightly release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{env.BASICROM_BIN}}
+            ${{env.LAUNCHER_BIN}}
+            ${{env.FLASHER_BIN}}
+          tag_name: latest-stable
+          release_name: latest-stable
+          overwrite: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

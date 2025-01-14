@@ -59,9 +59,9 @@ download file does.
 > where the SD-card listens to I/O port 0x4X. Earlier version of the PCB are no
 > longer actively maintained.
 
-* [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/BASICBOOTSTRAP.BIN)
-* [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/FLASHER.BIN)
-* [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/latest/download/LAUNCHER.BIN)
+* [BASICBOOTSTRAP.BIN](https://github.com/ifilot/p2000t-sdcard/releases/download/latest-stable/BASICBOOTSTRAP.BIN)
+* [FLASHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/download/latest-stable/FLASHER.BIN)
+* [LAUNCHER.BIN](https://github.com/ifilot/p2000t-sdcard/releases/download/latest-stable/LAUNCHER.BIN)
 
 > [!TIP]
 > * Precompiled SD-card images, including flashing instructions, can be found [here](https://github.com/ifilot/p2000t-sdcard-image)
