@@ -116,14 +116,14 @@ jobs:
 # DEPLOY TO SPECIAL RELEASE
 ################################################################################
 
-  deploy-release-2.x:
+  deploy-release-2_x:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write  # Needed for GitHub Releases
       actions: write   # Needed for uploading artifacts
 
-    needs: [build-flasher, build-flasher, build-basic]
+    needs: [build-flasher, build-launcher, build-basic]
 
     steps:
       - name: Checkout code
