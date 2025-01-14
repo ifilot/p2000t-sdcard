@@ -197,13 +197,13 @@ void command_loadrun(unsigned type) {
             print_error("File too large to load");
             return;
         }
-        sprintf(termbuffer, "Transfer address: %c0x%04X", COL_CYAN, transfer_addr);
+        sprintf(termbuffer, "Transfer address:%c0x%04X", COL_CYAN, transfer_addr);
         terminal_printtermbuffer();
-        sprintf(termbuffer, "Program length: %c0x%04X", COL_CYAN, file_length);
+        sprintf(termbuffer, "Program length:  %c0x%04X", COL_CYAN, file_length);
         terminal_printtermbuffer();
-        sprintf(termbuffer, "End address: %c0x%04X", COL_CYAN, transfer_addr + file_length);
+        sprintf(termbuffer, "End address:     %c0x%04X", COL_CYAN, transfer_addr + file_length);
         terminal_printtermbuffer();
-        sprintf(termbuffer, "Launch address: %c0x%04X", COL_CYAN, start_addr);
+        sprintf(termbuffer, "Launch address:  %c0x%04X", COL_CYAN, start_addr);
         terminal_printtermbuffer();
 
         sprintf(termbuffer, "Press any key to %s the program.", 
