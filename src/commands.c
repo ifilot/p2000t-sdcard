@@ -21,7 +21,7 @@
 #include "commands.h"
 
 char __lastinput[INPUTLENGTH];
-uint8_t __bootcas = 0;
+uint8_t __launch = 0;
 
 // set list of commands
 char* __commands[] = {
@@ -30,6 +30,7 @@ char* __commands[] = {
     "cd",
     "fileinfo",
     "run",
+    "load",
     "hexdump",
     "ledtest",
     "stack",
@@ -46,6 +47,7 @@ void (*__operations[])(void) = {
     command_cd,
     command_fileinfo,
     command_run,
+    command_load,
     command_hexdump,
     command_ledtest,
     command_stack,
@@ -129,103 +131,99 @@ void command_fileinfo(void) {
 }
 
 /**
- * @brief Load a (CAS) file into memory and launch it
- * 
+ * @brief Load a (CAS) file into memory and either launch it or return to BASIC
+ * prompt
  */
-void command_run(void) {
+void command_loadrun(unsigned type) {
     print_recall("Searching file...");
 
-    int fileid = atoi(&__lastinput[3]);
+    int fileid = atoi(&__lastinput[type ? 4 : 3]); // file nr after LOAD / RUN
 
     // find a file and store its cluster structure into the linked list
     if(read_file_metadata(fileid) != 0) {
         return;
     }
 
+    sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
+    terminal_printtermbuffer();
+    sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
+    terminal_printtermbuffer();
+    uint16_t transfer_addr = 0;
+    uint16_t file_length = 0;
+    uint16_t start_addr = 0;
+    set_ram_bank(RAM_BANK_CASSETTE);
+
     if(memcmp(_ext, "CAS", 3) == 0) {
-        sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
-        terminal_printtermbuffer();
-        sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
-        terminal_printtermbuffer();
-        
-        set_ram_bank(RAM_BANK_CASSETTE);
+        //copy cas
         store_cas_ram(_linkedlist[0], 0x0000);
 
-        uint16_t deploy_addr = ram_read_uint16_t(0x8000);
-        uint16_t file_length = ram_read_uint16_t(0x8002);
-
-        sprintf(termbuffer, "Deploy addr: %c0x%04X", COL_CYAN, deploy_addr);
-        terminal_printtermbuffer();
-        sprintf(termbuffer, "Program length: %c0x%04X", COL_CYAN, file_length);
-        terminal_printtermbuffer();
-        sprintf(termbuffer, "Top RAM: %c0x%04X", COL_CYAN, deploy_addr + file_length);
-        terminal_printtermbuffer();
-
-        print("Press c to calculate checksum or any");
-        print("other key to launch program.");
-        if(wait_for_key_fixed(28) == 1) {
-            // calculate CRC16 checksum
-            print_recall("Calculating CRC16 checksum...");
-            uint16_t crc16 = crc16_ramchip(0x0000, file_length);
-            sprintf(termbuffer, "CRC16 checksum: %c0x%04X", COL_CYAN, crc16);
-            terminal_printtermbuffer();
-
-            print("Press any key to start program");
-            wait_for_key();
-        }
-
-        set_ram_bank(0);
-        __bootcas = 1;
-    } else if(memcmp(_ext, "PRG", 3) == 0) {
-        if(memory[0x605C] < 2) {
-            print_error("Insufficient memory.");
-            print("At least 32kb of memory required.");
-            return;
-        }
-
-        // verify that the filesize is not too big
-        if(_filesize_current_file > 0x3D00) {
-            print_error("File too large to load");
-            return;
-        }
-
-        // copy program
-        sprintf(termbuffer, "Deploying program at %c0xA000", COL_CYAN);
-        terminal_printtermbuffer();
-        store_prg_intram(_linkedlist[0], PROGRAM_LOCATION);
+        transfer_addr = ram_read_uint16_t(0x8000);
+        file_length = ram_read_uint16_t(0x8002);
+        start_addr = type ? BASIC_RESET : BASIC_RUN;
+        // set start-address in 0x8004
+        ram_write_uint16_t(0x8004, start_addr);
+    }
+    if(memcmp(_ext, "PRG", 3) == 0) {
+        //copy program
+        store_prg_ram(_linkedlist[0], 0x0000);
 
         // verify that the signature is correct
-        if(memory[PROGRAM_LOCATION] != 0x50) {
+        if(ram_read_uint8_t(0x0000) != 0x50) {
             print_error("Invalid program ID");
             return;
         }
 
         // verify that the CRC-16 checksum matches
-        if(crc16_intram(&memory[0xA010], read_uint16_t(&memory[0xA001])) != 
-                        read_uint16_t(&memory[0xA003])) {
-            print_error("CRC16 checksum failed");
-            return;
+        uint16_t nrbytes = ram_read_uint16_t(0x0001);
+        if (nrbytes > 0) {
+            uint16_t crc16 = crc16_ramchip(0x0010, nrbytes);
+            if(ram_read_uint16_t(0x0003) != crc16) {
+                print_error("CRC16 checksum failed");
+                return;
+            }
         }
 
-        // wait on user key push
-        print("Press any key to run");
+        transfer_addr = CUST_PRG_START;
+        file_length = _filesize_current_file;
+        start_addr = CUST_PRG_START + 0x10;
+        // set start-address in 0x8004 to CUST_PRG_START + 16 byte preamble
+        ram_write_uint16_t(0x8000, transfer_addr);
+        ram_write_uint16_t(0x8002, file_length);
+        ram_write_uint16_t(0x8004, start_addr);
+    }
+
+    if (transfer_addr != 0) {
+        if(memory[0x605C] == 1 && file_length > MAX_BYTES_16K) {
+            print_error("File too large to load");
+            return;
+        }
+        sprintf(termbuffer, "Transfer address: %c0x%04X", COL_CYAN, transfer_addr);
+        terminal_printtermbuffer();
+        sprintf(termbuffer, "Program length: %c0x%04X", COL_CYAN, file_length);
+        terminal_printtermbuffer();
+        sprintf(termbuffer, "End address: %c0x%04X", COL_CYAN, transfer_addr + file_length);
+        terminal_printtermbuffer();
+        sprintf(termbuffer, "Launch address: %c0x%04X", COL_CYAN, start_addr);
+        terminal_printtermbuffer();
+
+        sprintf(termbuffer, "Press any key to %s the program.", 
+            (type && memcmp(_ext, "CAS", 3) == 0) ? "LOAD" : "RUN");
+        terminal_printtermbuffer();
         wait_for_key();
 
-        // transfer copy of current screen to external RAM
-        copy_to_ram(vidmem, VIDMEM_CACHE, 0x1000);
-
-        // launch the program
-        //memset(&memory[0xA000], 0x00, 0x200);
-        call_program(PROGRAM_LOCATION + 0x10);
-
-        // retrieve copy of current screen
-        copy_from_ram(VIDMEM_CACHE, vidmem, 0x1000);
-
-        // clean up memory including stack program stack
-        memset(&memory[0xA000], 0x00, 0xDF00 - 0xA000);
+        set_ram_bank(0);
+        __launch = 1;
     } else {
         print_error("Can only run CAS or PRG files.");
     }
+}
+
+void command_run(void) {
+    command_loadrun(0);
+}
+
+void command_load(void) {
+    command_loadrun(1);
 }
 
 void command_hexdump(void) {

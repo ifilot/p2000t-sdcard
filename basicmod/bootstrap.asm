@@ -37,9 +37,12 @@
 ;-------------------------------------------------------------------------------
 ; VARIABLES
 ;-------------------------------------------------------------------------------
-LAUNCHER_SRC:   EQU $0000       ; launcher's source address on SLOT2 ROM
-LAUNCHER_ADDR:  EQU $7000       ; launcher's target address in P2000T RAM
-LAUNCHER_SIZE:  EQU $2D00       ; hardcoded length of launcher app
+LAUNCHER_SRC:   EQU $0000       ; Launcher's source address on SLOT2 ROM
+LAUNCHER_ADDR:  EQU $6549       ; Launcher's target address in P2000T RAM
+                                ; note: this is BASIC's prog start addres + 2
+LAUNCHER_SIZE:  EQU $3A37       ; hardcoded max length of Launcher app
+                                ; note: Launcher loaded from $6549 to $9F7F
+                                ; leaving 128 ($80) bytes for stack
 PRG_SRC_ADDR:   EQU $0000       ; SLOT2 RAM start address of selected program
 PRG_SRC_META:   EQU $8000       ; ... and its metadata
 LED_IO:         EQU $44         ; LED I/O
@@ -49,7 +52,7 @@ IO_AL:          EQU $48         ; address low
 IO_AH:          EQU $49         ; address high
 ROM_BANK:       EQU $4A         ; address ROM bank
 RAM_BANK:       EQU $4B         ; address RAM bank
-BOOTSTR_HOOK:   EQU $60D3       ; Basic's hook address for our bootstrap
+BOOTSTR_HOOK:   EQU $60D3       ; BASIC's hook address for our bootstrap
 
 ;-------------------------------------------------------------------------------
 ; MARCO DEFINITIONS
@@ -65,18 +68,18 @@ led_off: macro
     endm
 
 print: macro string
-    ld hl,string
+    ld de,string
     call printmsg
-    call $0AF2        ; Monitor routine to wait 500ms
+    call $0AF2          ; Monitor routine which waits 500ms
     endm
 
 relocate_stack: macro
-    ld sp,$9FFF
-    ld a,($605C)
+    ld sp,$A000         ; set stack to top of RAM +1 (for minimal 16K RAM)
+    ld a,($605C)        ; $605C contains RAM size (1 = 16K, 2 = 32K, 3 = 48K)
     cp 1
-    ret z
-    ld sp,$DFFF
-    endm
+    jr z, .finish
+    ld sp,$E000
+.finish: endm
 
 ;-------------------------------------------------------------------------------
 ; This bootstrap code is injected into the end of the standard BASIC ROM
@@ -96,6 +99,7 @@ start:
     print msg_loading
     call load_program
     led_off
+    call clrscrn
     call run_program
     jp start            ; restart bootstrap (in case program returns)
 
@@ -137,13 +141,13 @@ cl_loop:
 load_program:
     ld a,1
     out (RAM_BANK), a   ; load programs from second RAM bank
-put_deploy_addr_into_de:
+put_transfer_addr_into_de:
     ld hl,PRG_SRC_META
-    call read_ram_byte  ; load low byte deploy addr
+    call read_ram_byte  ; load low byte transfer addr
     ld e,a
     ld hl,PRG_SRC_META+1
-    call read_ram_byte  ; load high byte deploy addr
-    ld d,a              ; de now contains deploy address
+    call read_ram_byte  ; load high byte transfer addr
+    ld d,a              ; de now contains transfer address
 put_file_size_into_bc:
     ld hl,PRG_SRC_META+2
     call read_ram_byte  ; load low byte file size
@@ -156,11 +160,21 @@ put_source_addr_into_hl:
     jp copy_program
 
 run_program:
-    xor a               ; set flags z, nc
-    jp $28d4            ; run basic program (or use $1fc6 to return to BASIC)
+put_start_addr_into_de:
+    ld hl,PRG_SRC_META+4
+    call read_ram_byte  ; load low byte start addr
+    ld e,a
+    ld hl,PRG_SRC_META+5
+    call read_ram_byte  ; load high byte start addr
+    ld d,a              ; de now contains start address
+call_start_address:
+    push de
+    pop hl
+    xor a               ; set flags z, nc (needed for BASIC run command)
+    jp (hl)             ; $28D4 = run BASIC program ; $1fc6 = return to BASIC
 
 ;-------------------------------------------------------------------------------
-; Copy data from SLOT2 RAM to P2000T RAM and set basic pointers
+; Copy data from SLOT2 RAM to P2000T RAM and set BASIC pointers
 ;
 ; hl - source in SLOT2 RAM
 ; de - destination in P2000T RAM
@@ -184,7 +198,7 @@ set_deploy_addr:
 set_basic_pointers:
     pop bc
     add hl,bc           ; add program length
-    ld ($6405),hl       ; set basic pointers to variable space
+    ld ($6405),hl       ; set BASIC pointers to variable space
     ld ($6407),hl
     ld ($6409),hl
     ret
@@ -195,23 +209,21 @@ set_basic_pointers:
 clrscrn:
     ld hl,$5000         ; start of screen memory
     ld a,24             ; 24 lines to clear
-    jp $0035          ; call Monitor's clear_lines routine
+    jp $0035            ; call Monitor's clear_lines routine
 
 ;-------------------------------------------------------------------------------
 ; Print message to screen
-; hl - pointer to string data
+; de - pointer to string data
 ;-------------------------------------------------------------------------------
 printmsg:
-    push hl
     call clrscrn
-    pop hl
     ld bc,$5000 + $50*10 ; print on screen line 10
 pmprint:
-    ld a,(hl)
-    cp 255
+    ld a,(de)
+    and a
     ret z
     ld (bc),a
-    inc hl
+    inc de
     inc bc
     jp pmprint
 
@@ -243,6 +255,6 @@ read_ram_byte:
 
 ; Messages
 msg_booting:
-    DB $06,$0D,"Booting launcher",$FF
+    DB $06,$0D,"Booting launcher",0
 msg_loading:
-    DB $06,$0D,"Loading program",$FF
+    DB $06,$0D,"Loading program",0

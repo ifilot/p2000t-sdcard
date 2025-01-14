@@ -300,7 +300,6 @@ transferbyte:
 _ram_set:
     ld a,0x02
     out (LED_IO),a              ; turn write LED on
-    di                          ; disable interrupts
     pop de                      ; retrieve return address
     pop hl                      ; ramptr
     dec sp
@@ -320,7 +319,6 @@ rsnext:
     ld a,b
     or c
     jr nz,rsnext                ; check if counter is zero
-    ei                          ; enable interrupts
     ld a,0
     out (LED_IO),a              ; turn write LED off
     ret

@@ -14,7 +14,7 @@ with open('BASICROM.BIN', 'rb') as f:
 # To call our custom code (at $4EC7) after startup, page 18 of 'Adresboekje' 
 # tells us to use addresses $60D0 or $60D3 to hook into the Basic interpreter.
 # Address $60D3 maps to position $08E7 in Basic ROM (see 'Adresboekje' page 13)
-rom[0x08E7] = 0xCD # 'call' opcode
+rom[0x08E7] = 0xC3 # 'jp nn' opcode
 rom[0x08E8:0x08EA] = BOOTSTRAP_ADDR.to_bytes(2, byteorder='little')
 
 # recalculate checksum

@@ -89,7 +89,6 @@ clr:
 ; uses: all
 ;-------------------------------------------------------------------------------
 _copy_to_rom:
-    di
     ld a,1
     out (LED_IO),a              ; turn ROM led on
     pop iy                      ; return address
@@ -139,7 +138,6 @@ next:
     jp nz, next
     ld a,0
     out (LED_IO),a              ; turn ROM led off
-    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -148,7 +146,6 @@ next:
 ; void fast_sd_to_rom_full(uint16_t rom_addr) __z88dk_callee;
 ;-------------------------------------------------------------------------------
 _fast_sd_to_rom_full:
-    di
     ld a,1
     out (LED_IO),a              ; turn ROM led on
     pop iy                      ; return address
@@ -202,5 +199,4 @@ copynext:
     out (CLKSTART),a
     ld a,0
     out (LED_IO),a              ; turn ROM led off
-    ei
     ret

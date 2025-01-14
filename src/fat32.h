@@ -125,11 +125,11 @@ uint32_t store_file_metadata(uint8_t entry_id);
 void store_cas_ram(uint32_t faddr, uint16_t ram_addr);
 
 /**
- * @brief Store a PRG file in internal ram
+ * @brief Store a PRG file in external ram
  * 
  * @param faddr    cluster address of the file
  * @param ram_addr first position in ram to store the file
  */
-void store_prg_intram(uint32_t faddr, uint16_t ram_addr);
+void store_prg_ram(uint32_t faddr, uint16_t ram_addr);
 
 #endif // _FAT32_H
