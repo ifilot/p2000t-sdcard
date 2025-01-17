@@ -158,8 +158,7 @@ load_program:
 
 run_program:
     read_metadata PRG_SRC_META+4 d e ; put launch-address into de
-    push de
-    pop hl              ; hl = de
+    ex de, hl           ; hl = de
     xor a               ; set flags z, nc (needed for BASIC run command)
     jp (hl)             ; call launch address. on return, `jp start` is called
 
