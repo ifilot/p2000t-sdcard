@@ -74,7 +74,7 @@ print: macro string
     endm
 
 ; read the program's metadata from the SLOT2 RAM and store in registers
-read_metadata: macro address high_reg low_reg
+read_metadata: macro address,high_reg,low_reg
     ld hl,address
     call read_ram_byte  ; load low byte
     ld low_reg,a
@@ -151,13 +151,13 @@ cl_loop:
 load_program:
     ld a,1
     out (RAM_BANK), a   ; load programs from second RAM bank
-    read_metadata PRG_SRC_META d e   ; put transfer-address into de
-    read_metadata PRG_SRC_META+2 b c ; put filesize into bc
+    read_metadata PRG_SRC_META,d,e   ; put transfer-address into de
+    read_metadata PRG_SRC_META+2,b,c ; put filesize into bc
     ld hl,PRG_SRC_ADDR  ; put start of SLOT2 ram into hl
     jp copy_program
 
 run_program:
-    read_metadata PRG_SRC_META+4 d e ; put launch-address into de
+    read_metadata PRG_SRC_META+4,d,e ; put launch-address into de
     ex de, hl           ; hl = de
     xor a               ; set flags z, nc (needed for BASIC run command)
     jp (hl)             ; call launch address. on return, `jp start` is called
