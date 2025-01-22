@@ -116,7 +116,8 @@ jobs:
 # DEPLOY TO SPECIAL RELEASE
 ################################################################################
 
-  deploy-release-2_x:
+  deploy-latest-stable:
+    if: github.repository_owner == 'ifilot'
     runs-on: ubuntu-latest
 
     permissions:
