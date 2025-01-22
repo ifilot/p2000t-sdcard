@@ -97,11 +97,15 @@ jobs:
 
   build-basic:
     runs-on: ubuntu-latest
+    container: 
+      image: z88dk/z88dk
 
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: sudo apt install -y python3 z80asm make
+      run: |
+        apk update
+        apk add --no-cache python3
     - name: Build modified basic cartridge
       run: |
         cd basicmod
@@ -117,6 +121,7 @@ jobs:
 ################################################################################
 
   deploy-release-2_x:
+    if: github.repository_owner == 'ifilot'
     runs-on: ubuntu-latest
 
     permissions:

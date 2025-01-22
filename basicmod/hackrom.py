@@ -18,10 +18,8 @@ rom[0x08E7] = 0xC3 # 'jp nn' opcode
 rom[0x08E8:0x08EA] = BOOTSTRAP_ADDR.to_bytes(2, byteorder='little')
 
 # recalculate checksum
-checksum = 0
 nbytes = int.from_bytes(rom[0x0001:0x0003], byteorder='little')
-for i in range(0x0005, 0x0005 + nbytes):
-    checksum += rom[i]
+checksum = sum(rom[0x0005:0x0005 + nbytes])
 
 # put the 2's complement negation of the checksum back in the ROM header
 rom[0x0003:0x0005] = ((~checksum+1) & 0xFFFF).to_bytes(2, byteorder='little')
