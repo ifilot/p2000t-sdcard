@@ -113,7 +113,7 @@ void command_fileinfo(void) {
         return;
     }
 
-    sprintf(termbuffer, "Filename: %.26s", filename);
+    sprintf(termbuffer, "Filename: %.26s", _filename);
     terminal_printtermbuffer();
     sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
     terminal_printtermbuffer();
@@ -144,7 +144,7 @@ void command_loadrun(unsigned cmd_load) {
         return;
     }
 
-    sprintf(termbuffer, "Filename:        %c%.22s", COL_CYAN, filename);
+    sprintf(termbuffer, "Filename:        %c%.22s", COL_CYAN, _filename);
     terminal_printtermbuffer();
     sprintf(termbuffer, "Filesize:        %c%lu bytes", COL_CYAN, _filesize_current_file);
     terminal_printtermbuffer();
@@ -239,7 +239,7 @@ void command_hexdump(void) {
     // read the first sector of the file
     read_sector(calculate_sector_address(_linkedlist[0], 0));
 
-    sprintf(termbuffer, "Filename: %.26s", filename);
+    sprintf(termbuffer, "Filename: %.26s", _filename);
     terminal_printtermbuffer();
 
     // print to screen

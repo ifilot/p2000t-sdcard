@@ -33,7 +33,7 @@ uint32_t _lba_addr_root_dir = 0;
 uint32_t _filesize_current_file = 0;
 uint32_t _current_folder_cluster = 0;
 char _ext[4] = {0};
-uint8_t filename[MAX_LFN_LENGTH+1];
+uint8_t _filename[MAX_LFN_LENGTH+1];
 uint8_t _current_attrib = 0;
 
 /**
@@ -179,14 +179,14 @@ uint32_t read_folder(int16_t file_id, uint8_t casrun) {
                 if ((attrPos & 0x0F) == 0x0F) {
                     if (!lfn_found) {
                         lfn_found = 1;  // indicate LNF found
-                        memset(filename, 0, MAX_LFN_LENGTH+1);
+                        memset(_filename, 0, MAX_LFN_LENGTH+1);
                     }
                     uint8_t seq = firstPos & 0x1F;  // LFN sequence number
                     if (seq <= 2) {
                         // extract characters from LFN entry
-                        for (k = 0; k < 5; k++) filename[(seq - 1) * 13 + k] = ram_read_uint8_t(loc + 1 + k * 2);
-                        for (k = 0; k < 6; k++) filename[(seq - 1) * 13 + 5 + k] = ram_read_uint8_t(loc + 14 + k * 2);
-                        for (k = 0; k < 2; k++) filename[(seq - 1) * 13 + 11 + k] = ram_read_uint8_t(loc + 28 + k * 2);
+                        for (k = 0; k < 5; k++) _filename[(seq - 1) * 13 + k] = ram_read_uint8_t(loc + 1 + k * 2);
+                        for (k = 0; k < 6; k++) _filename[(seq - 1) * 13 + 5 + k] = ram_read_uint8_t(loc + 14 + k * 2);
+                        for (k = 0; k < 2; k++) _filename[(seq - 1) * 13 + 11 + k] = ram_read_uint8_t(loc + 28 + k * 2);
                     }
                 }
 
@@ -204,18 +204,18 @@ uint32_t read_folder(int16_t file_id, uint8_t casrun) {
 
                         // if no LFN found, the SFN filename needs to be formatted
                         if (!lfn_found) {
-                            copy_from_ram(loc, filename, 8);
-                            memcpy(&filename[9], _ext, 4); // copy extension (incl terminator)
+                            copy_from_ram(loc, _filename, 8);
+                            memcpy(&_filename[9], _ext, 4); // copy extension (incl terminator)
                             // if file, inject dot before extension
-                            filename[8] = (attrPos & 0x10) ? '\0' : '.';
+                            _filename[8] = (attrPos & 0x10) ? '\0' : '.';
                             // remove spaces before extension
-                            for (k = 7; k >= 1 && filename[k] == ' '; k--);
-                            if (k < 7) memcpy(&filename[k+1], &filename[8], 5);
+                            for (k = 7; k >= 1 && _filename[k] == ' '; k--);
+                            if (k < 7) memcpy(&_filename[k+1], &_filename[8], 5);
                         }
 
                         if (attrPos & 0x10) {  // directory
                             sprintf(termbuffer, "%c%3u%c%-24.24s%c (dir)", 
-                                COL_YELLOW, fctr, COL_WHITE, filename, COL_CYAN);
+                                COL_YELLOW, fctr, COL_WHITE, _filename, COL_CYAN);
                         } else {  // regular file
                             if(casrun == 1 &&  memcmp(_ext, "CAS", 3) == 0) {
                                 // read from SD card once more and extract CAS data
@@ -243,7 +243,7 @@ uint32_t read_folder(int16_t file_id, uint8_t casrun) {
                                     COL_GREEN, fctr, COL_YELLOW, casname, ext, COL_CYAN, blocks, filesize);
                             } else { // non-cas file or not a cas run
                                 sprintf(termbuffer, "%c%3u%c%-24.24s%c%6lu", 
-                                    COL_GREEN, fctr, COL_WHITE, filename, COL_YELLOW, filesize);
+                                    COL_GREEN, fctr, COL_WHITE, _filename, COL_YELLOW, filesize);
                             }
                         }
                         terminal_printtermbuffer();
