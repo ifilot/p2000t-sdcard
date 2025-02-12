@@ -22,6 +22,7 @@
 #define _FAT32_H
 
 #define F_LL_SIZE               16
+#define MAX_LFN_LENGTH          26 // 2 * 13
 
 #include "sdcard.h"
 #include "util.h"
@@ -43,10 +44,9 @@ extern uint32_t _current_folder_cluster;
 
 // global variables for currently active file or folder
 extern uint32_t _filesize_current_file;
-extern char _basename[9];
-extern char _ext[4];
+extern char _ext[4];                        // file extension (uppercase)
+extern uint8_t _filename[MAX_LFN_LENGTH+1];  // filename buffer
 extern uint8_t _current_attrib;
-
 
 /**
  * @brief Read the Master Boot Record
