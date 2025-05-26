@@ -40,7 +40,7 @@
 #define __clock_freq 2500000
 
 extern char __lastinput[INPUTLENGTH];
-extern uint8_t __bootcas;
+extern uint8_t __loadcas;
 
 void commands_ls(void);
 
@@ -120,5 +120,19 @@ void execute_command(void);
  * @return uint8_t whether file can be read, 0 true, 1 false
  */
 uint8_t read_file_metadata(int16_t file_id);
+
+/**
+ * @brief Convert hexcode to unsigned 16 bit integer
+ * 
+ * @param addr 
+ * @return uint16_t 
+ */
+uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
+
+/**
+ * @brief Loads a cas file into P2000T memory and returns to BASIC.
+ * 
+ */
+void load_only(void) __z88dk_callee;
 
 #endif // _COMMANDS_H

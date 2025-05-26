@@ -35,6 +35,7 @@
 #define MEMBANK         0x94   // Z80 I/O address for memory banking
 
 #define PROGRAM_LOCATION 0xA000  // where to store custom programs
+#define MAX_BYTES_16K   14966  // maximum bytes free on a 16K P2000T
 
 extern char* memory;
 extern char* vidmem;

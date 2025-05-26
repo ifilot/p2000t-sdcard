@@ -32,4 +32,13 @@
  */
 uint16_t crc16_intram(uint8_t *addr, uint16_t nrbytes) __z88dk_callee;
 
+/**
+ * @brief Calculate CRC16 checksum for N bytes starting at external ram address
+ * 
+ * @param addr external RAM address
+ * @param nrbytes number of bytes to parse
+ * @return uint16_t 
+ */
+uint16_t crc16_ramchip(uint16_t addr, uint16_t nrbytes) __z88dk_callee;
+
 #endif // _CRC16_H

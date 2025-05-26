@@ -96,37 +96,12 @@ uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_fastcall;
 //------------------------------------------------------------------------------
 
 /**
- * @brief Write a single byte to external RAM
- * 
- * @param addr external memory address
- * @param val nbyte to write
- */
-void ram_write_uint8_t(uint16_t addr, uint8_t val) __z88dk_callee;
-
-/**
  * @brief Write 16-bit value to external RAM
  * 
  * @param addr  external memory address
  * @param val 16-bit value to write
  */
 void ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;
-
-/**
- * @brief Write 32-bit value to external RAM
- * 
- * @param addr  external memory address
- * @param val 32-bit value to write
- */
-void ram_write_uint32_t(uint16_t addr, uint32_t val) __z88dk_callee;
-
-/**
- * @brief Write fixed byte size to memory, can be used for clearing memory
- * 
- * @param addr memory start address
- * @param val value to write
- * @param num_bytes number of bytes to write
- */
-void ram_set(uint16_t addr, uint8_t val, uint16_t num_bytes) __z88dk_callee;
 
 //------------------------------------------------------------------------------
 // COPY FUNCTIONS
@@ -164,21 +139,5 @@ void copy_from_ram(uint16_t src, uint8_t *dest, uint16_t nrbytes) __z88dk_callee
  * @param nrbytes  number of bytes to copy
  */
 void ram_transfer(uint16_t src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
-
-//------------------------------------------------------------------------------
-// OTHER FUNCTIONS
-//------------------------------------------------------------------------------
-
-/**
- * @brief Calculate CRC16 checksum for N bytes starting at external ram address
- * 
- * @param addr external RAM address
- * @param nrbytes number of bytes to parse
- * @return uint16_t 
- */
-uint16_t crc16_ramchip(uint16_t addr, uint16_t nrbytes) __z88dk_callee;
-
-// this function is currently not being used
-// void read_from_ram(uint8_t *dest, uint16_t src, uint16_t n);
 
 #endif // _RAM_H

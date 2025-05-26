@@ -22,6 +22,7 @@
 #define _FAT32_H
 
 #define F_LL_SIZE               16
+#define MAX_LFN_LENGTH          26 // 2 * 13
 
 #include "sdcard.h"
 #include "util.h"
@@ -43,10 +44,9 @@ extern uint32_t _current_folder_cluster;
 
 // global variables for currently active file or folder
 extern uint32_t _filesize_current_file;
-extern char _basename[9];
-extern char _ext[4];
+extern uint8_t _filename[MAX_LFN_LENGTH+1]; // filename buffer
+extern char _ext[4]; // file extension (3 chars, uppercased)
 extern uint8_t _current_attrib;
-
 
 /**
  * @brief Read the Master Boot Record
@@ -107,14 +107,6 @@ uint32_t calculate_sector_address(uint32_t cluster, uint8_t sector);
  * @return uint32_t 
  */
 uint32_t grab_cluster_address_from_fileblock(uint16_t loc);
-
-/**
- * @brief Store entry metadata in special global variables
- * 
- * @param entry_id entry id with respect to current sector data
- * @return uint32_t pointer to first cluster
- */
-uint32_t store_file_metadata(uint8_t entry_id);
 
 /**
  * @brief Store a CAS file in the external ram

@@ -1,0 +1,7 @@
+// READ MORE: https://code.visualstudio.com/docs/devcontainers/containers
+{
+	"build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    }
+}

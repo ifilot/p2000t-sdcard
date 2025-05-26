@@ -35,3 +35,6 @@ fp-info-cache
 *.BIN
 *.bin
 card.png
+
+# Ignore macOS Finder metadata files
+.DS_Store
