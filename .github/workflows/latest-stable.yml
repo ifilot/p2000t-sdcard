@@ -3,8 +3,6 @@ name: latest-stable
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 env:
   BUILD_TYPE: Release
@@ -149,13 +147,14 @@ jobs:
           path: ./
 
       - name: Update the nightly release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
           files: |
             ${{env.BASICROM_BIN}}
             ${{env.LAUNCHER_BIN}}
             ${{env.FLASHER_BIN}}
           tag_name: latest-stable
-          name: latest-stable
+          release_name: latest-stable
+          overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
