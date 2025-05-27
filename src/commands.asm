@@ -97,10 +97,9 @@ hex_invalid:
 ;-------------------------------------------------------------------------------
 ; VARIABLES
 ;-------------------------------------------------------------------------------
-; DEPLOYADDR: EQU $6152
-CUSTOM_LOADROM: EQU $6151       ; start address of custom loadcas code
-PRG_SRC_ADDR:   EQU $0000       ; SLOT2 RAM start address of selected program
-PRG_SRC_META:   EQU $8000       ; ... and its metadata
+CUSTOM_LOADROM: EQU $6151      ; start address of relocated loadrom code
+PRG_SRC_ADDR:   EQU $0000      ; SLOT2 RAM start address of selected program
+PRG_SRC_META:   EQU $8000      ; ... and its metadata location
 
 _load_only:
     ld hl, loadrom                ; Source address
@@ -110,9 +109,10 @@ _load_only:
     jp CUSTOM_LOADROM
 
 ;-------------------------------------------------------------------------------
-; Load data from external rom
+; Load data from external rom and return to Basic
 ;-------------------------------------------------------------------------------
 loadrom:
+    ; clear screen
     ld hl,$5000         ; start of screen memory
     ld a,24             ; 24 lines to clear
     call $0035          ; call Monitor's clear_lines routine
@@ -121,33 +121,35 @@ loadrom:
     out (LED_IO), a     ; set read LED
     out (RAM_BANK), a   ; load programs from second RAM bank
     
-    ld hl,PRG_SRC_META  ; load deploy address into de
-    call read_ram_byte
+    ; load deploy address into de
+    ld hl,PRG_SRC_META  
+    call read_ram_byte - loadrom + CUSTOM_LOADROM
     ld e,a
     ld hl,PRG_SRC_META+1
-    call read_ram_byte
+    call read_ram_byte - loadrom + CUSTOM_LOADROM
     ld d,a
-    
-    ld hl,PRG_SRC_META+2 ; load file size into bc
-    call read_ram_byte
+    ; load file size into bc
+    ld hl,PRG_SRC_META+2 
+    call read_ram_byte - loadrom + CUSTOM_LOADROM
     ld c,a
     ld hl,PRG_SRC_META+3
-    call read_ram_byte
+    call read_ram_byte - loadrom + CUSTOM_LOADROM
     ld b,a
+    ; load start of SLOT2 ram into hl
+    ld hl,PRG_SRC_ADDR  
+    ; copy data from SLOT2 RAM to P2000T RAM
+    call copy_program - loadrom + CUSTOM_LOADROM
 
-    ld hl,PRG_SRC_ADDR  ; load start of SLOT2 ram into hl
-
-    call copy_program 
     ld a,0
     out (LED_IO), a     ; turn read LED off
     xor a               ; set flags z, nc
     jp $1FC6            ; back to Basic
 
-;-------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------
 ; read a byte from SLOT2 RAM into a register
 ;
 ; hl - address
-;-------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------
 read_ram_byte:
     ld a,h
     out (ADDR_HIGH),a   ; store upper bytes in register
@@ -156,25 +158,25 @@ read_ram_byte:
     in a,(RAM_IO)       ; load byte
     ret
 
-;-------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------
 ; Copy data from SLOT2 RAM to P2000T RAM and set BASIC pointers
 ;
 ; hl - source in SLOT2 RAM
 ; de - destination in P2000T RAM
 ; bc - number of bytes to copy
-;-------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------
 copy_program:
     push bc
     push de
 cp_loop:
-    call read_ram_byte  ; load from SLOT2 ram into a register
+    call read_ram_byte - loadrom + CUSTOM_LOADROM ; load from SLOT2 ram into a register
     ld (de),a
     inc de
     inc hl
     dec bc
     ld a,b
     or c
-    jp nz,cp_loop
+    jr nz,cp_loop
 set_deploy_addr:
     pop hl              ; read destination addres into $625C
     ld ($625C), hl
@@ -187,4 +189,4 @@ set_basic_pointers:
     ret
 
 loadrom_end:
-    ASSERT (loadrom_end - loadrom) <= ($6200 - CUSTOM_LOADROM), "Error: Custom loadrom code is too large!"
+    ASSERT (loadrom_end - loadrom) <= ($6200 - CUSTOM_LOADROM), "Error: Relocated loadrom code too large!"
