@@ -149,14 +149,13 @@ jobs:
           path: ./
 
       - name: Update the nightly release
-        uses: softprops/action-gh-release@v0.1.14
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{env.BASICROM_BIN}}
             ${{env.LAUNCHER_BIN}}
             ${{env.FLASHER_BIN}}
           tag_name: latest-stable
-          release_name: latest-stable
-          overwrite: true
+          name: latest-stable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
