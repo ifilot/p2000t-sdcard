@@ -149,7 +149,7 @@ jobs:
           path: ./
 
       - name: Update the nightly release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v0.1.14
         with:
           files: |
             ${{env.BASICROM_BIN}}
