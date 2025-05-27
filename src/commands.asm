@@ -97,9 +97,10 @@ hex_invalid:
 ;-------------------------------------------------------------------------------
 ; VARIABLES
 ;-------------------------------------------------------------------------------
-CUSTOM_LOADROM: EQU $6151      ; start address of relocated loadrom code
-PRG_SRC_ADDR:   EQU $0000      ; SLOT2 RAM start address of selected program
-PRG_SRC_META:   EQU $8000      ; ... and its metadata location
+CUSTOM_LOADROM:     EQU $6151      ; start address of relocated loadrom code
+PRG_SRC_ADDR:       EQU $0000      ; SLOT2 RAM start address of selected program
+PRG_SRC_META:       EQU $8000      ; ... and its metadata location
+RELOCATION_OFFSET:  EQU loadrom - CUSTOM_LOADROM ; relocation offset for loadrom
 
 _load_only:
     ld hl, loadrom                ; Source address
@@ -123,22 +124,22 @@ loadrom:
     
     ; load deploy address into de
     ld hl,PRG_SRC_META  
-    call read_ram_byte - loadrom + CUSTOM_LOADROM
+    call read_ram_byte - RELOCATION_OFFSET
     ld e,a
     ld hl,PRG_SRC_META+1
-    call read_ram_byte - loadrom + CUSTOM_LOADROM
+    call read_ram_byte - RELOCATION_OFFSET
     ld d,a
     ; load file size into bc
     ld hl,PRG_SRC_META+2 
-    call read_ram_byte - loadrom + CUSTOM_LOADROM
+    call read_ram_byte - RELOCATION_OFFSET
     ld c,a
     ld hl,PRG_SRC_META+3
-    call read_ram_byte - loadrom + CUSTOM_LOADROM
+    call read_ram_byte - RELOCATION_OFFSET
     ld b,a
     ; load start of SLOT2 ram into hl
     ld hl,PRG_SRC_ADDR  
     ; copy data from SLOT2 RAM to P2000T RAM
-    call copy_program - loadrom + CUSTOM_LOADROM
+    call copy_program - RELOCATION_OFFSET
 
     ld a,0
     out (LED_IO), a     ; turn read LED off
@@ -169,7 +170,7 @@ copy_program:
     push bc
     push de
 cp_loop:
-    call read_ram_byte - loadrom + CUSTOM_LOADROM ; load from SLOT2 ram into a register
+    call read_ram_byte - RELOCATION_OFFSET ; load from SLOT2 ram into a register
     ld (de),a
     inc de
     inc hl
