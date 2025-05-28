@@ -19,9 +19,9 @@
  **************************************************************************/
 
 #include "commands.h"
+#include "launch_cas.h"
 
 char __lastinput[INPUTLENGTH];
-uint8_t __loadcas = 0;
 
 // set list of commands
 char* __commands[] = {
@@ -190,7 +190,10 @@ void command_loadrun(unsigned type) {
         wait_for_key();
 
         set_ram_bank(0);
-        __loadcas = type + 1;
+        // now call asm function to copy the CAS program bytes from ext RAM to int RAM
+        // and then start it by calling Run (0x28d4) or "warm" Reset (0x1FC6)
+        // see "ROM routines BASIC.pdf" section 7.2
+        launch_cas(type ? 0x28d4 : 0x1FC6);
     } else if(memcmp(_ext, "PRG", 3) == 0) {
         if(memory[0x605C] < 2) {
             print_error("Insufficient memory.");

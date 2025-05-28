@@ -18,77 +18,15 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _UINT_UTIL_H
-#define _UINT_UTIL_H
+#ifndef LAUNCH_H
+#define LAUNCH_H
 
-#include <stdint.h>
-#include <string.h>
-#include "memory.h"
+#include <z80.h>
 
 /**
- * @brief Replace all bytes in a string
- * 
- * @param str original string
- * @param org byte to replace
- * @param rep replacement byte
- * @param nrbytes number of bytes to check
- */
-void replace_bytes(uint8_t *str, uint8_t org, uint8_t rep, uint16_t nrbytes) __z88dk_callee;
-
-/**
- * @brief Read a 16 bit value from memory
- * 
- * @param data memory location
- * @return uint16_t 16-bit value
- */
-uint16_t read_uint16_t(const uint8_t* data) __z88dk_callee;
-
-/**
- * @brief Read a 32 bit value from memory
- * 
- * @param data memory location
- * @return uint32_t 32-bit value
- */
-uint32_t read_uint32_t(const uint8_t* data) __z88dk_callee;
-
-/**
- * @brief Wait for key-press
- *
- */
-void wait_for_key(void);
-
-/**
- * @brief Wait but check for a specific key press
- *
- */
-uint8_t wait_for_key_fixed(uint8_t quitkey);
-
-/**
- * @brief Clear the screen
+ * @brief Copy the cas program from the external RAM to the internal RAM and the call boot_addr
  * 
  */
-void clear_screen(void);
+void launch_cas(uint16_t boot_addr) __z88dk_callee;
 
-/**
- * @brief Get the stack location object
- * 
- * @return uint16_t 
- */
-uint16_t get_stack_location(void) __z88dk_callee;
-
-/**
- * @brief Call program at location
- * 
- * @param location 
- */
-void call_program(uint16_t ramptr) __z88dk_callee;
-
-/**
- * @brief Convert hexcode to unsigned 16 bit integer
- * 
- * @param addr 
- * @return uint16_t 
- */
-uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
-
-#endif //_UINT_UTIL_HF
+#endif // LAUNCH_H

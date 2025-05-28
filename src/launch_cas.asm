@@ -20,99 +20,28 @@
 
 SECTION code_user
 
+PUBLIC _launch_cas
+
 INCLUDE "ports.inc"
-
-PUBLIC _hexcode_to_uint16t
-PUBLIC _load_only
-
-;-------------------------------------------------------------------------------
-; uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
-;-------------------------------------------------------------------------------
-_hexcode_to_uint16t:
-    pop iy                  ; get return address
-    pop hl                  ; get pointer to memory address
-    call hex_to_uint8_t     ; returns num in a and increments hl by 2
-    ld d,a                  ; store upper byte
-    call hex_to_uint8_t     ; returns num in a and increments hl by 2
-    ld e,a                  ; store lower byte
-    ex de,hl                ; put ex into hl
-    push iy                 ; put return address back onto the stack
-    ret                     ; return result in HL
-
-;-------------------------------------------------------------------------------
-; convert two hex chars to 8-bit unsigned integer
-;
-; input    - hl : memory position
-;
-; output   - a : 8 bit integer
-;
-; garbles: - c
-;          - hl' = hl + 2
-;-------------------------------------------------------------------------------
-hex_to_uint8_t:
-    ld a,(hl)
-    call hex_to_int         ; convert a
-    or a                    ; clear carry
-    rla                     ; shift left four times
-    rla
-    rla
-    rla
-    and 0xF0                ; zero lower bits
-    ld c,a                  ; store upper nibble
-    inc hl                  ; increment pointer
-    ld a,(hl)               ; load next char
-    call hex_to_int         ; convert to num and store in a
-    or c                    ; place upper nibble into a
-    inc hl
-    ret                     ; a contains 8-bit unsigned integer
-
-;-------------------------------------------------------------------------------
-; convert hexadecimal character stored in 'A' to numeric value
-; input:  a - hexadecimal character
-; output: a - numeric value
-; 
-; sets 0x00 for invalid number
-;-------------------------------------------------------------------------------
-hex_to_int:
-    ld a,(hl)               ; load character into a
-    cp '0'
-    jr c, hex_end
-    cp '9'
-    jr nc, hex_alpha_check
-    sub '0'
-    ret
-hex_alpha_check:
-    cp 'A'
-    jr c, hex_invalid
-    cp 'F'
-    jr nc, hex_invalid
-    sub 'A' - 10
-hex_end:
-    ret
-hex_invalid:
-    ld de,0
-    ret
-
-
 ;-------------------------------------------------------------------------------
 ; VARIABLES
 ;-------------------------------------------------------------------------------
-CUSTOM_LOADROM:     EQU $6151      ; start address of relocated loadrom code
+RELOCATED_LAUNCHER: EQU $6151      ; start address of relocated launch_cas_code
 PRG_SRC_ADDR:       EQU $0000      ; SLOT2 RAM start address of selected program
 PRG_SRC_META:       EQU $8000      ; ... and its metadata location
-RELOCATION_OFFSET:  EQU loadrom - CUSTOM_LOADROM ; relocation offset for loadrom
+RELOCATION_OFFSET:  EQU launch_cas_code - RELOCATED_LAUNCHER ; relocation offset for launch_cas_code
 
-_load_only:
-    ld hl, loadrom                ; Source address
-    ld de, CUSTOM_LOADROM         ; Destination address
-    ld bc, loadrom_end - loadrom  ; Number of bytes to copy
-    ldir                          ; Copy BC bytes from (HL) to (DE)
-    jp CUSTOM_LOADROM
+_launch_cas:
+    ld hl, launch_cas_code         ; Source address
+    ld de, RELOCATED_LAUNCHER      ; Destination address
+    ld bc, launch_cas_code_end - launch_cas_code ; Number of bytes to copy
+    ldir                           ; Copy BC bytes from (HL) to (DE)
+    jp RELOCATED_LAUNCHER
 
 ;-------------------------------------------------------------------------------
-; Load data from external rom and return to Basic
+; Load cas program data from external ram and call boot address
 ;-------------------------------------------------------------------------------
-loadrom:
+launch_cas_code:
     ; clear screen
     ld hl,$5000         ; start of screen memory
     ld a,24             ; 24 lines to clear
@@ -144,7 +73,9 @@ loadrom:
     ld a,0
     out (LED_IO), a     ; turn read LED off
     xor a               ; set flags z, nc
-    jp $1FC6            ; back to Basic
+    pop hl              ; pop z88dk_caller return address
+    pop hl              ; boot address
+    jp (hl)             ; call boot address
 
 ; -------------------------------------------------------------------------------
 ; read a byte from SLOT2 RAM into a register
@@ -189,5 +120,5 @@ set_basic_pointers:
     ld ($6409),hl
     ret
 
-loadrom_end:
-    ASSERT (loadrom_end - loadrom) <= ($6200 - CUSTOM_LOADROM), "Error: Relocated loadrom code too large!"
+launch_cas_code_end:
+    ASSERT (launch_cas_code_end - launch_cas_code) <= ($6200 - RELOCATED_LAUNCHER), "Error: Relocated launch_cas_code code too large!"

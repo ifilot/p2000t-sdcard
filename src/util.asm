@@ -25,6 +25,7 @@ PUBLIC _read_uint16_t
 PUBLIC _read_uint32_t
 PUBLIC _get_stack_location
 PUBLIC _call_program
+PUBLIC _hexcode_to_uint16t
 
 ;-------------------------------------------------------------------------------
 ; void replace_bytes(uint8_t* str, uint8_t org, uint8_t rep, uint16_t nrbytes) __z88dk_callee;
@@ -102,3 +103,71 @@ _call_program:
     pop hl                  ; pointer address
     push iy                 ; put return address on the stack
     jp (hl)
+
+;-------------------------------------------------------------------------------
+; uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
+;-------------------------------------------------------------------------------
+_hexcode_to_uint16t:
+    pop iy                  ; get return address
+    pop hl                  ; get pointer to memory address
+    call hex_to_uint8_t     ; returns num in a and increments hl by 2
+    ld d,a                  ; store upper byte
+    call hex_to_uint8_t     ; returns num in a and increments hl by 2
+    ld e,a                  ; store lower byte
+    ex de,hl                ; put ex into hl
+    push iy                 ; put return address back onto the stack
+    ret                     ; return result in HL
+
+;-------------------------------------------------------------------------------
+; convert two hex chars to 8-bit unsigned integer
+;
+; input    - hl : memory position
+;
+; output   - a : 8 bit integer
+;
+; garbles: - c
+;          - hl' = hl + 2
+;-------------------------------------------------------------------------------
+hex_to_uint8_t:
+    ld a,(hl)
+    call hex_to_int         ; convert a
+    or a                    ; clear carry
+    rla                     ; shift left four times
+    rla
+    rla
+    rla
+    and 0xF0                ; zero lower bits
+    ld c,a                  ; store upper nibble
+    inc hl                  ; increment pointer
+    ld a,(hl)               ; load next char
+    call hex_to_int         ; convert to num and store in a
+    or c                    ; place upper nibble into a
+    inc hl
+    ret                     ; a contains 8-bit unsigned integer
+
+;-------------------------------------------------------------------------------
+; convert hexadecimal character stored in 'A' to numeric value
+; input:  a - hexadecimal character
+; output: a - numeric value
+; 
+; sets 0x00 for invalid number
+;-------------------------------------------------------------------------------
+hex_to_int:
+    ld a,(hl)               ; load character into a
+    cp '0'
+    jr c, hex_end
+    cp '9'
+    jr nc, hex_alpha_check
+    sub '0'
+    ret
+hex_alpha_check:
+    cp 'A'
+    jr c, hex_invalid
+    cp 'F'
+    jr nc, hex_invalid
+    sub 'A' - 10
+hex_end:
+    ret
+hex_invalid:
+    ld de,0
+    ret

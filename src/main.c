@@ -52,8 +52,7 @@ void main(void) {
     }
 
     // put in infinite loop and wait for user commands
-    // only terminate the loop when a program should be executed
-    while(__loadcas == 0) {
+    for(;;) {
         if(keymem[0x0C] > 0) {
             for(uint8_t i=0; i<keymem[0x0C]; i++) {
                 if(keymem[i] == 52) { // return key
@@ -88,13 +87,6 @@ void main(void) {
         // add a blinking cursor
         terminal_cursor_blink();
     }
-
-    if (__loadcas == 1) {
-        // don't RUN the cas file, but only LOAD it
-        load_only();
-    }
-
-    //oterwise, return to caller (BASICBOOTSTRAP) to RUN the cas file
 }
 
 void init(void) {
