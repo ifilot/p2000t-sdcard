@@ -91,4 +91,4 @@ void call_program(uint16_t ramptr) __z88dk_callee;
  */
 uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
 
-#endif //_UINT_UTIL_H
+#endif //_UINT_UTIL_HF

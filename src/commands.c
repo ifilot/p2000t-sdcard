@@ -19,9 +19,9 @@
  **************************************************************************/
 
 #include "commands.h"
+#include "launch_cas.h"
 
 char __lastinput[INPUTLENGTH];
-uint8_t __bootcas = 0;
 
 // set list of commands
 char* __commands[] = {
@@ -30,6 +30,8 @@ char* __commands[] = {
     "cd",
     "fileinfo",
     "run",
+    "load",
+    "crc",
     "hexdump",
     "ledtest",
     "stack",
@@ -46,6 +48,8 @@ void (*__operations[])(void) = {
     command_cd,
     command_fileinfo,
     command_run,
+    command_load,
+    command_crc,
     command_hexdump,
     command_ledtest,
     command_stack,
@@ -111,7 +115,7 @@ void command_fileinfo(void) {
         return;
     }
 
-    sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
+    sprintf(termbuffer, "Filename: %.26s", _filename);
     terminal_printtermbuffer();
     sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
     terminal_printtermbuffer();
@@ -132,27 +136,46 @@ void command_fileinfo(void) {
  * @brief Load a (CAS) file into memory and launch it
  * 
  */
-void command_run(void) {
+void command_loadrun(unsigned type) {
     print_recall("Searching file...");
 
-    int fileid = atoi(&__lastinput[3]);
+    int fileid = atoi(&__lastinput[type ? 3 : 4]); // file nr after LOAD / RUN / CRC
 
     // find a file and store its cluster structure into the linked list
     if(read_file_metadata(fileid) != 0) {
         return;
     }
 
+    if(memcmp(_ext, "CAS", 3) != 0 && type == 2) {
+        print_error("Can only calculate for CAS files.");
+        return;
+    }
+
     if(memcmp(_ext, "CAS", 3) == 0) {
-        sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
+        sprintf(termbuffer, "Filename:%c%.22s", COL_CYAN, _filename);
         terminal_printtermbuffer();
         sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
         terminal_printtermbuffer();
-        
+
         set_ram_bank(RAM_BANK_CASSETTE);
         store_cas_ram(_linkedlist[0], 0x0000);
 
         uint16_t deploy_addr = ram_read_uint16_t(0x8000);
         uint16_t file_length = ram_read_uint16_t(0x8002);
+
+        if (type == 2) {
+            // if CRC is requested, we do not load the file
+            print_recall("Calculating CRC16 checksum...");
+            uint16_t crc16 = crc16_ramchip(0x0000, file_length);
+            sprintf(termbuffer, "CRC16 checksum: %c0x%04X", COL_CYAN, crc16);
+            terminal_printtermbuffer();
+            return;
+        }
+
+        if(memory[0x605C] == 1 && _filesize_current_file > MAX_BYTES_16K) {
+            print_error("File too large to load");
+            return;
+        }
 
         sprintf(termbuffer, "Deploy addr: %c0x%04X", COL_CYAN, deploy_addr);
         terminal_printtermbuffer();
@@ -161,21 +184,16 @@ void command_run(void) {
         sprintf(termbuffer, "Top RAM: %c0x%04X", COL_CYAN, deploy_addr + file_length);
         terminal_printtermbuffer();
 
-        print("Press c to calculate checksum or any");
-        print("other key to launch program.");
-        if(wait_for_key_fixed(28) == 1) {
-            // calculate CRC16 checksum
-            print_recall("Calculating CRC16 checksum...");
-            uint16_t crc16 = crc16_ramchip(0x0000, file_length);
-            sprintf(termbuffer, "CRC16 checksum: %c0x%04X", COL_CYAN, crc16);
-            terminal_printtermbuffer();
-
-            print("Press any key to start program");
-            wait_for_key();
-        }
+        sprintf(termbuffer, "Press%cany key%cto %s the program.", TEXT_FLASH, TEXT_STEADY, 
+            type ? "RUN" : "LOAD");
+        terminal_printtermbuffer();
+        wait_for_key();
 
         set_ram_bank(0);
-        __bootcas = 1;
+        // now call asm function to copy the CAS program bytes from ext RAM to int RAM
+        // and then start it by calling Run (0x28d4) or "warm" Reset (0x1FC6)
+        // see "ROM routines BASIC.pdf" section 7.2
+        launch_cas(type ? 0x28d4 : 0x1FC6);
     } else if(memcmp(_ext, "PRG", 3) == 0) {
         if(memory[0x605C] < 2) {
             print_error("Insufficient memory.");
@@ -228,6 +246,18 @@ void command_run(void) {
     }
 }
 
+void command_load(void) {
+    command_loadrun(0);
+}
+
+void command_run(void) {
+    command_loadrun(1);
+}
+
+void command_crc(void) {
+    command_loadrun(2);
+}
+
 void command_hexdump(void) {
     int file_id = atoi(&__lastinput[7]);
 
@@ -238,7 +268,7 @@ void command_hexdump(void) {
     // read the first sector of the file
     read_sector(calculate_sector_address(_linkedlist[0], 0));
 
-    sprintf(termbuffer, "Filename: %s.%s", _basename, _ext);
+    sprintf(termbuffer, "Filename: %.26s", _filename);
     terminal_printtermbuffer();
 
     // print to screen

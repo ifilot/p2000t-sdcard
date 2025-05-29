@@ -109,16 +109,13 @@ _cmd8:
     ret
 
 ;-------------------------------------------------------------------------------
-; CMD17: Read block
+; Send command and address to the SD card
 ;
-; uint8_t cmd17(uint32_t addr);
-;
-; garbles: a,b,de,hl,iy
-; result of R1 is stored in l
+; a contains the command byte
+; dehl contains the address to send
 ;-------------------------------------------------------------------------------
-_cmd17:
-    ld a,17|0x40
-    out (SERIAL),a
+sd_send_command_and_address:
+    out (SERIAL),a              ; a contains the command byte
     out (CLKSTART),a            ; send out
 
     ld a,d
@@ -140,7 +137,19 @@ _cmd17:
     ld a,0x00|0x01
     out (SERIAL),a
     out (CLKSTART),a            ; send out
+    ret
 
+;-------------------------------------------------------------------------------
+; CMD17: Read block
+;
+; uint8_t cmd17(uint32_t addr);
+;
+; garbles: a,b,de,hl,iy
+; result of R1 is stored in l
+;-------------------------------------------------------------------------------
+_cmd17:
+    ld a,17|0x40
+    call sd_send_command_and_address
     call _receive_R1
     ld a,0xFF                   ; flush with ones
     out (SERIAL),a
@@ -170,29 +179,7 @@ cmd17timeout:
 ;-------------------------------------------------------------------------------
 _cmd24:
     ld a,24|0x40
-    out (SERIAL),a
-    out (CLKSTART),a            ; send out
-
-    ld a,d
-    out (SERIAL),a              ; byte 0
-    out (CLKSTART),a            ; send out
-
-    ld a,e
-    out (SERIAL),a              ; byte 1
-    out (CLKSTART),a            ; send out
-
-    ld a,h
-    out (SERIAL),a              ; byte 2
-    out (CLKSTART),a            ; send out
-
-    ld a,l
-    out (SERIAL),a              ; byte 3
-    out (CLKSTART),a            ; send out
-
-    ld a,0x00|0x01
-    out (SERIAL),a
-    out (CLKSTART),a            ; send out
-
+    call sd_send_command_and_address
     call _receive_R1
     ret
 
@@ -338,7 +325,6 @@ blocknext:
 ; OUTPUT: L - read token (0xFE is success, failure otherwise)
 ;-------------------------------------------------------------------------------
 _read_sector:
-    di
     call _open_command
     call _cmd17                 ; return SD card status
     ld a,l                      ; load response into a
@@ -352,7 +338,6 @@ readsectorsuccess:
     ld l,0xFE
 readsectorexit:
     call _close_command
-    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -361,36 +346,10 @@ readsectorexit:
 ; void fast_sd_to_ram_first_0x100(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_first_0x100:
-    di
-    ld a,0x02
-    out (LED_IO),a              ; turn WRITE led on
-    pop de                      ; return address
-    pop hl                      ; ramptr
-    push de                     ; put return address back on stack
-    ld a,$FF
-    out (SERIAL),a              ; flush shift register with ones
-    ld b,0                      ; perform 0x100 iterations with copy
-nb10:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    in a, (SERIAL)              ; read value
-    ld d,a                      ; store temporarily in d
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,d                      ; put value back in a
-    out (RAM_IO),a              ; store in external memory
-    inc hl                      ; increment RAM pointer
-    djnz nb10
-    ld b,0                      ; perform another 0x100 iterations without copy
-nb11:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    djnz nb11
-    out (CLKSTART),a            ; two more pulses for the checksum
-    out (CLKSTART),a
-    ld a,0
-    out (LED_IO),a              ; turn write LED off
-    ei
+    call fast_sd_to_ram_init
+    call fast_sd_to_ram_copy_256
+    call fast_sd_to_ram_skip_256
+    call fast_sd_to_ram_exit
     ret
 
 ;-------------------------------------------------------------------------------
@@ -399,36 +358,10 @@ nb11:
 ; void fast_sd_to_ram_last_0x100(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_last_0x100:
-    di
-    ld a,0x02
-    out (LED_IO),a              ; turn WRITE led on
-    pop de                      ; return address
-    pop hl                      ; ramptr
-    push de                     ; put return address back on stack
-    ld a,$FF
-    out (SERIAL),a              ; flush shift register with ones
-    ld b,0                      ; perform 0x100 iterations without copy
-nb20:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    djnz nb20
-    ld b,0                      ; perform another 0x100 iterations but with copy
-nb21:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    in a, (SERIAL)              ; read value
-    ld d,a                      ; store temporarily in d
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,d                      ; put value back in a
-    out (RAM_IO),a              ; store in external memory
-    inc hl                      ; increment RAM pointer
-    djnz nb21
-    out (CLKSTART),a            ; two more pulses for the checksum
-    out (CLKSTART),a
-    ld a,0
-    out (LED_IO),a              ; turn write LED off
-    ei
+    call fast_sd_to_ram_init
+    call fast_sd_to_ram_skip_256
+    call fast_sd_to_ram_copy_256
+    call fast_sd_to_ram_exit
     ret
 
 ;-------------------------------------------------------------------------------
@@ -437,36 +370,10 @@ nb21:
 ; void fast_sd_to_ram_full(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_ram_full:
-    di
-    ld a,0x02
-    out (LED_IO),a              ; turn WRITE led on
-    pop de                      ; return address
-    pop hl                      ; ramptr
-    push de                     ; put return address back on stack
-    ld a,$FF
-    out (SERIAL),a              ; flush shift register with ones
-    ld c,2                      ; number of outer loops
-ornb30:
-    ld b,0                      ; 256 iterations for inner loop
-nb30:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    in a, (SERIAL)              ; read value
-    ld d,a                      ; store temporarily in d
-    ld a,h
-    out (ADDR_HIGH), a          ; store upper byte address
-    ld a,l
-    out (ADDR_LOW), a           ; store lower byte address
-    ld a,d                      ; put value back in a
-    out (RAM_IO),a              ; store in external memory
-    inc hl                      ; increment RAM pointer
-    djnz nb30
-    dec c
-    jp nz, ornb30
-    out (CLKSTART),a            ; two more pulses for the checksum
-    out (CLKSTART),a
-    ld a,0
-    out (LED_IO),a              ; turn write LED off
-    ei
+    call fast_sd_to_ram_init
+    call fast_sd_to_ram_copy_256
+    call fast_sd_to_ram_copy_256
+    call fast_sd_to_ram_exit
     ret
 
 ;-------------------------------------------------------------------------------
@@ -475,7 +382,6 @@ nb30:
 ; void fast_sd_to_intram_full(uint16_t ram_addr);
 ;-------------------------------------------------------------------------------
 _fast_sd_to_intram_full:
-    di
     pop de                      ; return address
     pop hl                      ; ramptr
     push de                     ; put return address back on stack
@@ -494,7 +400,6 @@ fstifinner:
     jp nz, fstifouter
     out (CLKSTART),a            ; two more pulses for the checksum
     out (CLKSTART),a
-    ei
     ret
 
 ;-------------------------------------------------------------------------------
@@ -556,4 +461,53 @@ _sdcs_set:
 ;-------------------------------------------------------------------------------
 _sdcs_reset:
     out (SELECT),a              ; value in a is ignored when setting
+    ret
+
+;-------------------------------------------------------------------------------
+; AUXILIARY ROUNTINES
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Helper routines for fast SD to RAM copy
+;-------------------------------------------------------------------------------
+fast_sd_to_ram_init:
+    ld a,0x02
+    out (LED_IO),a              ; turn WRITE led on
+    pop bc                      ; return address for this routine
+    pop de                      ; return address for the caller
+    pop hl                      ; ramptr
+    push de                     ; put caller's return address back on stack
+    push bc                     ; put this routine's return address back on stack   
+    ld a,$FF
+    out (SERIAL),a              ; flush shift register with ones
+    ret
+
+fast_sd_to_ram_copy_256:
+    ld b,0                      ; perform 0x100 iterations with copy
+nb_copy_256:
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    in a, (SERIAL)              ; read value
+    ld d,a                      ; store temporarily in d
+    ld a,h
+    out (ADDR_HIGH), a
+    ld a,l
+    out (ADDR_LOW), a
+    ld a,d                      ; put value back in a
+    out (RAM_IO),a              ; store in external memory
+    inc hl                      ; increment RAM pointer
+    djnz nb_copy_256
+    ret
+
+fast_sd_to_ram_skip_256:
+    ld b,0                      ; perform another 0x100 iterations without copy
+nb_skip_256:
+    out (CLKSTART),a            ; pulse clock, does not care about value of a
+    djnz nb_skip_256
+    ret
+
+fast_sd_to_ram_exit:
+    out (CLKSTART),a            ; two more pulses for the checksum
+    out (CLKSTART),a
+    ld a,0
+    out (LED_IO),a              ; turn write LED off
     ret

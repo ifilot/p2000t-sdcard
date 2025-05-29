@@ -3,8 +3,6 @@ name: latest-stable
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 env:
   BUILD_TYPE: Release
@@ -29,7 +27,7 @@ jobs:
     - name: Build launcher application
       run: |
         cd src
-        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
+        sed -i 's/node[[:digit:]]\+/node200000/g' Makefile
         make launcher
         ls -alh LAUNCHER*
     - name: Upload launcher
@@ -82,7 +80,7 @@ jobs:
     - name: Build launcher application
       run: |
         cd src
-        sed -i 's/node[[:digit:]]\+/node2000000/g' Makefile
+        sed -i 's/node[[:digit:]]\+/node200000/g' Makefile
         make flasher
         ls -alh FLASHER*
     - name: Upload flasher

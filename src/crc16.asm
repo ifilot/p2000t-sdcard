@@ -20,7 +20,10 @@
 
 SECTION code_user
 
+INCLUDE "ports.inc"
+
 PUBLIC _crc16_intram
+PUBLIC _crc16_ramchip
 
 ;-------------------------------------------------------------------------------
 ; Generate a 16 bit checksum of internal RAM
@@ -41,6 +44,16 @@ _crc16_intram:
 nextbyte:
     push bc                     ; push counter onto stack
     ld a, (hl)                  ; read byte from ram chip
+    call calc_byte
+    pop bc                      ; get counter back from stack
+    dec bc                      ; decrement counter
+    ld a,b                      ; check if counter is zero
+    or c
+    jp nz,nextbyte              ; if not zero, go to next byte
+    ex de,hl                    ; swap de and hl such that hl contains crc
+    ret                         ; return value is stored in hl
+
+calc_byte:
     xor d                       ; xor byte into CRC top byte
     ld b,8                      ; prepare to rotate 8 bits
 rot:
@@ -58,10 +71,40 @@ clr:
     jp nz,rot                 ; loop for 8 bits
     ld d,a                      ; put crc top byte back into d
     inc hl                      ; step to next byte
+    ret
+
+;-------------------------------------------------------------------------------
+; Generate a 16 bit checksum
+;
+; input:  bc - number of bytes
+;         hl - start of memory address
+; output: hl - crc16 checksum
+; uses: a, bc, de, hl
+;
+; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
+;-------------------------------------------------------------------------------
+_crc16_ramchip:
+    ld a,0x01
+    out (LED_IO),a              ; turn RAM led on
+    pop de                      ; return address
+    pop hl                      ; ramptr
+    pop bc                      ; number of bytes
+    push de                     ; put return address back on stack
+    ld de,$0000                 ; set de to $0000
+nextbyte_ram:
+    push bc                     ; push counter onto stack
+    ld a,h                      ; set upper address memory
+    out (ADDR_HIGH),a
+    ld a,l                      ; set lower address memory
+    out (ADDR_LOW),a
+    in a, (RAM_IO)              ; read byte from ram chip
+    call calc_byte
     pop bc                      ; get counter back from stack
     dec bc                      ; decrement counter
     ld a,b                      ; check if counter is zero
     or c
-    jp nz,nextbyte              ; if not zero, go to next byte
+    jp nz,nextbyte_ram              ; if not zero, go to next byte
     ex de,hl                    ; swap de and hl such that hl contains crc
+    ld a,0x00
+    out (LED_IO),a              ; turn RAM led off
     ret                         ; return value is stored in hl
