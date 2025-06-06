@@ -336,7 +336,6 @@ void handle_key_right(void) {
 void color_selected_file_red(void) {
     // color the file red
     vidmem[0x50*(highlight_id + DISPLAY_OFFSET) + 2] = 0x01; // color file red
-    highlight_refresh();
 }
 
 /**
