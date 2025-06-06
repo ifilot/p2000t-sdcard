@@ -1,6 +1,6 @@
 /**************************************************************************
  *                                                                        *
- *   Author: Ivo Filot <ivo@ivofilot.nl>                                  *
+ *   Author(s): Dion Olsthoorn <@dionoid>                                 *
  *                                                                        *
  *   P2000T-SDCARD is free software:                                      *
  *   you can redistribute it and/or modify it under the terms of the      *
