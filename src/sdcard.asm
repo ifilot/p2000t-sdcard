@@ -41,13 +41,8 @@ PUBLIC _receive_R1
 PUBLIC _open_command
 PUBLIC _close_command
 
-PUBLIC _read_block
-PUBLIC _fast_sd_to_ram_first_0x100
-PUBLIC _fast_sd_to_ram_last_0x100
-PUBLIC _fast_sd_to_ram_full
 PUBLIC _fast_sd_to_intram_full
-
-PUBLIC _read_sector
+PUBLIC _read_sector_to
 
 PUBLIC _sdout_set
 PUBLIC _sdout_reset
@@ -287,28 +282,27 @@ recvbyte:
 ;
 ; void read_block(void);
 ;
-; Input: None
-; Garbles: a,c,hl
+; Input: DE - external RAM address
+; Garbles: a,b,c
 ; Output: None
 ;-------------------------------------------------------------------------------
-_read_block:
+read_block:
     ld a,0x02
     out (LED_IO),a              ; turn write led on
     ld a,$FF
     out (SERIAL),a              ; flush shift register with ones
-    ld hl,SDCACHE0              ; set external RAM address
     ld c,2                      ; number of outer loops
 blockouter:
     ld b,0                      ; 256 iterations for inner loop
 blocknext:
-    ld a,h
+    ld a,d
     out (ADDR_HIGH),a           ; set high byte
-    ld a,l
+    ld a,e
     out (ADDR_LOW),a            ; set low byte
     out (CLKSTART),a            ; pulse clock, does not care about value of a
     in a, (SERIAL)              ; read value
     out (RAM_IO),a              ; write to RAM
-    inc hl                      ; increment RAM pointer
+    inc de                      ; increment RAM pointer
     djnz blocknext
     dec c
     jp nz, blockouter
@@ -321,16 +315,27 @@ blocknext:
 ;-------------------------------------------------------------------------------
 ; Read a sector from the SD card
 ;
-; INPUT: DEHL - 32 bit SD card sector address
+; INPUT: stack contains the following:
+;        - return address
+;        - low word of sector address
+;        - high word of sector address
+;        - target address in external RAM
 ; OUTPUT: L - read token (0xFE is success, failure otherwise)
 ;-------------------------------------------------------------------------------
-_read_sector:
+_read_sector_to:
+    pop iy                      ; return address
+    pop hl                      ; retrieve sector address (low)
+    pop de                      ; retrieve sector address (high) 
+    push iy                     ; put return address back on stack
     call _open_command
     call _cmd17                 ; return SD card status
+    pop iy                      ; return address
+    pop de                      ; retrieve target address external RAM
+    push iy                     ; put return address back on stack
     ld a,l                      ; load response into a
     cp 0xFE                     ; check if equal to success token
     jp nz,readsectorexit        ; if not, exit with an error
-    call _read_block            ; if success token, read block
+    call read_block             ; if success token, read block
     jmp readsectorsuccess
 readsectorfail:
     jmp readsectorexit
@@ -338,42 +343,6 @@ readsectorsuccess:
     ld l,0xFE
 readsectorexit:
     call _close_command
-    ret
-
-;-------------------------------------------------------------------------------
-; Copy the first 0x100 bytes from a block to external RAM
-;
-; void fast_sd_to_ram_first_0x100(uint16_t ram_addr);
-;-------------------------------------------------------------------------------
-_fast_sd_to_ram_first_0x100:
-    call fast_sd_to_ram_init
-    call fast_sd_to_ram_copy_256
-    call fast_sd_to_ram_skip_256
-    call fast_sd_to_ram_exit
-    ret
-
-;-------------------------------------------------------------------------------
-; Copy the last 0x100 bytes from a block to external RAM
-;
-; void fast_sd_to_ram_last_0x100(uint16_t ram_addr);
-;-------------------------------------------------------------------------------
-_fast_sd_to_ram_last_0x100:
-    call fast_sd_to_ram_init
-    call fast_sd_to_ram_skip_256
-    call fast_sd_to_ram_copy_256
-    call fast_sd_to_ram_exit
-    ret
-
-;-------------------------------------------------------------------------------
-; Copy the full 0x200 bytes from a block to external RAM
-;
-; void fast_sd_to_ram_full(uint16_t ram_addr);
-;-------------------------------------------------------------------------------
-_fast_sd_to_ram_full:
-    call fast_sd_to_ram_init
-    call fast_sd_to_ram_copy_256
-    call fast_sd_to_ram_copy_256
-    call fast_sd_to_ram_exit
     ret
 
 ;-------------------------------------------------------------------------------
@@ -461,53 +430,4 @@ _sdcs_set:
 ;-------------------------------------------------------------------------------
 _sdcs_reset:
     out (SELECT),a              ; value in a is ignored when setting
-    ret
-
-;-------------------------------------------------------------------------------
-; AUXILIARY ROUNTINES
-;-------------------------------------------------------------------------------
-
-;-------------------------------------------------------------------------------
-; Helper routines for fast SD to RAM copy
-;-------------------------------------------------------------------------------
-fast_sd_to_ram_init:
-    ld a,0x02
-    out (LED_IO),a              ; turn WRITE led on
-    pop bc                      ; return address for this routine
-    pop de                      ; return address for the caller
-    pop hl                      ; ramptr
-    push de                     ; put caller's return address back on stack
-    push bc                     ; put this routine's return address back on stack   
-    ld a,$FF
-    out (SERIAL),a              ; flush shift register with ones
-    ret
-
-fast_sd_to_ram_copy_256:
-    ld b,0                      ; perform 0x100 iterations with copy
-nb_copy_256:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    in a, (SERIAL)              ; read value
-    ld d,a                      ; store temporarily in d
-    ld a,h
-    out (ADDR_HIGH), a
-    ld a,l
-    out (ADDR_LOW), a
-    ld a,d                      ; put value back in a
-    out (RAM_IO),a              ; store in external memory
-    inc hl                      ; increment RAM pointer
-    djnz nb_copy_256
-    ret
-
-fast_sd_to_ram_skip_256:
-    ld b,0                      ; perform another 0x100 iterations without copy
-nb_skip_256:
-    out (CLKSTART),a            ; pulse clock, does not care about value of a
-    djnz nb_skip_256
-    ret
-
-fast_sd_to_ram_exit:
-    out (CLKSTART),a            ; two more pulses for the checksum
-    out (CLKSTART),a
-    ld a,0
-    out (LED_IO),a              ; turn write LED off
     ret

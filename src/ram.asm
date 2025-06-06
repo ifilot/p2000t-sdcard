@@ -29,6 +29,7 @@ PUBLIC _ram_read_uint8_t
 PUBLIC _ram_read_uint16_t
 PUBLIC _ram_read_uint32_t
 
+PUBLIC _ram_write_uint8_t
 PUBLIC _ram_write_uint16_t
 
 PUBLIC _copy_to_ram
@@ -120,6 +121,19 @@ _ram_read_uint32_t:
 ;-------------------------------------------------------------------------------
 ; WRITE FUNCTIONS
 ;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; void ram_write_uint8_t(uint16_t addr, uint8_t val) __z88dk_callee;
+;-------------------------------------------------------------------------------
+_ram_write_uint8_t:
+    pop de                      ; return address
+    pop hl                      ; ramptr
+    call _set_ram_address
+    dec sp                      ; decrement sp for 1-byte argument
+    pop af                      ; byte to write (stored in b)
+    push de                     ; push return address back onto stack
+    out (RAM_IO), a
+    ret
 
 ;-------------------------------------------------------------------------------
 ; void ram_write_uint16_t(uint16_t addr, uint16_t val) __z88dk_callee;

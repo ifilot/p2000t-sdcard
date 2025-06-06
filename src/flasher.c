@@ -25,7 +25,6 @@
 
 #include "constants.h"
 #include "util.h"
-#include "copy.h"
 #include "config.h"
 #include "sdcard.h"
 
@@ -146,10 +145,7 @@ uint8_t store_file_rom(uint32_t faddr, uint16_t rom_addr, uint8_t verbose) {
     build_linked_list(faddr);
 
     // count number of clusters
-    uint8_t total_sectors = _filesize_current_file / 512;
-    if(_filesize_current_file % 512 != 0) {
-        total_sectors++;
-    }
+    uint8_t total_sectors = (_filesize_current_file + 511) / 512;
 
     uint8_t ctr = 0;    // counter for clusters
     uint8_t scctr = 0;  // counter for sectors

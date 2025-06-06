@@ -119,34 +119,6 @@ uint8_t acmd41(void) __z88dk_callee;
  ******************************************************************************/
 
 /**
- * @brief Read a 512 byte block including 2 bytes checksum from SD card
- */
-void read_block(void) __z88dk_callee;
-
-/**
- * @brief Copy the first 0x100 bytes immediately from SD to RAM while discarding
- *        all other data.
- * 
- * @param ram_addr external memory address
- */
-void fast_sd_to_ram_first_0x100(uint16_t ram_addr) __z88dk_callee;
-
-/**
- * @brief Copy the last 0x100 bytes immediately from SD to RAM while discarding
- *        all other data.
- * 
- * @param ram_addr external memory address
- */
-void fast_sd_to_ram_last_0x100(uint16_t ram_addr) __z88dk_callee;
-
-/**
- * @brief Copy all 0x200 bytes immediately from SD to external RAM.
- * 
- * @param ram_addr external memory address
- */
-void fast_sd_to_ram_full(uint16_t ram_addr) __z88dk_callee;
-
-/**
  * @brief Copy all 0x200 bytes immediately from SD to internal RAM.
  * 
  * @param ram_addr external memory address
@@ -156,9 +128,17 @@ void fast_sd_to_intram_full(uint16_t ram_addr) __z88dk_callee;
 /**
  * @brief Read a single 512-byte sector
  * 
- * @param addr sector address
+ * @param sec_addr sector address
  */
-uint8_t read_sector(uint32_t addr) __z88dk_fastcall;
+uint8_t read_sector(uint32_t sec_addr);
+
+/**
+ * @brief Read a single 512-byte sector
+ * 
+ * @param sec_addr sector address
+ * @param ram_addr external RAM address to write the sector data to
+ */
+uint8_t read_sector_to(uint32_t sec_addr, uint16_t ram_addr) __z88dk_callee;
 
 /******************************************************************************
  * I/O CONTROL

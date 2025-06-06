@@ -120,4 +120,12 @@ void execute_command(void);
  */
 uint8_t read_file_metadata(int16_t file_id);
 
+/**
+ * @brief Convert hexcode to unsigned 16 bit integer
+ * 
+ * @param addr 
+ * @return uint16_t 
+ */
+uint16_t hexcode_to_uint16t(uint8_t *addr) __z88dk_callee;
+
 #endif // _COMMANDS_H

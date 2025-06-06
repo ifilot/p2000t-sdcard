@@ -21,6 +21,7 @@
 SECTION code_user
 
 PUBLIC _launch_cas
+PUBLIC _call_addr
 
 INCLUDE "ports.inc"
 ;-------------------------------------------------------------------------------
@@ -122,3 +123,9 @@ set_basic_pointers:
 
 launch_cas_code_end:
     ASSERT (launch_cas_code_end - launch_cas_code) <= ($6200 - RELOCATED_LAUNCHER), "Error: Relocated launch_cas_code code too large!"
+
+;--------------------------------------------------------------------------------
+; Call address in hl
+;--------------------------------------------------------------------------------
+_call_addr:
+    jp (hl)
