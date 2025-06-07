@@ -1,6 +1,6 @@
 ;-------------------------------------------------------------------------------
 ;                                                                       
-;   Author: Ivo Filot <ivo@ivofilot.nl>                                 
+;   Author: Dion Olsthoorn <@dionoid>                                 
 ;                                                                       
 ;   P2000T-SDCARD is free software:                                     
 ;   you can redistribute it and/or modify it under the terms of the     
@@ -21,6 +21,16 @@
 SECTION code_user
 
 PUBLIC _launch_cas
+PUBLIC _call_addr
+
+;-------------------------------------------------------------------------------
+; launch_cas is used to launch a program from the externral RAM (SLOT2)
+; It copies the launch_cas_code to a relocated (free) address in the P2000T RAM
+; and then calls it.
+; The launch_cas_code will read the program metadata from SLOT2 RAM and copy
+; the program data to the P2000T RAM and then calls the boot address, which is
+; either the Basic's RUN command or Basic's "warm boot" address.
+;-------------------------------------------------------------------------------
 
 INCLUDE "ports.inc"
 ;-------------------------------------------------------------------------------
@@ -73,8 +83,8 @@ launch_cas_code:
     ld a,0
     out (LED_IO), a     ; turn read LED off
     xor a               ; set flags z, nc
-    pop hl              ; pop z88dk_caller return address
-    pop hl              ; boot address
+    pop hl              ; pop z88dk_caller return address and ignore it
+    pop hl              ; pop boot address
     jp (hl)             ; call boot address
 
 ; -------------------------------------------------------------------------------
@@ -122,3 +132,9 @@ set_basic_pointers:
 
 launch_cas_code_end:
     ASSERT (launch_cas_code_end - launch_cas_code) <= ($6200 - RELOCATED_LAUNCHER), "Error: Relocated launch_cas_code code too large!"
+
+;--------------------------------------------------------------------------------
+; Call address in hl
+;--------------------------------------------------------------------------------
+_call_addr:
+    jp (hl)

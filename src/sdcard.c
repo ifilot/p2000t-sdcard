@@ -31,7 +31,9 @@ uint8_t _flag_sdcard_mounted = 0;
  */
 uint8_t init_sdcard(void) {
     // mount sd card
+#ifndef NON_VERBOSE
     print_recall("Initializing SD card..");
+#endif
     
     // settings ~CS and PULL-UP resistor
     sdcs_set();
@@ -77,7 +79,9 @@ uint8_t init_sdcard(void) {
     }
 
     if(ctr == 1000) {
+#ifndef NON_VERBOSE
         print_error("SD card time-out");
+#endif
         return -1;
     } else {
         // sprintf(termbuffer, "ACMD41 attempts: %i", ctr);
@@ -95,7 +99,13 @@ uint8_t init_sdcard(void) {
 
     // inform user that the SD card is initialized and that we are ready to read
     // the first block from the SD card and print it to the screen
+#ifndef NON_VERBOSE
     print("SD Card initialized");
+#endif
 
     return 0;
+}
+
+uint8_t read_sector(uint32_t sec_addr) { 
+    return read_sector_to(sec_addr, SDCACHE0); 
 }

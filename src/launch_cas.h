@@ -1,6 +1,6 @@
 /**************************************************************************
  *                                                                        *
- *   Author: Ivo Filot <ivo@ivofilot.nl>                                  *
+ *   Author(s): Dion Olsthoorn <@dionoid>                                 *
  *                                                                        *
  *   P2000T-SDCARD is free software:                                      *
  *   you can redistribute it and/or modify it under the terms of the      *
@@ -28,5 +28,12 @@
  * 
  */
 void launch_cas(uint16_t boot_addr) __z88dk_callee;
+
+/**
+ * @brief Call the address in the internal RAM
+ * 
+ * @param addr address to call
+ */
+void call_addr(uint16_t addr) __z88dk_fastcall;
 
 #endif // LAUNCH_H

@@ -96,6 +96,14 @@ uint32_t ram_read_uint32_t(uint16_t addr) __z88dk_fastcall;
 //------------------------------------------------------------------------------
 
 /**
+ * @brief Write 8-bit value to external RAM
+ * 
+ * @param addr external memory address
+ * @param val 8-bit value to write
+ */
+void ram_write_uint8_t(uint16_t addr, uint8_t val) __z88dk_callee;
+
+/**
  * @brief Write 16-bit value to external RAM
  * 
  * @param addr  external memory address

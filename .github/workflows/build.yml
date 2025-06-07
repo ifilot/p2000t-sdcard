@@ -12,6 +12,7 @@ env:
   BUILD_TYPE: Release
   FLASHER_BIN: FLASHER.BIN
   LAUNCHER_BIN: LAUNCHER.BIN
+  EZLAUNCH_BIN: EZLAUNCH.BIN
   BASICROM_BIN: BASICBOOTSTRAP.BIN
 
 jobs:
@@ -106,6 +107,82 @@ jobs:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{env.LAUNCHER_BIN}}
         asset_name: LAUNCHER.BIN
+        asset_content_type: application/octet-stream
+
+################################################################################
+# EZLAUNCH
+################################################################################
+
+  # Easy-Launcher for the SLOT2 cartridge
+  build-ezlaunch:
+    runs-on: ubuntu-latest
+    container: 
+      image: z88dk/z88dk
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build ezlaunch application
+      run: |
+        cd src
+        sed -i 's/node[[:digit:]]\+/node200000/g' Makefile
+        make ezlaunch
+        ls -alh EZLAUNCH*
+    - name: Upload ezlaunch
+      uses: actions/upload-artifact@v4
+      with:
+        name: EZLAUNCH-UNSIGNED
+        path: src/${{env.EZLAUNCH_BIN}}
+
+  sign-ezlaunch:
+    runs-on: ubuntu-latest
+    needs: [build-ezlaunch]
+    permissions: write-all
+    steps:
+    - name: Install dependencies
+      run: sudo apt install -y cmake build-essential libtclap-dev libboost-all-dev git
+    - name: Download repository
+      run: git clone https://github.com/ifilot/crc16sign.git --depth 1
+    - name: build crc16sign
+      run: |
+        cd crc16sign
+        mkdir build
+        cd build
+        cmake ../src
+        make -j
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: EZLAUNCH-UNSIGNED
+        path: ./
+    - name: Sign binary
+      run: |
+        crc16sign/build/crc16sign -i ${{env.EZLAUNCH_BIN}} -o ${{env.EZLAUNCH_BIN}} -s
+    - name: Upload ezlaunch
+      uses: actions/upload-artifact@v4
+      with:
+        name: EZLAUNCH
+        path: ${{env.EZLAUNCH_BIN}}
+
+  deploy-ezlaunch:
+    runs-on: ubuntu-latest
+    needs: [build-ezlaunch, create-release, sign-ezlaunch]
+    permissions: write-all
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download EZLAUNCH
+      uses: actions/download-artifact@v4
+      with:
+        name: EZLAUNCH
+        path: ./
+    - name: Upload Release Asset
+      id: upload-release-asset-ezlaunch
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ${{env.EZLAUNCH_BIN}}
+        asset_name: EZLAUNCH.BIN
         asset_content_type: application/octet-stream
 
 ################################################################################
