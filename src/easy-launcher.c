@@ -33,8 +33,6 @@
 #include "launch_cas.h"
 #include "sst39sf.h"
 
-#define EZ_LAUNCHER_VERSION "0.1"
-
 // set printf io
 #pragma printf "%d %c %s %lu"
 
@@ -79,7 +77,7 @@ void init(void) {
     // activate and mount sd card
     uint32_t lba0;
     if(init_sdcard() != 0 || (lba0 = read_mbr()) == 0) {
-        show_status("\001Kan geen FAT32 SD kaart vinden.");
+        show_status("\001Geen FAT32 SD-card gevonden.");
         for(;;){}
     }
     read_partition(lba0);
@@ -163,7 +161,7 @@ void update_screen(uint8_t count_pages) {
 void clearscreen(void) {
     // clear screen
     memset(vidmem, 0x00, 0x780);
-    strcpy(vidmem, "\006 P2000T SD-CARD\002v"EZ_LAUNCHER_VERSION);
+    strcpy(vidmem, "\006 P2000T SD-CARD\002v"__VERSION__);
     for (uint8_t i = 2; i < 22; i++) {
         strcpy(vidmem + 0x50*i, "\004\x1D");
     }
@@ -177,7 +175,7 @@ void clearscreen(void) {
  */
 void update_pagination(void) {
     char pagina_str[32];
-    sprintf(pagina_str, "\003Pagina %d van %d", page_num, _num_of_pages);
+    sprintf(pagina_str, "\003Pagina %d/%d", page_num, _num_of_pages);
     strcpy(vidmem + 39 - strlen(pagina_str), pagina_str);
 }
 
