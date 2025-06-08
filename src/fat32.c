@@ -34,6 +34,7 @@ uint32_t _filesize_current_file = 0;
 uint32_t _current_folder_cluster = 0;
 uint8_t _filename[MAX_LFN_LENGTH+1];
 char _ext[4] = {0};
+char _base_name[9] = {0};
 uint8_t _current_attrib = 0;
 
 /**
@@ -126,17 +127,25 @@ void read_partition(uint32_t lba0) {
 }
 
 /**
- * @brief Read the contents of the root folder and search for a file identified 
- *        by file id. When a negative file_id is supplied, the directory is
- *        simply scanned and the list of files are outputted to the screen.
- * 
- * @param file_id ith file in the folder
- * @return uint32_t first cluster of the file or directory
- */
-uint32_t read_folder(int16_t file_id, uint8_t casrun) {
+ * @brief Read the contents of the folder starting at address cluster and:
+ *        - when file_id < 0, scan the directory and output the list of files
+ *        - when file_id == 0, search for a file identified by basename_find and ext_find
+ *        - when file_id > 0, search for a file identified by file id
 
-    // build linked list for the root directory
-    build_linked_list(_current_folder_cluster);
+ * @brief Find a file identified by BASENAME and EXT in the folder correspond
+ *        to the cluster address
+ * 
+ * @param cluster        folder's first cluster address
+ * @param file_id        ith file in the folder
+ * @param casrun         whether we are performing a run with CAS file metadata scan
+ * @param basename_find  first 8 bytes of the file to find
+ * @param ext_find       3 byte extension of the file to find
+ * @return uint32_t      cluster address of the file
+ */
+uint32_t read_folder_int(uint32_t cluster, int16_t file_id, uint8_t casrun, const char* basename_find, const char* ext_find) {
+
+    // build linked list for the cluster addr
+    build_linked_list(cluster);
 
     // loop over the clusters and read directory contents
     uint8_t ctr = 0;                // counter over clusters
@@ -196,24 +205,34 @@ uint32_t read_folder(int16_t file_id, uint8_t casrun) {
                     if(firstPos != '.' || ram_read_uint8_t(loc+1) == '.') { // skip dotfiles but keep ".." parent folder
                         // capture metadata
                         fctr++;
-                        if (file_id < 0 || fctr == file_id) {
+                        if (file_id < 0 || fctr == file_id || file_id == 0) {
                             const uint32_t fc = grab_cluster_address_from_fileblock(loc);
                             _filesize_current_file = ram_read_uint32_t(loc + 0x1C);
                             totalfilesize += _filesize_current_file;
                             
-                            // copy extension
+                            // copy DOS base name and extension
+                            copy_from_ram(loc, _base_name, 8);
                             copy_from_ram(loc+0x08, _ext, 3);
+
+                            if (file_id == 0) {
+                                if (memcmp(basename_find, _base_name, 8) == 0 && memcmp(ext_find, _ext, 3) == 0) {
+                                    return fc;
+                                } else {
+                                    loc += 32;  // next file entry location
+                                    continue;
+                                }
+                            }
 
                             // if no LFN found, the SFN filename needs to be formatted
                             if (!lfn_found) {
-                                copy_from_ram(loc, _filename, 8);
+                                memcpy(_filename, _base_name, 8); // copy base name
                                 memcpy(&_filename[9], _ext, 4); // copy extension (incl terminator)
                                 // if file, inject dot before extension
                                 _filename[8] = (_current_attrib & 0x10) ? '\0' : '.';
                                 // remove superfluous spaces before extension
-                                // uint8_t k = 0;
-                                // for (k = 7; k >= 1 && _filename[k] == ' '; k--);
-                                // if (k < 7) memcpy(&_filename[k+1], &_filename[8], 5);
+                                uint8_t k = 0;
+                                for (k = 7; k >= 1 && _filename[k] == ' '; k--);
+                                if (k < 7) memcpy(&_filename[k+1], &_filename[8], 5);
                             }
 
                             if(file_id < 0) {
@@ -267,15 +286,26 @@ uint32_t read_folder(int16_t file_id, uint8_t casrun) {
         ctr++;  // next cluster
     }
 
+    if (file_id == 0) return 0; // if file_id is 0, we return 0 to indicate no file found
+
     if(file_id < 0) {
         sprintf(termbuffer, "%6u File(s) %10lu Bytes", fctr, totalfilesize);
-        terminal_printtermbuffer();
-    } else {
-        sprintf(termbuffer, "%c File id > %6u", fctr);
         terminal_printtermbuffer();
     }
 
     return _root_dir_first_cluster;
+}
+
+/**
+ * @brief Read the contents of the root folder and search for a file identified 
+ *        by file id. When a negative file_id is supplied, the directory is
+ *        simply scanned and the list of files are outputted to the screen.
+ * 
+ * @param file_id ith file in the folder
+ * @return uint32_t first cluster of the file or directory
+ */
+uint32_t read_folder(int16_t file_id, uint8_t casrun) {
+    return read_folder_int(_current_folder_cluster, file_id, casrun, NULL, NULL);
 }
 
 /**
@@ -288,64 +318,7 @@ uint32_t read_folder(int16_t file_id, uint8_t casrun) {
  * @return uint32_t cluster address of the file or 0 if not found
  */
 uint32_t find_file(uint32_t cluster, const char* basename_find, const char* ext_find) {
-    // build linked list for the root directory
-    build_linked_list(cluster);
-
-    // loop over the clusters and read directory contents
-    uint8_t ctr = 0;                // counter over sectors
-    uint16_t fctr = 0;              // counter over directory entries (files and folders)
-    uint8_t stopreading = 0;
-    uint16_t loc = 0;               // current entry position
-    uint8_t filename[11];
-    uint8_t c = 0;                  // check byte
-    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < 16 && stopreading == 0) {
-        
-        // get cluster address
-        uint32_t caddr = calculate_sector_address(_linkedlist[ctr], 0);
-
-        // loop over all sectors per cluster
-        for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
-            read_sector(caddr); // read sector data
-            loc = SDCACHE0;
-            for(uint16_t j=0; j<16; j++) { // 16 file tables per sector
-                // check first position
-                c = ram_read_uint8_t(loc);
-
-                // early exit if a zero is read
-                if(c == 0x00) {
-                    stopreading = 1;
-                    break;
-                }
-
-                // continue if an unused entry is encountered 0xE5
-                if(c == 0xE5) {
-                    loc += 32;  // next file entry location
-                    continue;
-                }
-
-                c = ram_read_uint8_t(loc + 0x0B);    // attrib byte
-
-                // if lower five bits of byte 0x0B of file table is unset
-                // assume we are reading a file and try to decode it
-                if((c & 0x0F) == 0x00) {
-                    fctr++;
-                    copy_from_ram(loc, filename, 11);
-                    if(memcmp(basename_find, filename, 8) == 0 && 
-                       memcmp(ext_find, &filename[8], 3) == 0) {
-
-                        _filesize_current_file = ram_read_uint32_t(loc + 0x1C);
-
-                        return grab_cluster_address_from_fileblock(loc);
-                    }
-                }
-                loc += 32;  // next file entry location
-            }
-            caddr++;
-        }
-        ctr++;
-    }
-
-    return 0;
+    return read_folder_int(cluster, 0, 0, basename_find, ext_find);
 }
 
 /**

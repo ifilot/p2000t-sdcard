@@ -28,6 +28,7 @@
 #include "ports.h"
 #include "memory.h"
 #include "ram.h"
+#include "rom.h"
 #include "fat32-easy.h"
 #include "launch_cas.h"
 #include "sst39sf.h"
@@ -43,13 +44,14 @@ void highlight_refresh(void);
 void update_screen(uint8_t);
 void clearscreen(void);
 void update_pagination(void);
-void store_file_rom(uint32_t faddr, uint16_t rom_addr);
-uint8_t flash_rom(uint32_t faddr);
+void store_file_rom(uint16_t rom_addr);
+uint8_t flash_rom(void);
 // key handling functions
 void handle_key_H(void);
 void handle_key_down(void);
 void handle_key_up(void);
 void handle_key_right(void);
+void handle_key_left(void);
 void handle_key_select(uint8_t key0);
 
 uint16_t highlight_id = 1; // file id of the currently highlighted/selected file
@@ -109,6 +111,10 @@ void main(void) {
             if(key0 == 23)  {
                 handle_key_right();
             }
+            // key left
+            if(key0 == 0)  {
+                handle_key_left();
+            }
             // space or enter key
             if(key0 == 17 || key0 == 52 || key0 == 32)  { // space or enter or CODE
                 handle_key_select(key0);
@@ -144,7 +150,7 @@ void update_screen(uint8_t count_pages) {
     // refresh the screen
     clearscreen();
     if (count_pages) build_linked_list(_current_folder_cluster);
-    read_folder(page_num, count_pages);
+    display_folder(page_num, count_pages);
     update_pagination();
     highlight_refresh();
 }
@@ -193,11 +199,9 @@ void show_status(const char* str) {
  * This function checks the device ID of the SST39SF ROM chip and if it is one of the known types,
  * it wipes it and copies the firmware from the SD card to the ROM.
  * 
- * @param faddr cluster address of the firmware file
- * 
  * @return 1 on success, 0 on failure
  */
-uint8_t flash_rom(uint32_t faddr) {
+uint8_t flash_rom(void) {
     set_rom_bank(ROM_BANK_DEFAULT);
     set_ram_bank(RAM_BANK_CACHE);
     uint16_t rom_id = sst39sf_get_device_id();
@@ -208,7 +212,7 @@ uint8_t flash_rom(uint32_t faddr) {
             sst39sf_wipe_sector(0x1000 * i);
         }
         // copying from SD-CARD to ROM
-        store_file_rom(faddr, 0x0000);
+        store_file_rom(0x0000);
         return 1;
     } else {
         show_status("\001Onbekend SST39SF apparaatnummer.");
@@ -219,13 +223,11 @@ uint8_t flash_rom(uint32_t faddr) {
 /**
  * @brief Store a file in the external ROM
  * 
- * @param faddr    cluster address of the file
  * @param rom_addr first position in ROM to store the file
  * 
  * @return number of sectors stored
  */
-void store_file_rom(uint32_t faddr, uint16_t rom_addr) {
-    build_linked_list(faddr);
+void store_file_rom(uint16_t rom_addr) {
     // count number of sectors
     uint8_t total_sectors = (_filesize_current_file + 511) / 512;
 
@@ -304,7 +306,7 @@ void handle_key_up(void) {
         }
         if (_num_of_pages > 1) {
             clearscreen();
-            read_folder(page_num, 0);
+            display_folder(page_num, 0);
             update_pagination();
         }
         for (int8_t i = PAGE_SIZE; i >= 0; i--) {
@@ -333,6 +335,22 @@ void handle_key_right(void) {
     update_screen(0);
 }
 
+/**
+ * @brief Handle the key left press
+ * 
+ * This function moves to the previous page of files.
+ */
+void handle_key_left(void) {
+    if (_num_of_pages == 1) return;
+    if (page_num > 1) {
+        page_num--;
+    } else {
+        page_num = _num_of_pages; // wrap around
+    }
+    highlight_id = 1; // highlight first item in newly loaded folder
+    update_screen(0);
+}
+
 void color_selected_file_red(void) {
     // color the file red
     vidmem[0x50*(highlight_id + DISPLAY_OFFSET) + 2] = 0x01; // color file red
@@ -348,7 +366,7 @@ void color_selected_file_red(void) {
  * @param key0 The key pressed (space or enter)
  */
 void handle_key_select(uint8_t key0) {
-    uint32_t cluster = find_file(highlight_id + PAGE_SIZE * (page_num-1));
+    uint32_t cluster = find_file(page_num, highlight_id + PAGE_SIZE * (page_num-1));
     if(cluster != _root_dir_first_cluster) {
         if(_current_attrib & 0x10) {
             if(cluster == 0) { // if zero, this is the root directory
@@ -361,13 +379,6 @@ void handle_key_select(uint8_t key0) {
             update_screen(1);
         }
         else {
-            if ((memcmp(_base_name, "LAUNCHER", 8) == 0 || memcmp(_base_name, "EZLAUNCH", 8) == 0) && memcmp(_ext, "BIN", 3 ) == 0) {
-                show_status("\003Firmware vernieuwen...");
-                if (flash_rom(cluster))
-                    call_addr(0x1010); //cold reset after firmware flashing
-                return;
-            }
-
             if (memcmp(_ext, "CAS", 3) != 0 && memcmp(_ext, "PRG", 3) != 0) {
                 // unsupported file type
                 color_selected_file_red();
@@ -380,7 +391,14 @@ void handle_key_select(uint8_t key0) {
                 return;
             }
             
-            build_linked_list(cluster); // update _linkedlist for store_cas_ram and store_prg_intram
+            build_linked_list(cluster); // update _linkedlist for store_cas_ram, store_prg_intram or flash_rom
+
+            if ((memcmp(_base_name, "LAUNCHER", 8) == 0 || memcmp(_base_name, "EZLAUNCH", 8) == 0) && memcmp(_ext, "BIN", 3 ) == 0) {
+                show_status("\003Firmware vernieuwen...");
+                if (flash_rom())
+                    call_addr(0x1010); //cold reset after firmware flashing
+                goto restore_state;
+            }
 
             if (memcmp(_ext, "CAS", 3) == 0) {
                 // set RAM bank to CASSETTE

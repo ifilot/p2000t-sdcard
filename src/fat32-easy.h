@@ -71,17 +71,17 @@ void read_partition(uint32_t lba0);
  * @brief Read the contents of the folder and display a page of files and folders.
  * 
  * @param page_number page number to display
- * @return uint32_t first cluster of the file or directory
+ * @param count_pages whether to count the number of pages in the folder
  */
-void read_folder(uint8_t page_number, uint8_t count_pages);
+void display_folder(uint8_t page_number, uint8_t count_pages);
 
 /**
- * @brief Find a file identified by sequence number in the current folder
+ * @brief Find a file identified by page_number and file_id (sequence number) in the current folder
  * 
  * @param file_id   file sequence number
- * @return uint32_t cluster address of the file or 0 if not found
+ * @return uint32_t cluster address of the file or _root_dir_first_cluster if not found
  */
-uint32_t find_file(uint16_t file_id);
+uint32_t find_file(uint8_t page_number, uint16_t file_id);
 
 /**
  * @brief Build a linked list of sector addresses starting from a root address

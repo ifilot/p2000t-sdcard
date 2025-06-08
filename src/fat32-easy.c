@@ -77,70 +77,18 @@ void read_partition(uint32_t lba0) {
     _SECTOR_begin_lba = lba0 + _reserved_sectors + (_number_of_fats * _sectors_per_fat);
 }
 
-uint32_t find_file(uint16_t file_id) {
-    uint8_t ctr = 0;                // counter over clusters
-    uint16_t fctr = 0;              // counter over directory entries (files and folders)
-    uint16_t loc = 0;               // current entry position
-    uint8_t firstPos = 0;
-    uint8_t secondPos = 0;
-
-    while(_linkedlist[ctr] != 0xFFFFFFFF && ctr < F_LL_SIZE) {
-        
-        // print cluster number and address
-        uint32_t caddr = calculate_sector_address(_linkedlist[ctr], 0);
-
-        // loop over all sectors per cluster
-        for(uint8_t i=0; i<_sectors_per_cluster; i++) {
-            read_sector(caddr);            // read sector data
-            loc = SDCACHE0;
-            for(uint8_t j=0; j<16; j++) { // 16 file tables per sector
-                // check first position
-                firstPos = ram_read_uint8_t(loc);
-                _current_attrib = ram_read_uint8_t(loc + 0x0B);    // attrib byte
-
-                // continue if an unused entry is encountered 0xE5
-                if(firstPos == 0xE5) {
-                    loc += 32;  // next file entry location
-                    continue;
-                }
-
-                // early exit if a zero is read
-                if(firstPos == 0x00) return _root_dir_first_cluster;
-
-                // check for SFN entry
-                if((_current_attrib & 0x0F) == 0x00) {
-
-                    secondPos = ram_read_uint8_t(loc+1);
-
-                    if((_current_attrib & 0x10) == 0 || firstPos != '.' || secondPos == '.') {
-
-                        fctr++;
-
-                        if (file_id == fctr) {
-                            //_current_attrib = attrib; // store current attrib byte
-                            copy_from_ram(loc, _base_name, 8);
-                            copy_from_ram(loc+8, _ext, 3);
-                            _filesize_current_file = ram_read_uint32_t(loc + 0x1C);
-                            return grab_cluster_address_from_fileblock(loc);
-                        }
-                    }
-                }
-                loc += 32;  // next file entry location
-            }
-            caddr++;    // next sector
-        }
-        ctr++;  // next cluster
-    }
-    return _root_dir_first_cluster; //not found
-}
-
 /**
- * @brief Read the contents of the folder and display a page of files and folders.
+ * @brief Scan a folder and:
+ *        - when file_id > 0, return the cluster address of the file index
+ *        - when file_id is 0, display the files of page page_number in the folder
+ *        - when count_pages is set, also count the number of pages
  * 
- * @param page_number page number to display, 0 for calculating the number of pages
+ * @param page_number page number to display
+ * @param count_pages whether to count the number of pages in the folder
+ * @param file_id     file sequence number to find
  * @return uint32_t first cluster of the file or directory
  */
-void read_folder(uint8_t page_number, uint8_t count_pages) {
+uint32_t scan_folder_int(uint8_t page_number, uint8_t count_pages, uint16_t file_id) {
     if (count_pages) {
         _num_of_pages = 1; // reset page count
     }
@@ -183,9 +131,9 @@ void read_folder(uint8_t page_number, uint8_t count_pages) {
                 }
 
                 // early exit if a zero is read
-                if(firstPos == 0x00) return;
+                if(firstPos == 0x00) return _root_dir_first_cluster;
 
-                display_next_file = (display_fctr < PAGE_SIZE) && (page_number == fctr / PAGE_SIZE + 1); // current page number based on file count
+                display_next_file = (file_id == 0 && display_fctr < PAGE_SIZE) && (page_number == fctr / PAGE_SIZE + 1); // current page number based on file count
 
                 // check for LFN entry
                 if (display_next_file) {
@@ -212,6 +160,15 @@ void read_folder(uint8_t page_number, uint8_t count_pages) {
                     if(firstPos != '.' || secondPos == '.') { // skip dotfiles but keep ".." parent folder
 
                         fctr++;
+
+                        if (file_id == fctr) {
+                            //_current_attrib = attrib; // store current attrib byte
+                            copy_from_ram(loc, _base_name, 8);
+                            copy_from_ram(loc+8, _ext, 3);
+                            _filesize_current_file = ram_read_uint32_t(loc + 0x1C);
+                            return grab_cluster_address_from_fileblock(loc);
+                        }
+
                         if (display_next_file) {
                             display_fctr++;
 
@@ -244,7 +201,7 @@ void read_folder(uint8_t page_number, uint8_t count_pages) {
                         }
 
                         if (!count_pages && display_fctr == PAGE_SIZE)
-                           return; // when full page is displayed, exit
+                           return _root_dir_first_cluster; // when full page is displayed, exit
 
                         // cache ctr and fctr for this page
                         if (count_pages) {
@@ -267,8 +224,29 @@ void read_folder(uint8_t page_number, uint8_t count_pages) {
         }
         ctr++;  // next cluster
     }
+
+    return _root_dir_first_cluster; //not found
 }
 
+/**
+ * @brief Read the contents of the folder and display a page of files and folders.
+ * 
+ * @param page_number page number to display
+ * @param count_pages whether to count the number of pages in the folder
+ */
+void display_folder(uint8_t page_number, uint8_t count_pages) {
+    scan_folder_int(page_number, count_pages, 0);
+}
+
+/**
+ * @brief Find a file identified by sequence number in the current folder
+ * 
+ * @param file_id   file sequence number
+ * @return uint32_t cluster address of the file or _root_dir_first_cluster if not found
+ */
+uint32_t find_file(uint8_t page_number, uint16_t file_id) {
+    return scan_folder_int(page_number, 0, file_id);
+}
 
 /**
  * @brief Build a linked list of sector addresses starting from a root address
