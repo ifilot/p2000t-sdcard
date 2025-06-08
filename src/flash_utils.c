@@ -11,7 +11,7 @@
 #include "sst39sf.h"
 #include "flash_utils.h"
 
-void flash_rom(uint32_t faddr) {
+uint8_t flash_rom(uint32_t faddr) {
     uint16_t rom_id = sst39sf_get_device_id();
 
 #ifdef FLASH_VERBOSE 
@@ -43,8 +43,7 @@ void flash_rom(uint32_t faddr) {
         }
 
         // copying from SD-CARD to RAM
-        sprintf(termbuffer, "Flashing ROM, please wait...");
-        terminal_printtermbuffer();
+        print("Flashing ROM, please wait...");
         uint8_t sectors_stored = store_file_rom(faddr, 0x0000);
 #ifdef FLASH_VERBOSE 
         print(""); // empty line
@@ -65,7 +64,9 @@ void flash_rom(uint32_t faddr) {
     } else {
         sprintf(termbuffer, "Invalid device id: %04X", rom_id);
         terminal_printtermbuffer();
+        return 0;
     }
+    return 1;
 }
 
 

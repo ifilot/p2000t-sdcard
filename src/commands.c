@@ -102,7 +102,11 @@ void command_flash(void) {
     }
 
     if ((memcmp(_base_name, "LAUNCHER", 8) == 0 || memcmp(_base_name, "EZLAUNCH", 8) == 0) && memcmp(_ext, "BIN", 3 ) == 0) {
-        flash_rom(_linkedlist[0]);
+        if (flash_rom(_linkedlist[0])) {
+            print("Press any key to restart");
+            wait_for_key();
+            call_addr(0x1010); //cold reset after firmware flashing
+        }
     } else{
         print_error("Not a valid firmware file.");
     }
@@ -300,11 +304,6 @@ void execute_command(void) {
  * @return uint8_t whether file can be read, 0 true, 1 false
  */
 uint8_t read_file_metadata(int16_t file_id) {
-    // read file id and check its value
-    if(file_id < 0) {
-        print_error("Invalid file id");
-        return 1;
-    }
 
     uint32_t cluster = read_folder(file_id, 0);
     if(cluster == _root_dir_first_cluster) {
