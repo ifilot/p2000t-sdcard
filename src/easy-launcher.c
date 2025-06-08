@@ -87,6 +87,7 @@ void main(void) {
     // initialize SD card
     init();
     update_screen(1);
+    keymem[0x0C] = 0; //clear key buffer
 
     // put in infinite loop and wait for program selection
     for(;;) {
