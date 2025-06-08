@@ -43,7 +43,7 @@ void update_screen(uint8_t);
 void clearscreen(void);
 void update_pagination(void);
 void store_file_rom(uint16_t rom_addr);
-uint8_t flash_rom(void);
+uint8_t flash_rom(uint16_t cluster);
 // key handling functions
 void handle_key_H(void);
 void handle_key_down(void);
@@ -199,7 +199,8 @@ void show_status(const char* str) {
  * 
  * @return 1 on success, 0 on failure
  */
-uint8_t flash_rom(void) {
+uint8_t flash_rom(uint16_t cluster) {
+    build_linked_list(cluster);
     set_rom_bank(ROM_BANK_DEFAULT);
     set_ram_bank(RAM_BANK_CACHE);
     uint16_t rom_id = sst39sf_get_device_id();
@@ -377,6 +378,13 @@ void handle_key_select(uint8_t key0) {
             update_screen(1);
         }
         else {
+            if ((memcmp(_base_name, "LAUNCHER", 8) == 0 || memcmp(_base_name, "EZLAUNCH", 8) == 0) && memcmp(_ext, "BIN", 3 ) == 0) {
+                show_status("\003Firmware vernieuwen...");
+                if (flash_rom(cluster))
+                    call_addr(0x1010); //cold reset after firmware flashing
+                goto restore_state;
+            }
+
             if (memcmp(_ext, "CAS", 3) != 0 && memcmp(_ext, "PRG", 3) != 0) {
                 // unsupported file type
                 color_selected_file_red();
@@ -388,15 +396,8 @@ void handle_key_select(uint8_t key0) {
                 color_selected_file_red();
                 return;
             }
-            
-            build_linked_list(cluster); // update _linkedlist for store_cas_ram, store_prg_intram or flash_rom
 
-            if ((memcmp(_base_name, "LAUNCHER", 8) == 0 || memcmp(_base_name, "EZLAUNCH", 8) == 0) && memcmp(_ext, "BIN", 3 ) == 0) {
-                show_status("\003Firmware vernieuwen...");
-                if (flash_rom())
-                    call_addr(0x1010); //cold reset after firmware flashing
-                goto restore_state;
-            }
+            build_linked_list(cluster); // update _linkedlist for store_cas_ram, store_prg_intram or flash_rom
 
             if (memcmp(_ext, "CAS", 3) == 0) {
                 // set RAM bank to CASSETTE
