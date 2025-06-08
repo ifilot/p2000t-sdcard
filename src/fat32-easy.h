@@ -84,6 +84,16 @@ void display_folder(uint8_t page_number, uint8_t count_pages);
 uint32_t find_file(uint8_t page_number, uint16_t file_id);
 
 /**
+ * @brief Find a file identified by filename and extension in the current folder
+ * 
+ * @param count_pages whether to count the number of pages in the folder (this also preps page caching)
+ * @param basename_find   file base name (first 8 bytes)
+ * @param ext_find        file extension (3 bytes)
+ * @return uint32_t cluster address of the file or _root_dir_first_cluster if not found
+ */
+uint32_t find_file_by_name(uint8_t count_pages, const char* basename_find, const char* ext_find);
+
+/**
  * @brief Build a linked list of sector addresses starting from a root address
  * 
  * @param cluster0 first cluster in the linked list

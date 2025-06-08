@@ -88,7 +88,7 @@ void read_partition(uint32_t lba0) {
  * @param file_id     file sequence number to find
  * @return uint32_t first cluster of the file or directory
  */
-uint32_t scan_folder_int(uint8_t page_number, uint8_t count_pages, uint16_t file_id) {
+uint32_t scan_folder_int(uint8_t page_number, uint8_t count_pages, uint16_t file_id, const char* basename_find, const char* ext_find) {
     if (count_pages) {
         _num_of_pages = 1; // reset page count
     }
@@ -133,7 +133,7 @@ uint32_t scan_folder_int(uint8_t page_number, uint8_t count_pages, uint16_t file
                 // early exit if a zero is read
                 if(firstPos == 0x00) return _root_dir_first_cluster;
 
-                display_next_file = (file_id == 0 && display_fctr < PAGE_SIZE) && (page_number == fctr / PAGE_SIZE + 1); // current page number based on file count
+                display_next_file = file_id == 0 && basename_find == NULL && (display_fctr < PAGE_SIZE) && (page_number == fctr / PAGE_SIZE + 1); // current page number based on file count
 
                 // check for LFN entry
                 if (display_next_file) {
@@ -161,12 +161,13 @@ uint32_t scan_folder_int(uint8_t page_number, uint8_t count_pages, uint16_t file
 
                         fctr++;
 
-                        if (file_id == fctr) {
-                            //_current_attrib = attrib; // store current attrib byte
+                        if (file_id != 0 || basename_find != NULL) {
                             copy_from_ram(loc, _base_name, 8);
                             copy_from_ram(loc+8, _ext, 3);
-                            _filesize_current_file = ram_read_uint32_t(loc + 0x1C);
-                            return grab_cluster_address_from_fileblock(loc);
+                            if (file_id == fctr || (basename_find != NULL && memcmp(_base_name, basename_find, 8) == 0 && memcmp(_ext, ext_find, 3) == 0)) {
+                                _filesize_current_file = ram_read_uint32_t(loc + 0x1C);
+                                return grab_cluster_address_from_fileblock(loc);
+                            }
                         }
 
                         if (display_next_file) {
@@ -184,10 +185,6 @@ uint32_t scan_folder_int(uint8_t page_number, uint8_t count_pages, uint16_t file
                                 for (k = 7; k >= 1 && _filename[k] == ' '; k--);
                                 if (k < 7) memcpy(&_filename[k+1], &_filename[8], 5); // 5 = "." + ext + '\0'
                             }
-
-                            // char _debug[9] = {0};
-                            // copy_from_ram(loc, _temp, 8);
-                            // sprintf(vidmem + 0x50*(display_fctr+DISPLAY_OFFSET) + 4, "%s: ctr %d, caddr %d", _debug, ctr, caddr);
 
                             if(_current_attrib & 0x10) {
                                 // directory entry
@@ -235,7 +232,7 @@ uint32_t scan_folder_int(uint8_t page_number, uint8_t count_pages, uint16_t file
  * @param count_pages whether to count the number of pages in the folder
  */
 void display_folder(uint8_t page_number, uint8_t count_pages) {
-    scan_folder_int(page_number, count_pages, 0);
+    scan_folder_int(page_number, count_pages, 0, NULL, NULL);
 }
 
 /**
@@ -245,7 +242,19 @@ void display_folder(uint8_t page_number, uint8_t count_pages) {
  * @return uint32_t cluster address of the file or _root_dir_first_cluster if not found
  */
 uint32_t find_file(uint8_t page_number, uint16_t file_id) {
-    return scan_folder_int(page_number, 0, file_id);
+    return scan_folder_int(page_number, 0, file_id, NULL, NULL);
+}
+
+/**
+ * @brief Find a file identified by filename and extension in the current folder
+ * 
+ * @param count_pages whether to count the number of pages in the folder (this also preps page caching)
+ * @param basename_find   file base name (first 8 bytes)
+ * @param ext_find        file extension (3 bytes)
+ * @return uint32_t cluster address of the file or _root_dir_first_cluster if not found
+ */
+uint32_t find_file_by_name(uint8_t count_pages, const char* basename_find, const char* ext_find) {
+    return scan_folder_int(1, count_pages, 0, basename_find, ext_find);
 }
 
 /**

@@ -39,11 +39,12 @@
 // helper function prototypes
 void show_status(const char* str);
 void highlight_refresh(void);
-void update_screen(uint8_t);
+void update_screen(uint8_t count_pages);
 void clearscreen(void);
 void update_pagination(void);
 void store_file_rom(uint16_t rom_addr);
 uint8_t flash_rom(uint16_t cluster);
+void start_selected_cas(uint8_t only_load);
 // key handling functions
 void handle_key_H(void);
 void handle_key_down(void);
@@ -65,6 +66,9 @@ static const uint8_t help_bar[] = {
 };
 
 void init(void) {
+
+    clearscreen();
+    
     // deactivate SD-card
     sdcs_set();
 
@@ -86,9 +90,21 @@ void init(void) {
 void main(void) {
     // initialize SD card
     init();
-    update_screen(1);
     keymem[0x0C] = 0; //clear key buffer
+    build_linked_list(_current_folder_cluster);
 
+    // check if there is a file called "AUTOBOOT.CAS".
+    // if so, immediately launch this CAS file
+    uint32_t fcl = find_file_by_name(1, "AUTOBOOT", "CAS");
+    if(fcl != _root_dir_first_cluster) {
+        build_linked_list(fcl);
+        start_selected_cas(0);
+    }
+
+    // display the first page of the root directory
+    // note: counting pages was already done in find_file_by_name, so no need to do it again
+    update_screen(0); 
+    
     // put in infinite loop and wait for program selection
     for(;;) {
         // wait for key-press
@@ -142,13 +158,10 @@ void highlight_refresh(void) {
 
 /**
  * @brief Update the screen with the current folder contents
- * 
- * @param count_pages whether to count pages or not
  */
 void update_screen(uint8_t count_pages) {
     // refresh the screen
     clearscreen();
-    if (count_pages) build_linked_list(_current_folder_cluster);
     display_folder(page_num, count_pages);
     update_pagination();
     highlight_refresh();
@@ -356,6 +369,16 @@ void color_selected_file_red(void) {
     vidmem[0x50*(highlight_id + DISPLAY_OFFSET) + 2] = 0x01; // color file red
 }
 
+void start_selected_cas(uint8_t only_load) {
+    // set RAM bank to CASSETTE
+    set_ram_bank(RAM_BANK_CASSETTE);
+    show_status("\003Programma laden...");
+    store_cas_ram(_linkedlist[0], 0x0000);
+    set_ram_bank(RAM_BANK_CACHE);
+    // either return to Basic or RUN
+    launch_cas(only_load ? 0x1FC6 : 0x28d4);
+}
+
 /**
  * @brief Handle the key select press (space or enter)
  * 
@@ -376,6 +399,7 @@ void handle_key_select(uint8_t key0) {
             }
             page_num = 1;
             highlight_id = 1; // highlight first item in newly loaded folder
+            build_linked_list(_current_folder_cluster);
             update_screen(1);
         }
         else {
@@ -401,13 +425,7 @@ void handle_key_select(uint8_t key0) {
             build_linked_list(cluster); // update _linkedlist for store_cas_ram, store_prg_intram or flash_rom
 
             if (memcmp(_ext, "CAS", 3) == 0) {
-                // set RAM bank to CASSETTE
-                set_ram_bank(RAM_BANK_CASSETTE);
-                show_status("\003Programma laden...");
-                store_cas_ram(_linkedlist[0], 0x0000);
-                set_ram_bank(RAM_BANK_CACHE);
-                // if CODE was pressed, load and return to Basic, otherwise load and run
-                launch_cas(key0 == 32 ? 0x1FC6 : 0x28d4);
+                start_selected_cas(key0 == 32);  // if CODE was pressed, load and return to Basic, otherwise load and run
             }
 
             // load PRG file into internal RAM
