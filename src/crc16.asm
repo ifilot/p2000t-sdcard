@@ -23,7 +23,7 @@ SECTION code_user
 INCLUDE "ports.inc"
 
 PUBLIC _crc16_intram
-PUBLIC _crc16_ramchip
+PUBLIC _crc16_romchip
 
 ;-------------------------------------------------------------------------------
 ; Generate a 16 bit checksum of internal RAM
@@ -83,28 +83,28 @@ clr:
 ;
 ; source: https://mdfs.net/Info/Comp/Comms/CRC16.htm
 ;-------------------------------------------------------------------------------
-_crc16_ramchip:
+_crc16_romchip:
     ld a,0x01
-    out (LED_IO),a              ; turn RAM led on
+    out (LED_IO),a              ; turn ROM led on
     pop de                      ; return address
     pop hl                      ; ramptr
     pop bc                      ; number of bytes
     push de                     ; put return address back on stack
     ld de,$0000                 ; set de to $0000
-nextbyte_ram:
+nextbyte_rom:
     push bc                     ; push counter onto stack
     ld a,h                      ; set upper address memory
     out (ADDR_HIGH),a
     ld a,l                      ; set lower address memory
     out (ADDR_LOW),a
-    in a, (RAM_IO)              ; read byte from ram chip
+    in a, (ROM_IO)              ; read byte from ram chip
     call calc_byte
     pop bc                      ; get counter back from stack
     dec bc                      ; decrement counter
     ld a,b                      ; check if counter is zero
     or c
-    jp nz,nextbyte_ram              ; if not zero, go to next byte
+    jp nz,nextbyte_rom          ; if not zero, go to next byte
     ex de,hl                    ; swap de and hl such that hl contains crc
     ld a,0x00
-    out (LED_IO),a              ; turn RAM led off
+    out (LED_IO),a              ; turn ROM led off
     ret                         ; return value is stored in hl

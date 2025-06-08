@@ -23,7 +23,6 @@ SECTION code_user
 PUBLIC _replace_bytes
 PUBLIC _read_uint16_t
 PUBLIC _read_uint32_t
-PUBLIC _get_stack_location
 PUBLIC _call_program
 PUBLIC _hexcode_to_uint16t
 
@@ -83,14 +82,6 @@ _read_uint32_t:
     ld d,a
     push iy
     ret                     ; result in DEHL
-
-;-------------------------------------------------------------------------------
-; uint16_t get_stack_location(void)
-;-------------------------------------------------------------------------------
-_get_stack_location:
-    ld hl,0
-    add hl,sp
-    ret                     ; result in HL
 
 ;-------------------------------------------------------------------------------
 ; void call_program(uint16_t) __z88dk_callee;

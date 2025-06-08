@@ -30,7 +30,6 @@
 #include "sdcard.h"
 #include "memory.h"
 #include "terminal.h"
-#include "terminal_ext.h"
 #include "fat32.h"
 #include "ram.h"
 #include "ports.h"
@@ -55,10 +54,10 @@ void command_lscas(void);
 void command_cd(void);
 
 /**
- * @brief Obtain info of a given file
+ * @brief Flash a file to the ROM chip
  * 
  */
-void command_fileinfo(void);
+void command_flash(void);
 
 /**
  * @brief Load a (CAS) file into memory and launch it
@@ -73,34 +72,10 @@ void command_run(void);
 void command_ledtest(void);
 
 /**
- * @brief Indicate where the stack is
+ * @brief Show brief help message on screen
  * 
  */
-void command_stack(void);
-
-/**
- * @brief Dump cartridge ROM contents to the screen
- * 
- */
-void command_romdump(void);
-
-/**
- * @brief Dump cartridge ROM contents to the screen
- * 
- */
-void command_ramdump(void);
-
-/**
- * @brief Dump system RAM to the screen
- * 
- */
-void command_dump(void);
-
-// /**
-//  * @brief Show brief help message on screen
-//  * 
-//  */
-// void command_help(void);
+void command_help(void);
 
 /**
  * @brief Execute the command given by instruction

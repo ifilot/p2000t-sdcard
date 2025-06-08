@@ -44,6 +44,7 @@ extern uint32_t _current_folder_cluster;
 // global variables for currently active file or folder
 extern uint32_t _filesize_current_file;
 extern uint8_t _filename[]; // filename buffer
+extern char _base_name[9]; // DOS 8.3 base name (8 chars, uppercased)
 extern char _ext[4]; // file extension (3 chars, uppercased)
 extern uint8_t _current_attrib;
 
