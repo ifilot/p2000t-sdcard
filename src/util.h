@@ -70,13 +70,6 @@ uint8_t wait_for_key_fixed(uint8_t quitkey);
 void clear_screen(void);
 
 /**
- * @brief Get the stack location object
- * 
- * @return uint16_t 
- */
-uint16_t get_stack_location(void) __z88dk_callee;
-
-/**
  * @brief Call program at location
  * 
  * @param location 

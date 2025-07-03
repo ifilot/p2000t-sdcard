@@ -20,6 +20,7 @@
 
 #include "commands.h"
 #include "launch_cas.h"
+#include "flash_utils.h"
 
 char __lastinput[INPUTLENGTH];
 
@@ -28,16 +29,10 @@ char* __commands[] = {
     "ls",
     "lscas",
     "cd",
-    "fileinfo",
     "run",
     "load",
-    "crc",
-    "hexdump",
     "ledtest",
-    "stack",
-    "romdump",
-    "ramdump",
-    "dump",
+    "flash",
     "help",
 };
 
@@ -46,16 +41,10 @@ void (*__operations[])(void) = {
     command_ls,
     command_lscas,
     command_cd,
-    command_fileinfo,
     command_run,
     command_load,
-    command_crc,
-    command_hexdump,
     command_ledtest,
-    command_stack,
-    command_romdump,
-    command_ramdump,
-    command_dump,
+    command_flash,
     command_help,
 };
 
@@ -104,31 +93,22 @@ void command_cd(void) {
     }
 }
 
-/**
- * @brief Obtain info of a given file
- * 
- */
-void command_fileinfo(void) {
-    int fileid = atoi(&__lastinput[8]);
+void command_flash(void) {
+    int fileid = atoi(&__lastinput[5]); // file nr
 
+    // find a file and store its cluster structure into the linked list
     if(read_file_metadata(fileid) != 0) {
         return;
     }
 
-    sprintf(termbuffer, "Filename: %.26s", _filename);
-    terminal_printtermbuffer();
-    sprintf(termbuffer, "Filesize: %lu bytes", _filesize_current_file);
-    terminal_printtermbuffer();
-    print("Clusters:");
-    for(uint8_t i=0; i<F_LL_SIZE; i++) {
-        uint32_t cluster_id = _linkedlist[i];
-
-        if(cluster_id == 0 || cluster_id == 0xFFFFFFFF) {
-            break;
+    if ((memcmp(_base_name, "LAUNCHER", 8) == 0 || memcmp(_base_name, "EZLAUNCH", 8) == 0) && memcmp(_ext, "BIN", 3 ) == 0) {
+        if (flash_rom(_linkedlist[0])) {
+            print("Press any key to restart");
+            wait_for_key();
+            call_addr(0x1010); //cold reset after firmware flashing
         }
-
-        sprintf(termbuffer, "  %02i: %c%08lX", i+1, COL_CYAN, cluster_id);
-        terminal_printtermbuffer();
+    } else{
+        print_error("Not a valid firmware file.");
     }
 }
 
@@ -139,15 +119,10 @@ void command_fileinfo(void) {
 void command_loadrun(unsigned type) {
     print_recall("Searching file...");
 
-    int fileid = atoi(&__lastinput[type ? 3 : 4]); // file nr after LOAD / RUN / CRC
+    int fileid = atoi(&__lastinput[type ? 3 : 4]); // file nr after LOAD / RUN
 
     // find a file and store its cluster structure into the linked list
     if(read_file_metadata(fileid) != 0) {
-        return;
-    }
-
-    if(memcmp(_ext, "CAS", 3) != 0 && type == 2) {
-        print_error("Can only calculate for CAS files.");
         return;
     }
 
@@ -162,15 +137,6 @@ void command_loadrun(unsigned type) {
 
         uint16_t deploy_addr = ram_read_uint16_t(0x8000);
         uint16_t file_length = ram_read_uint16_t(0x8002);
-
-        if (type == 2) {
-            // if CRC is requested, we do not load the file
-            print_recall("Calculating CRC16 checksum...");
-            uint16_t crc16 = crc16_ramchip(0x0000, file_length);
-            sprintf(termbuffer, "CRC16 checksum: %c0x%04X", COL_CYAN, crc16);
-            terminal_printtermbuffer();
-            return;
-        }
 
         if(memory[0x605C] == 1 && _filesize_current_file > MAX_BYTES_16K) {
             print_error("File too large to load");
@@ -196,8 +162,7 @@ void command_loadrun(unsigned type) {
         launch_cas(type ? 0x28d4 : 0x1FC6);
     } else if(memcmp(_ext, "PRG", 3) == 0) {
         if(memory[0x605C] < 2) {
-            print_error("Insufficient memory.");
-            print("At least 32kb of memory required.");
+            print_error("At least 32kb of memory required.");
             return;
         }
 
@@ -254,27 +219,6 @@ void command_run(void) {
     command_loadrun(1);
 }
 
-void command_crc(void) {
-    command_loadrun(2);
-}
-
-void command_hexdump(void) {
-    int file_id = atoi(&__lastinput[7]);
-
-    if(read_file_metadata(file_id) != 0) {
-        return;
-    }
-
-    // read the first sector of the file
-    read_sector(calculate_sector_address(_linkedlist[0], 0));
-
-    sprintf(termbuffer, "Filename: %.26s", _filename);
-    terminal_printtermbuffer();
-
-    // print to screen
-    terminal_hexdump(SDCACHE0, DUMP_EXTRAM);
-}
-
 /**
  * @brief Test burning of read and write LEDs
  * 
@@ -287,57 +231,6 @@ void command_ledtest(void) {
     z80_outp(PORT_LED_IO, 0x02);
     z80_delay_ms(500);
     z80_outp(PORT_LED_IO, 0x00);
-}
-
-/**
- * @brief Indicate where the stack is
- * 
- */
-void command_stack(void) {
-    const uint16_t stackloc = get_stack_location();
-    sprintf(termbuffer, "Stack: %04X", stackloc);
-    terminal_printtermbuffer();
-}
-
-/**
- * @brief Dump cartridge ROM contents to the screen
- * 
- */
-void command_romdump(void) {
-    uint8_t bank = 0;
-    if(__lastinput[7] == '1') {
-        bank = 1;
-    }
-    uint16_t addr = hexcode_to_uint16t(&__lastinput[8]);
-
-    set_rom_bank(bank);
-    terminal_hexdump(addr, DUMP_EXTROM);
-    set_rom_bank(ROM_BANK_DEFAULT);
-}
-
-/**
- * @brief Dump cartridge ROM contents to the screen
- * 
- */
-void command_ramdump(void) {
-    uint8_t bank = 0;
-    if(__lastinput[7] == '1') {
-        bank = 1;
-    }
-    uint16_t addr = hexcode_to_uint16t(&__lastinput[8]);
-
-    set_ram_bank(bank);
-    terminal_hexdump(addr, DUMP_EXTRAM);
-    set_ram_bank(RAM_BANK_CACHE);
-}
-
-/**
- * @brief Dump system RAM to the screen
- * 
- */
-void command_dump(void) {
-    uint16_t addr = hexcode_to_uint16t(&__lastinput[4]);
-    terminal_hexdump(addr, DUMP_INTRAM);
 }
 
 /**
@@ -411,11 +304,6 @@ void execute_command(void) {
  * @return uint8_t whether file can be read, 0 true, 1 false
  */
 uint8_t read_file_metadata(int16_t file_id) {
-    // read file id and check its value
-    if(file_id < 0) {
-        print_error("Invalid file id");
-        return 1;
-    }
 
     uint32_t cluster = read_folder(file_id, 0);
     if(cluster == _root_dir_first_cluster) {

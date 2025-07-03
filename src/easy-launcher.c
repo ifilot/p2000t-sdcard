@@ -28,11 +28,10 @@
 #include "ports.h"
 #include "memory.h"
 #include "ram.h"
+#include "rom.h"
 #include "fat32-easy.h"
 #include "launch_cas.h"
 #include "sst39sf.h"
-
-#define EZ_LAUNCHER_VERSION "0.1"
 
 // set printf io
 #pragma printf "%d %c %s %lu"
@@ -40,16 +39,18 @@
 // helper function prototypes
 void show_status(const char* str);
 void highlight_refresh(void);
-void update_screen(uint8_t);
+void update_screen(uint8_t count_pages);
 void clearscreen(void);
 void update_pagination(void);
-void store_file_rom(uint32_t faddr, uint16_t rom_addr);
-uint8_t flash_rom(uint32_t faddr);
+void store_file_rom(uint16_t rom_addr);
+uint8_t flash_rom(uint16_t cluster);
+void start_selected_cas(uint8_t only_load);
 // key handling functions
 void handle_key_H(void);
 void handle_key_down(void);
 void handle_key_up(void);
 void handle_key_right(void);
+void handle_key_left(void);
 void handle_key_select(uint8_t key0);
 
 uint16_t highlight_id = 1; // file id of the currently highlighted/selected file
@@ -65,6 +66,9 @@ static const uint8_t help_bar[] = {
 };
 
 void init(void) {
+
+    clearscreen();
+    
     // deactivate SD-card
     sdcs_set();
 
@@ -77,7 +81,7 @@ void init(void) {
     // activate and mount sd card
     uint32_t lba0;
     if(init_sdcard() != 0 || (lba0 = read_mbr()) == 0) {
-        show_status("\001Kan geen FAT32 SD kaart vinden.");
+        show_status("\001Geen FAT32 SD-card gevonden.");
         for(;;){}
     }
     read_partition(lba0);
@@ -86,8 +90,21 @@ void init(void) {
 void main(void) {
     // initialize SD card
     init();
-    update_screen(1);
+    keymem[0x0C] = 0; //clear key buffer
+    build_linked_list(_current_folder_cluster);
 
+    // check if there is a file called "AUTOBOOT.CAS".
+    // if so, immediately launch this CAS file
+    uint32_t fcl = find_file_by_name(1, "AUTOBOOT", "CAS");
+    if(fcl != _root_dir_first_cluster) {
+        build_linked_list(fcl);
+        start_selected_cas(0);
+    }
+
+    // display the first page of the root directory
+    // note: counting pages was already done in find_file_by_name, so no need to do it again
+    update_screen(0); 
+    
     // put in infinite loop and wait for program selection
     for(;;) {
         // wait for key-press
@@ -108,6 +125,10 @@ void main(void) {
             // key right
             if(key0 == 23)  {
                 handle_key_right();
+            }
+            // key left
+            if(key0 == 0)  {
+                handle_key_left();
             }
             // space or enter key
             if(key0 == 17 || key0 == 52 || key0 == 32)  { // space or enter or CODE
@@ -137,14 +158,11 @@ void highlight_refresh(void) {
 
 /**
  * @brief Update the screen with the current folder contents
- * 
- * @param count_pages whether to count pages or not
  */
 void update_screen(uint8_t count_pages) {
     // refresh the screen
     clearscreen();
-    if (count_pages) build_linked_list(_current_folder_cluster);
-    read_folder(page_num, count_pages);
+    display_folder(page_num, count_pages);
     update_pagination();
     highlight_refresh();
 }
@@ -157,7 +175,7 @@ void update_screen(uint8_t count_pages) {
 void clearscreen(void) {
     // clear screen
     memset(vidmem, 0x00, 0x780);
-    strcpy(vidmem, "\006 P2000T SD-CARD\002v"EZ_LAUNCHER_VERSION);
+    strcpy(vidmem, "\006 P2000T SD-CARD\002v"__VERSION__);
     for (uint8_t i = 2; i < 22; i++) {
         strcpy(vidmem + 0x50*i, "\004\x1D");
     }
@@ -171,7 +189,7 @@ void clearscreen(void) {
  */
 void update_pagination(void) {
     char pagina_str[32];
-    sprintf(pagina_str, "\003Pagina %d van %d", page_num, _num_of_pages);
+    sprintf(pagina_str, "\003Pagina %d/%d", page_num, _num_of_pages);
     strcpy(vidmem + 39 - strlen(pagina_str), pagina_str);
 }
 
@@ -193,11 +211,10 @@ void show_status(const char* str) {
  * This function checks the device ID of the SST39SF ROM chip and if it is one of the known types,
  * it wipes it and copies the firmware from the SD card to the ROM.
  * 
- * @param faddr cluster address of the firmware file
- * 
  * @return 1 on success, 0 on failure
  */
-uint8_t flash_rom(uint32_t faddr) {
+uint8_t flash_rom(uint16_t cluster) {
+    build_linked_list(cluster);
     set_rom_bank(ROM_BANK_DEFAULT);
     set_ram_bank(RAM_BANK_CACHE);
     uint16_t rom_id = sst39sf_get_device_id();
@@ -208,7 +225,7 @@ uint8_t flash_rom(uint32_t faddr) {
             sst39sf_wipe_sector(0x1000 * i);
         }
         // copying from SD-CARD to ROM
-        store_file_rom(faddr, 0x0000);
+        store_file_rom(0x0000);
         return 1;
     } else {
         show_status("\001Onbekend SST39SF apparaatnummer.");
@@ -219,13 +236,11 @@ uint8_t flash_rom(uint32_t faddr) {
 /**
  * @brief Store a file in the external ROM
  * 
- * @param faddr    cluster address of the file
  * @param rom_addr first position in ROM to store the file
  * 
  * @return number of sectors stored
  */
-void store_file_rom(uint32_t faddr, uint16_t rom_addr) {
-    build_linked_list(faddr);
+void store_file_rom(uint16_t rom_addr) {
     // count number of sectors
     uint8_t total_sectors = (_filesize_current_file + 511) / 512;
 
@@ -304,7 +319,7 @@ void handle_key_up(void) {
         }
         if (_num_of_pages > 1) {
             clearscreen();
-            read_folder(page_num, 0);
+            display_folder(page_num, 0);
             update_pagination();
         }
         for (int8_t i = PAGE_SIZE; i >= 0; i--) {
@@ -333,9 +348,35 @@ void handle_key_right(void) {
     update_screen(0);
 }
 
+/**
+ * @brief Handle the key left press
+ * 
+ * This function moves to the previous page of files.
+ */
+void handle_key_left(void) {
+    if (_num_of_pages == 1) return;
+    if (page_num > 1) {
+        page_num--;
+    } else {
+        page_num = _num_of_pages; // wrap around
+    }
+    highlight_id = 1; // highlight first item in newly loaded folder
+    update_screen(0);
+}
+
 void color_selected_file_red(void) {
     // color the file red
     vidmem[0x50*(highlight_id + DISPLAY_OFFSET) + 2] = 0x01; // color file red
+}
+
+void start_selected_cas(uint8_t only_load) {
+    // set RAM bank to CASSETTE
+    set_ram_bank(RAM_BANK_CASSETTE);
+    show_status("\003Programma laden...");
+    store_cas_ram(_linkedlist[0], 0x0000);
+    set_ram_bank(RAM_BANK_CACHE);
+    // either return to Basic or RUN
+    launch_cas(only_load ? 0x1FC6 : 0x28d4);
 }
 
 /**
@@ -348,7 +389,7 @@ void color_selected_file_red(void) {
  * @param key0 The key pressed (space or enter)
  */
 void handle_key_select(uint8_t key0) {
-    uint32_t cluster = find_file(highlight_id + PAGE_SIZE * (page_num-1));
+    uint32_t cluster = find_file(page_num, highlight_id + PAGE_SIZE * (page_num-1));
     if(cluster != _root_dir_first_cluster) {
         if(_current_attrib & 0x10) {
             if(cluster == 0) { // if zero, this is the root directory
@@ -358,6 +399,7 @@ void handle_key_select(uint8_t key0) {
             }
             page_num = 1;
             highlight_id = 1; // highlight first item in newly loaded folder
+            build_linked_list(_current_folder_cluster);
             update_screen(1);
         }
         else {
@@ -365,7 +407,7 @@ void handle_key_select(uint8_t key0) {
                 show_status("\003Firmware vernieuwen...");
                 if (flash_rom(cluster))
                     call_addr(0x1010); //cold reset after firmware flashing
-                return;
+                goto restore_state;
             }
 
             if (memcmp(_ext, "CAS", 3) != 0 && memcmp(_ext, "PRG", 3) != 0) {
@@ -379,17 +421,11 @@ void handle_key_select(uint8_t key0) {
                 color_selected_file_red();
                 return;
             }
-            
-            build_linked_list(cluster); // update _linkedlist for store_cas_ram and store_prg_intram
+
+            build_linked_list(cluster); // update _linkedlist for store_cas_ram, store_prg_intram or flash_rom
 
             if (memcmp(_ext, "CAS", 3) == 0) {
-                // set RAM bank to CASSETTE
-                set_ram_bank(RAM_BANK_CASSETTE);
-                show_status("\003Programma laden...");
-                store_cas_ram(_linkedlist[0], 0x0000);
-                set_ram_bank(RAM_BANK_CACHE);
-                // if CODE was pressed, load and return to Basic, otherwise load and run
-                launch_cas(key0 == 32 ? 0x1FC6 : 0x28d4);
+                start_selected_cas(key0 == 32);  // if CODE was pressed, load and return to Basic, otherwise load and run
             }
 
             // load PRG file into internal RAM
