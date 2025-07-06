@@ -81,15 +81,4 @@ void copy_to_rom(uint8_t *src, uint16_t dest, uint16_t nrbytes) __z88dk_callee;
  */
 void fast_sd_to_rom_full(uint16_t ram_addr) __z88dk_callee;
 
-/**
- * @brief Calculate CRC16 checksum on ROM
- * 
- * See: sst39sf.asm
- *
- * @param addr start address
- * @param nrbytes number of bytes to evaluate
- * @return uint16_t CRC-16 checksum
- */
-uint16_t crc16_romchip(uint16_t addr, uint16_t nrbytes) __z88dk_callee;
-
 #endif
