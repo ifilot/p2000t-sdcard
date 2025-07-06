@@ -152,7 +152,6 @@ uint32_t read_folder_int(uint32_t cluster, int16_t file_id, uint8_t casrun, cons
     uint16_t fctr = 0;              // counter over directory entries (files and folders)
     uint32_t totalfilesize = 0;     // collect size of files in folder
     uint8_t stopreading = 0;        // whether to break of reading procedure
-    uint16_t loc = 0;               // current entry position
     uint8_t firstPos = 0;
     uint8_t lfn_found = 0; 
 
@@ -163,16 +162,14 @@ uint32_t read_folder_int(uint32_t cluster, int16_t file_id, uint8_t casrun, cons
 
         // loop over all sectors per cluster
         for(uint8_t i=0; i<_sectors_per_cluster && stopreading == 0; i++) {
-            read_sector(caddr);            // read sector data
-            loc = SDCACHE0;
-            for(uint8_t j=0; j<16; j++) { // 16 file tables per sector
+            read_sector(caddr++);            // read next sector data
+            for(uint16_t loc=SDCACHE0; loc<SDCACHE0+16*32; loc+=32) { // 16 file tables per sector
                 // check first position
                 firstPos = ram_read_uint8_t(loc);
                 _current_attrib = ram_read_uint8_t(loc + 0x0B);    // attrib byte
 
                 // continue if an unused entry is encountered 0xE5
                 if(firstPos == 0xE5) {
-                    loc += 32;  // next file entry location
                     continue;
                 }
 
@@ -197,11 +194,12 @@ uint32_t read_folder_int(uint32_t cluster, int16_t file_id, uint8_t casrun, cons
                             for (k = 0; k < 6; k++) _filename[(seq - 1) * 13 + 5 + k] = ram_read_uint8_t(loc + 14 + k * 2);
                             for (k = 0; k < 2; k++) _filename[(seq - 1) * 13 + 11 + k] = ram_read_uint8_t(loc + 28 + k * 2);
                         }
+                        continue;
                     }
                 }
 
-                // check for SFN entry
-                if((_current_attrib & 0x0F) == 0x00) {
+                // check for non-hidden, non-system, non-volumeID SFN entry
+                if((_current_attrib & 0b00001110) == 0) {
                     if(firstPos != '.' || ram_read_uint8_t(loc+1) == '.') { // skip dotfiles but keep ".." parent folder
                         // capture metadata
                         fctr++;
@@ -218,7 +216,6 @@ uint32_t read_folder_int(uint32_t cluster, int16_t file_id, uint8_t casrun, cons
                                 if (memcmp(basename_find, _base_name, 8) == 0 && memcmp(ext_find, _ext, 3) == 0) {
                                     return fc;
                                 } else {
-                                    loc += 32;  // next file entry location
                                     continue;
                                 }
                             }
@@ -277,11 +274,9 @@ uint32_t read_folder_int(uint32_t cluster, int16_t file_id, uint8_t casrun, cons
                             }
                         }
                     }
-                    lfn_found = 0; // reset LFN tracking 
                 }
-                loc += 32;  // next file entry location
+                lfn_found = 0; // reset LFN tracking 
             }
-            caddr++;    // next sector
         }
         ctr++;  // next cluster
     }
