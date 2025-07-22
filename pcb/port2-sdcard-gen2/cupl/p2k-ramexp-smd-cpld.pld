@@ -1,0 +1,77 @@
+Name     ATF1508ASV;
+PartNo   00;
+Date     07/22/2025;
+Revision 1.0;
+Designer Ivo Filot;
+Company  None;
+Assembly None;
+Location None;
+Device   f1508isptqfp100;
+
+PROPERTY ATMEL {POWER_RESET = OFF};
+PROPERTY ATMEL {PIN_KEEP = ON};
+PROPERTY ATMEL {PREASSIGN = KEEP};
+
+/** ------------------------------------------------------------------------**/
+/** IMPORTANT NOTES WHEN FLASHING                                           **/
+/** - When ATMISP is crashing when opening a .JED file, ensure it is        **/
+/**   located in a short and simple file path without any spaces present.   **/
+/**   in ATMISP.                                                            **/
+/** - When changes have been made to the .JED file, always reload the file  **/
+/**   in ATMISP.                                                            **/
+/** - The ATDH1150USB device has two ports, port 0 should use the WINUSB    **/
+/**   driver while port 1 should use the FTDI BUS driver. This can be       **/
+/**   configured using Zadig.                                               **/
+/** ------------------------------------------------------------------------**/
+
+/** PINS **/
+PIN 27 = D0;
+PIN 28 = D1;
+PIN 29 = D2;
+PIN 30 = D3;
+PIN 31 = D4;
+PIN 32 = D5;
+PIN 33 = D6;
+PIN 35 = D7;
+PIN 36 = A0;
+PIN 37 = A1;
+PIN 40 = A2;
+PIN 42 = A3;
+PIN 44 = A4;
+PIN 45 = A5;
+PIN 46 = A6;
+PIN 47 = A7;
+PIN 48 = IORQ_N;
+PIN 49 = RD_N;
+PIN 50 = RES_N;
+PIN 52 = WR_N;
+PIN 53 = MOSI;
+PIN 54 = MISO;
+
+/** ------------------------------------------------------------------------**/
+/** PORT SELECTION                                                          **/
+/** ------------------------------------------------------------------------**/
+PORT40 = !A7 & A6 & !A5 & !A4;
+S1  = !IORQ_N & PORT40 & !A0 & !A1 & !A2 & !A3;            /* 0x40 */
+S2  = !IORQ_N & PORT40 &  A0 & !A1 & !A2 & !A3;            /* 0x41 */
+S3  = !IORQ_N & PORT40 & !A0 &  A1 & !A2 & !A3;            /* 0x42 */
+S4  = !IORQ_N & PORT40 &  A0 &  A1 & !A2 & !A3;            /* 0x43 */
+S5  = !IORQ_N & PORT40 & !A0 & !A1 &  A2 & !A3;            /* 0x44 */
+S6  = !IORQ_N & PORT40 &  A0 & !A1 &  A2 & !A3;            /* 0x45 */
+S7  = !IORQ_N & PORT40 & !A0 &  A1 &  A2 & !A3;            /* 0x46 */
+S8  = !IORQ_N & PORT40 &  A0 &  A1 &  A2 & !A3;            /* 0x47 */
+S9  = !IORQ_N & PORT40 & !A0 & !A1 & !A2 &  A3;            /* 0x48 */
+S10 = !IORQ_N & PORT40 &  A0 & !A1 & !A2 &  A3;            /* 0x49 */
+S11 = !IORQ_N & PORT40 & !A0 &  A1 & !A2 &  A3;            /* 0x4A */
+S12 = !IORQ_N & PORT40 &  A0 &  A1 & !A2 &  A3;            /* 0x4B */
+S13 = !IORQ_N & PORT40 & !A0 & !A1 &  A2 &  A3;            /* 0x4C */
+S14 = !IORQ_N & PORT40 &  A0 & !A1 &  A2 &  A3;            /* 0x4D */
+S15 = !IORQ_N & PORT40 & !A0 &  A1 &  A2 &  A3;            /* 0x4E */
+S16 = !IORQ_N & PORT40 &  A0 &  A1 &  A2 &  A3;            /* 0x4F */
+
+/** ------------------------------------------------------------------------**/
+/** Shift registers                                                         **/
+/** ------------------------------------------------------------------------**/
+Pinnode = [PISO_Q7..PISO_Q0];
+[PISO_Q7..PISO_Q0].ck = !WR_N & S1;
+[PISO_Q7..PISO_Q0].d = [D7..D0];
